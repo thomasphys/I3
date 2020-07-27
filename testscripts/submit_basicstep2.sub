@@ -1,0 +1,16 @@
+####################
+#
+# Basic Condor Submission
+#
+####################
+
+executable     = /home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step2.py
+transfer_input_files = /home/users/tmcelroy/icecube/testscripts/test.i3.gz
+request_gpus   = 1
+output         = log.out
+error          = log.error
+log            = log.log
+request_memory = 2 GB
+
+queue
+

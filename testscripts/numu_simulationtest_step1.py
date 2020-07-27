@@ -1,3 +1,6 @@
+#!/bin/sh /cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/icetray-start
+#METAPROJECT combo/V00-00-04
+
 from I3Tray import *
 from icecube import icetray, dataclasses, phys_services, sim_services, dataio, earthmodel_service, neutrino_generator, tableio, hdfwriter, simclasses, phys_services, DOMLauncher, DomTools, clsim, trigger_sim
 from icecube.simprod import segments
@@ -10,20 +13,11 @@ import argparse
 from icecube import PROPOSAL                                                    
 from os.path import expandvars 
 
-def BasicHitFilter(frame):
-  hits = 0
-  if frame.Has("I3Photons"):
-    hits = len(frame.Get("I3Photons"))
-  if hits>0:
-    return True
-  else:
-    return False
-
 parser = argparse.ArgumentParser(description = "A scripts to run the neutrino generation simulation step using Neutrino Generator")
 
 parser.add_argument('-emin', '--energyMin', default = 5.0, help = "the minimum energy")
 parser.add_argument('-emax', '--energyMax', default = 8.0, help = "the maximum energy")
-parser.add_argument('-n', '--numEvents', default = 10, help = "number of events produced by the simulation")
+parser.add_argument('-n', '--numEvents', default = 10000, help = "number of events produced by the simulation")
 parser.add_argument('-o', '--outfile', default = "output2",help="name and path of output file")
 parser.add_argument('-r', '--runNum', default = 5000, help="run Number")
 parser.add_argument("-a", "--ratios",default="1.0:1.0", help="ratio of input neutrino")
@@ -130,92 +124,6 @@ tray.Add(segments.PropagateMuons, 'ParticlePropagators',
          SaveState=True,
          InputMCTreeName="I3MCTree_nugen",
          OutputMCTreeName="I3MCTree")
-
-#This is typically the first break in the simulation stream. Up to know the
-#detector geometry is needed beyond the cylinder that you are shooting the
-#neutrinos at.
-
-#Now propagate photons
-
-tray.AddModule("I3GeometryDecomposer","I3ModuleGeoMap")
-
-tray.AddSegment(clsim.I3CLSimMakePhotons, 'goCLSIM',
-                UseCPUs=False,
-                UseGPUs=True,
-                MCTreeName="I3MCTree",
-                OutputMCTreeName="I3MCTree_clsim",
-                FlasherInfoVectName=None,
-                #MMCTrackListName="MMCTrackList",
-                PhotonSeriesName = "I3Photons",
-                #ParallelEvents=1000,
-                RandomService=randomService,
-                #IceModelLocation=icemodel_path,
-                #UseGeant4=True,
-                #CrossoverEnergyEM=0.1,
-                #CrossoverEnergyHadron=float(options.CROSSENERGY),
-                StopDetectedPhotons=True,
-                #HoleIceParameterization=expandvars("$I3_SRC/ice-models/resources/models/angsens/as.flasher_p1_0.30_p2_-1"),
-                DoNotParallelize=False,
-                DOMOversizeFactor=1., 
-                UnshadowedFraction=1.0,
-                #GCDFile=gcd_file,
-                GCDFile=gcd,
-                )
-
-tray.AddModule(BasicHitFilter, 'FilterNullPhotons', Streams =
-              [icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
-              )
-
-#This is the next typical breakpoint.
-
-tray.AddSegment(clsim.I3CLSimMakeHitsFromPhotons, "makeHitsFromPhotons",
-    PhotonSeriesName="I3Photons",
-    MCPESeriesName="MCPESeriesMap_2",
-    RandomService=randomService,
-    DOMOversizeFactor=1.,
-    UnshadowedFraction=1.,
-    IceModelLocation = expandvars("$I3_SRC/ice-models/resources/models/spice_mie"),
-    GCDFile=gcd,
-    #HoleIceParameterization=expandvars("$I3_SRC/ice-models/resources/models/spice_mie"),
-    #HoleIceParameterization=expandvars("$I3_SRC/ice-models/resources/models/angsens_unified/%s"%options.HOLEICE),
-    )
-
-tray.AddModule("PMTResponseSimulator","rosencrantz",
-               Input="MCPESeriesMap_2",  
-               Output="MCPESeriesMap_3",
-               MergeHits=True,
-              )
-
-tray.AddModule("DOMLauncher", "guildenstern",
-               Input= "MCPESeriesMap_3",
-               Output="MCPESeriesMap_4",
-#               UseTabulatedPT=True, #might be taking too much memory? causing
-#               segmentation violation.
-              )
-
-tray.AddModule("I3DOMLaunchCleaning","launchcleaning")(
-              ("InIceInput","MCPESeriesMap_4"),
-              ("InIceOutput","MCPESeriesMap_5"),
-              #("FirstLaunchCleaning",False),
-              #("CleanedKeys",BadDoms),
-              )
-
-tray.AddSegment(trigger_sim.TriggerSim, "trig",                                 
-                gcd_file = my_gcd_file,                                                        
-                #time_shift_args = {"SkipKeys" : ["BundleGen"]},                             
-                run_id=1,
-                )
-
-#converts q frames?
-#tray.Add("I3NullSplitter",
-#       SubEventStreamName = "fullevent")
-
-#creates HDF5 file
-#tray.AddSegment(I3HDFWriter,
-#                output="foo.hdf5",
-#                keys=['LineFit','InIceRawData'],
-#                SubEventStreams=['in_ice'],
-#               )
 
 tray.Add("I3Writer", "writer", 
         Filename = 'test.i3.gz',

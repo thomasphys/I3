@@ -1,3 +1,6 @@
+#!/bin/sh /cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/icetray-start           
+#METAPROJECT combo/V00-00-04
+
 from I3Tray import *
 from icecube import icetray, dataclasses, phys_services, sim_services, dataio, earthmodel_service, neutrino_generator, tableio, hdfwriter, simclasses, phys_services, DOMLauncher, DomTools, clsim, trigger_sim
 from icecube.simprod import segments
@@ -65,108 +68,12 @@ randomService = phys_services.I3SPRNGRandomService(
         streamnum = 1)
 
 tray.context['I3RandomService'] = randomService
-tray.Add("I3InfiniteSource", prefix = gcd)
 
-tray.Add("I3MCEventHeaderGenerator",
-	       EventID=0,
-	       IncrementEventID=True)
-
-tray.Add("I3EarthModelServiceFactory", "EarthModelService")
-#tray.Add("I3EarthModelServiceFactory", "EarthModelService",
-#                EarthModels = ["PREM_mmc"],
-#                MaterialModels = ["Standard"],
-#                IceCapType = "IceSheet",
-#                DetectorDepth = 2600*I3Units.m,
-#                PathToDataFileDir = "")
-
-tray.Add("I3NuGSteeringFactory", "steering",
-                EarthModelName = "EarthModelService",
-                NEvents = numEvents,
-                SimMode = "Detector",
-                VTXGenMode = "NuGen",
-                InjectionMode = "surface",
-                CylinderParams = cylinder,
-                DoMuonRangeExtension = False,
-                UseSimpleScatterForm = True,
-                MCTreeName = "I3MCTree_nugen"
-                )
-
-tray.Add("I3NuGDiffuseSource","diffusesource",
-               RandomService = randomService,
-               SteeringName = "steering",
-               NuTypes = typevec,#['NuTau','NuTauBar'],
-               PrimaryTypeRatio = ratiovec,
-               GammaIndex = 2.19,
-               EnergyMinLog = emin,
-               EnergyMaxLog = emax,
-               ZenithMin = zenithMin,
-               ZenithMax = zenithMax,
-               AzimuthMin = azimuthMin,
-               AzimuthMax = azimuthMax,
-               ZenithWeightParam = 1.0,
-               AngleSamplingMode = "COS"
-              )
-
-tray.Add("I3NuGInteractionInfoDifferentialFactory", "interaction",
-                RandomService = randomService,
-                SteeringName = "steering",
-                TablesDir = "/home/users/dhilu/P_ONE_dvirhilu/CrossSectionModels",
-                CrossSectionModel = "csms_differential_v1.0"
-              )
-
-tray.Add("I3NeutrinoGenerator","generator",
-                RandomService = randomService,
-                SteeringName = "steering",
-                InjectorName = "diffusesource",
-                InteractionInfoName = "interaction",
-                #PropagationWeightMode = "NCGRWEIGHTED",
-                InteractionCCFactor = 1.0,
-                InteractionNCFactor = 1.0,
-                #InteractionGRFactor = 1.0
-              )
-
-tray.Add(segments.PropagateMuons, 'ParticlePropagators',
-         RandomService=randomService,
-         SaveState=True,
-         InputMCTreeName="I3MCTree_nugen",
-         OutputMCTreeName="I3MCTree")
-
-#This is typically the first break in the simulation stream. Up to know the
-#detector geometry is needed beyond the cylinder that you are shooting the
-#neutrinos at.
-
-#Now propagate photons
-
-tray.AddModule("I3GeometryDecomposer","I3ModuleGeoMap")
-
-tray.AddSegment(clsim.I3CLSimMakePhotons, 'goCLSIM',
-                UseCPUs=False,
-                UseGPUs=True,
-                MCTreeName="I3MCTree",
-                OutputMCTreeName="I3MCTree_clsim",
-                FlasherInfoVectName=None,
-                #MMCTrackListName="MMCTrackList",
-                PhotonSeriesName = "I3Photons",
-                #ParallelEvents=1000,
-                RandomService=randomService,
-                #IceModelLocation=icemodel_path,
-                #UseGeant4=True,
-                #CrossoverEnergyEM=0.1,
-                #CrossoverEnergyHadron=float(options.CROSSENERGY),
-                StopDetectedPhotons=True,
-                #HoleIceParameterization=expandvars("$I3_SRC/ice-models/resources/models/angsens/as.flasher_p1_0.30_p2_-1"),
-                DoNotParallelize=False,
-                DOMOversizeFactor=1., 
-                UnshadowedFraction=1.0,
-                #GCDFile=gcd_file,
-                GCDFile=gcd,
-                )
-
-tray.AddModule(BasicHitFilter, 'FilterNullPhotons', Streams =
-              [icetray.I3Frame.DAQ, icetray.I3Frame.Physics]
-              )
-
-#This is the next typical breakpoint.
+tray.AddModule('I3Reader', 'reader',                                            
+                    FilenameList = [gcd,"test2.i3.gz"]                               
+                                                )                                                   
+                                                                                
+#tray.AddModule("I3GeometryDecomposer","I3ModuleGeoMap")    
 
 tray.AddSegment(clsim.I3CLSimMakeHitsFromPhotons, "makeHitsFromPhotons",
     PhotonSeriesName="I3Photons",
@@ -189,7 +96,7 @@ tray.AddModule("PMTResponseSimulator","rosencrantz",
 tray.AddModule("DOMLauncher", "guildenstern",
                Input= "MCPESeriesMap_3",
                Output="MCPESeriesMap_4",
-#               UseTabulatedPT=True, #might be taking too much memory? causing
+               UseTabulatedPT=True, #might be taking too much memory? causing
 #               segmentation violation.
               )
 
@@ -218,7 +125,7 @@ tray.AddSegment(trigger_sim.TriggerSim, "trig",
 #               )
 
 tray.Add("I3Writer", "writer", 
-        Filename = 'test.i3.gz',
+        Filename = 'test3.i3.gz',
  #       DropBuffers=True,
   #      streams = [icetray.I3Frame.DAQ,icetray.I3FramePhysics,icetray.I3Frame.TrayInfo,icetray.I3Frame.Simulation],
         )

@@ -1,0 +1,14 @@
+####################
+#
+# Basic Condor Submission
+#
+####################
+
+request_gpus         = 1
+request_memory       = 2048
+executable           = /usr/bin/python
+transfer_input_files = /home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step1.py,/home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step2.py,/home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step3.py
+universe             = vanilla
+
+queue
+

@@ -1,0 +1,15 @@
+####################
+#
+# Basic Condor Submission
+#
+####################
+
+executable     = /usr/bin/python
+input          = /home/users/tmcelroy/test/basicmuon.py
+output         = log.out
+error          = log.error
+log            = log.log
+request_memory = 1 GB
+
+queue
+
