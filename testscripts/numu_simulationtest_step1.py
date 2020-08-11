@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description = "A scripts to run the neutrino ge
 
 parser.add_argument('-emin', '--energyMin', default = 5.0, help = "the minimum energy")
 parser.add_argument('-emax', '--energyMax', default = 8.0, help = "the maximum energy")
-parser.add_argument('-n', '--numEvents', default = 10000, help = "number of events produced by the simulation")
+parser.add_argument('-n', '--numEvents', default = 10, help = "number of events produced by the simulation")
 parser.add_argument('-o', '--outfile', default = "output2",help="name and path of output file")
 parser.add_argument('-r', '--runNum', default = 5000, help="run Number")
 parser.add_argument("-a", "--ratios",default="1.0:1.0", help="ratio of input neutrino")

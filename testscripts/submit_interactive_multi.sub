@@ -5,9 +5,10 @@
 ####################
 
 request_gpus         = 1
-request_memory       = 2048
+request_memory       = 8GB
 executable           = /usr/bin/python
-transfer_input_files = /home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step1.py,/home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step2.py,/home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step3.py
+#transfer_input_files = /home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step1.py,/home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step2.py,/home/users/tmcelroy/icecube/testscripts/numu_simulationtest_step3.py
+transfer_input_files = /home/users/tmcelroy/icecube/testscripts/numu_Level1.sh,/home/users/tmcelroy/icecube/testscripts/test3.i3.gz 
 universe             = vanilla
 
 queue

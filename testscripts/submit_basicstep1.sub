@@ -8,7 +8,7 @@ executable     = /home/users/tmcelroy/icecube/testscripts/numu_simulationtest_st
 output         = log.out
 error          = log.error
 log            = log.log
-request_memory = 2 GB
+request_memory = 8 GB
 
 queue
 

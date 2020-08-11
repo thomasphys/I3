@@ -4,12 +4,11 @@
 #
 ####################
 
-executable     = /usr/bin/python
-input          = /home/users/tmcelroy/test/basicmuon.py
+executable     = /home/users/tmcelroy/icecube/testscripts/numu_Level1.sh
 output         = log.out
 error          = log.error
 log            = log.log
-request_memory = 1 GB
+request_memory = 8 GB
 
 queue
 
