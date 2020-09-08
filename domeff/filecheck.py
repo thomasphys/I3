@@ -17,16 +17,20 @@ gcd_file = '/cvmfs/icecube.opensciencegrid.org/data/GCD/GeoCalibDetectorStatus_I
 gfile = dataio.I3File(gcd_file)
 gframe = gfile.pop_frame()
 geometry = gframe['I3Geometry']
+atten = 50.0
+
+angularaccemptance = [];
 
 
 def residualtime(distance,tracktime,pulsetime):
-
-    texpected = distance / (0.3/1.31) + tracktime
-
-    return pulsetime-texpected
+    return pulsetime-distance / (0.3/1.31) + tracktime
 
 def correctedcharge(distance,charge) :
     return distance*charge
+
+def correctedAttencharge(distance,charge) :
+    return distance*charge/np.exp(-distance/atten)
+
 
 
 ___main___ :
@@ -50,8 +54,8 @@ infile =  dataio.I3File(os.path.join(files_dir, file_list[i]))
         pulses = frame['SRTInIcePulsesDOMeff'].apply(frame)
 
         char = []
-        zero = []
-        one = []
+        key = []
+        value = []
 
         for i in range(len(pulses)):
             one_dom = pulses.popitem()
@@ -59,20 +63,24 @@ infile =  dataio.I3File(os.path.join(files_dir, file_list[i]))
             for pulse in one_dom[1]:
                 charge += pulse.charge
             char.append(charge)
-            zero.append(one_dom[0])
-            one.append(one_dom[1])
+            key.append(one_dom[0])
+            value.append(one_dom[1])
 
 
             dom=[]
             tr=[]
-            dist = []
+            dist_cher = []
+            dist_diff = []
 
-            for j in range(len(zero)):
-            mydom = geometry.omgeo[zero[j]]
-            dom.append(mydom)
+            for j in range(len(key)):
+                mydom = geometry.omgeo[key[j]]
+                dom.append(mydom)
            
-            distance = phys_services.I3Calculator.cherenkov_distance(track, mydom.position)
-            dist.append(distance)
+                distance = phys_services.I3Calculator.cherenkov_distance(track, mydom.position)
+                dist.append(distance)
+                corcharge = correctedcharge(distance,char[j])
+                timeres = residualtime(distance,tracktime,pulsetime)
+
 
 
 			

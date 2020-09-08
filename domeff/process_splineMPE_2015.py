@@ -233,11 +233,11 @@ tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
 
 # Write the data out to an HDF5 analysis file
 tray.AddModule(EventWriter, 'EventWriter',
-               FileName='test.h5')
+               FileName=opts.get('out')+'.h5')
 
 # Write out the data to an I3 file
 tray.AddModule('I3Writer', 'I3Writer',
-               FileName=opts.get('out'),
+               FileName=opts.get('out')+'.i3.gz',
 #               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
                DropOrphanStreams=[icetray.I3Frame.DAQ],
                Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]

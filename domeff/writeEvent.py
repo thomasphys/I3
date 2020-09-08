@@ -27,13 +27,13 @@ class EventWriter(icetray.I3Module):
         event=self.events.row
         # Get the current event ID number
         event['id']=self.eventId
-        event['reco/time']   = frame['SplineMPE'].time
-        event['reco/energy'] = frame['SplineMPE'].energy
-        event['reco/speed']  = frame['SplineMPE'].speed
-        event['reco/length'] = frame['SplineMPE'].length
-        event['reco/pos/x'] = frame['SplineMPE'].pos.x
-        event['reco/pos/y'] = frame['SplineMPE'].pos.y
-        event['reco/pos/z'] = frame['SplineMPE'].pos.z
+        event['reco/time']        = frame['SplineMPE'].time
+        event['reco/energy']      = frame['SplineMPE'].energy
+        event['reco/speed']       = frame['SplineMPE'].speed
+        event['reco/length']      = frame['SplineMPE'].length
+        event['reco/pos/x']       = frame['SplineMPE'].pos.x
+        event['reco/pos/y']       = frame['SplineMPE'].pos.y
+        event['reco/pos/z']       = frame['SplineMPE'].pos.z
         event['reco/dir/zenith']  = frame['SplineMPE'].dir.zenith
         event['reco/dir/azimuth'] = frame['SplineMPE'].dir.azimuth
 

@@ -37,7 +37,7 @@ class DOM(IsDescription):
     eventId           = UInt32Col()   # ID number of the event this DOM belongs to
     string = UInt16Col()       # String containing the DOM
     om     = UInt16Col()       # Opitcal module number of the DOM
-    recoDist          = Float64Col()
+    recoDist          = Float64Col()  # Reconstruction distance.
     distAboveEndpoint = Float64Col()  # Distance of the DOM above the endpoint of the track
     impactAngle       = Float64Col()
     totalCharge       = Float64Col()  # Total charge seen by the DOM
