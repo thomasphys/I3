@@ -31,7 +31,8 @@ def correctedcharge(distance,charge) :
 def correctedAttencharge(distance,charge) :
     return distance*charge/np.exp(-distance/atten)
 
-
+def emission_distance_from_start(dom_x,dom_y,dom_z,start_x,start_y,start_z,track_az,track_ze) :
+    
 
 ___main___ :
 

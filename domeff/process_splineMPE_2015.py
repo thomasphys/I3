@@ -17,20 +17,14 @@ sys.path.insert(0, parentdir)
 # Setup logging
 from icecube.icetray.i3logging import *
 
-# Get the options package
-from options import Options
-
-opts = Options()
+opts = {}
 
 # I/O options
-opts.add('gcd', 'Geometry, Calibration and Detector Status filename', '')
-opts.add('data', 'Data file to be processed', '')
-opts.add('nevents', 'Maximum number of events to process', 0)
-opts.add('out', 'Name of the output file to write','out.i3')
-opts.add('sim','Turn on extra processing for sim files (default False)',False)
-
-# Get all the options
-opts.execute()
+opts["gcd"] = sys.argv[1]
+opts["data"] = sys.argv[2]
+opts["nevents"] = int(sys.argv[3])
+opts["out"] = sys.argv[4]
+opts["sim"]=bool(sys.argv[5])
 
 from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics
@@ -69,7 +63,7 @@ tray = I3Tray()
 
 # Read the files.
 tray.AddModule('I3Reader', 'I3Reader',
-               Filenamelist=[opts.get('gcd'), opts.get('data')])
+               Filenamelist=[opts["gcd"], opts["data"]])
 
 # *********TEMPORARY FIX *********
 # Only allow the InIneSplit stream to pass
@@ -233,16 +227,19 @@ tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
 
 # Write the data out to an HDF5 analysis file
 tray.AddModule(EventWriter, 'EventWriter',
-               FileName=opts.get('out')+'.h5')
+               FileName=opts["out"]+'.h5')
 
 # Write out the data to an I3 file
-tray.AddModule('I3Writer', 'I3Writer',
-               FileName=opts.get('out')+'.i3.gz',
+#tray.AddModule('I3Writer', 'I3Writer',
+#               FileName=opts["out"]+'.i3.gz',
 #               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
-               DropOrphanStreams=[icetray.I3Frame.DAQ],
-               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
-               )
+#               DropOrphanStreams=[icetray.I3Frame.DAQ],
+#               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
+#               )
     
 tray.AddModule('TrashCan', 'yeswecan')
-tray.Execute(300)
+if opt['nevents'] > 0 :
+  tray.Execute(opt['nevents'])
+else :
+  tray.Execute()
 tray.Finish()
