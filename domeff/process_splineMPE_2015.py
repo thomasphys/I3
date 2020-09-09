@@ -238,8 +238,8 @@ tray.AddModule(EventWriter, 'EventWriter',
 #               )
     
 tray.AddModule('TrashCan', 'yeswecan')
-if opt['nevents'] > 0 :
-  tray.Execute(opt['nevents'])
+if opts['nevents'] > 0 :
+  tray.Execute(opts['nevents'])
 else :
   tray.Execute()
 tray.Finish()
