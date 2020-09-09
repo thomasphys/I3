@@ -38,10 +38,10 @@ class EventWriter(icetray.I3Module):
         event['reco/dir/azimuth'] = frame['SplineMPE'].dir.azimuth
 
         if frame.Has['I3MCTree']:
-            event['primary/id'] = frame['MCweightedPrimary'].type
-            event['primary/energy'] = frame['MCweightPrimary'].energy
+            event['primary/id'] = UInt32Col(frame['MCweightedPrimary'].type)
+            event['primary/energy'] = Float64Col(frame['MCweightPrimary'].energy)
         else :
-            event['primary/id'] = -1
+            event['primary/id'] = 0
 
         # Loop over the DOM hits and add them to the DOM table
         for i in range(len(frame['DOM_TotalCharge'])):
