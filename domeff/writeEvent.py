@@ -37,6 +37,12 @@ class EventWriter(icetray.I3Module):
         event['reco/dir/zenith']  = frame['SplineMPE'].dir.zenith
         event['reco/dir/azimuth'] = frame['SplineMPE'].dir.azimuth
 
+        if frame.Has['I3MCTree']:
+            event['primary/id'] = frame['MCweightedPrimary'].type
+            event['primary/energy'] = frame['MCweightPrimary'].energy
+        else :
+            event['primary/id'] = -1
+
         # Loop over the DOM hits and add them to the DOM table
         for i in range(len(frame['DOM_TotalCharge'])):
             dom=self.doms.row
