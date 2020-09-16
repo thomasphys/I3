@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
 """
 Process the I3 files.
@@ -9,6 +9,7 @@ from __future__ import print_function, division  # 2to3
 # Kludge to allow importing from parent directory for shared utility modules
 import os
 import sys
+sys.path.append('/home/tmcelroy/icecube/domeff')
 import inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -21,10 +22,13 @@ opts = {}
 
 # I/O options
 opts["gcd"] = sys.argv[1]
-opts["data"] = sys.argv[2]
-opts["nevents"] = int(sys.argv[3])
-opts["out"] = sys.argv[4]
-opts["sim"]=bool(sys.argv[5])
+opts["datadir"] = sys.argv[2]
+opts["data"] = sys.argv[3]
+opts["currentnumber"] = int(sys.argv[4])
+opts["filesuffix"] = sys.argv[5]
+opts["nevents"] = int(sys.argv[6])
+opts["out"] = sys.argv[7]
+opts["sim"]=bool(sys.argv[8])
 
 from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics
@@ -61,9 +65,11 @@ options['max_dist'] = 140
 
 tray = I3Tray()
 
+datafilename = opts["data"] + "{0:0{1}d}".format(opts["currentnumber"],5)
+
 # Read the files.
 tray.AddModule('I3Reader', 'I3Reader',
-               Filenamelist=[opts["gcd"], opts["data"]])
+               Filenamelist=[opts["gcd"], opts["datadir"]+datafilename+opts["filesuffix"]])
 
 # *********TEMPORARY FIX *********
 # Only allow the InIneSplit stream to pass
@@ -226,8 +232,9 @@ tray.AddModule(count_hits, 'count_hits',
 tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
 
 # Write the data out to an HDF5 analysis file
+
 tray.AddModule(EventWriter, 'EventWriter',
-               FileName=opts["out"]+'.h5')
+               FileName=opts["out"]+datafilename+'.h5')
 
 # Write out the data to an I3 file
 #tray.AddModule('I3Writer', 'I3Writer',
