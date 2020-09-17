@@ -1,16 +1,7 @@
-import h5py
 import os, sys
-import numpy as np
-import matplotlib as mpl
-from matplotlib.colors import LogNorm, Normalize
-import matplotlib.pyplot as plt
-import timeit as time
-import math
-from datetime import datetime
-from icecube.weighting.fluxes import  Hoerandel5,GaisserH3a
-from icecube.weighting import weighting
-import tables
+from tables import open_file
 import ROOT
+import numpy as np
 
 opts = {}
 
@@ -32,25 +23,27 @@ Distances = [0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0
 files_dir = opts["data"]
 file_list_aux = os.listdir(files_dir)
 file_list_h5 = [x for x in file_list_aux if '.h5' in x]
-file_list_h5 = [x for x in file_list_h5 if opts["eff"] in x]
+file_list = [x for x in file_list_h5 if opts["eff"] in x]
 
-fout = ROOT.TFile(opts["out"]," RECREATE ")
+fout = ROOT.TFile.Open(opts["out"],"RECREATE")
 
 eventcount = 0
 	
 for filename in file_list :
-	h5file = h5py.File(filename, 'r')
-
+	h5file = open_file(files_dir+filename, mode="r")
+	print('opening file ' + filename)
+	print(h5file)
 	domtable = h5file.root.doms
 	eventtable = h5file.root.events
 
-	eventcount += eventtable.nrows()
 	domindex = 0
 
 	for event in eventtable.iterrows() :
+		print('event = '+str(event['id']))
 		DomCharge_event = np.zeros(40,dtype=float)
 		DomCharge_norm = np.zeros(40,dtype=float)
 		for dom in domtable.iterrows(domindex) :
+			print('dom index = '+str(domindex)+' dom event = ' + str(dom['eventId']))
 			if  event['id'] != dom['eventId'] :
 				break
 			domindex += 1
@@ -62,7 +55,7 @@ for filename in file_list :
 				DomCharge_event[i] += char
 				DomCharge_norm[i] += 1.0
 
-		for j in range(len(DomCorCharge_norm)) :
+		for j in range(len(DomCharge_GaisserH4a)) :
 			if DomCharge_norm[j] > 0.0 :
 				DomCharge_GaisserH4a[j] += event['weight_GaisserH4a']*DomCharge_event[j]/DomCharge_norm[j]
 				DomCharge_GaisserH3a[j] += event['weight_GaisserH3a']*DomCharge_event[j]/DomCharge_norm[j]
@@ -71,14 +64,27 @@ for filename in file_list :
 				DomCharge_Hoerandel5[j] += event['weight_Hoerandel5']*DomCharge_event[j]/DomCharge_norm[j]
 				DomCharge_Hoerandel_IT[j] += event['weight_Hoerandel_IT']*DomCharge_event[j]/DomCharge_norm[j]
 				DomCharge_GaisserHillas[j] += event['weight_GaisserHillas']*DomCharge_event[j]/DomCharge_norm[j]
-					
-tg_GaisserH4a = ROOT.TGraph(len(Distance),Distance,DomCharge_GaisserH4a)
-tg_GaisserH3a = ROOT.TGraph(len(Distance),Distance,DomCharge_GaisserH3a)
-tg_GaisserH4a_IT = ROOT.TGraph(len(Distance),Distance,DomCharge_GaisserH4a_IT)
-tg_Hoerandel = ROOT.TGraph(len(Distance),Distance,DomCharge_Hoerandel)
-tg_Hoerandel5 = ROOT.TGraph(len(Distance),Distance,DomCharge_Hoerandel5)
-tg_Hoerandel_IT = ROOT.TGraph(len(Distance),Distance,DomCharge_Hoerandel_IT)
-tg_GaisserHillas = ROOT.TGraph(len(Distance),Distance,DomCharge_GaisserHillas)
+		eventcount = eventcount + 1
+
+	h5file.close()
+
+ for j in range(len(DomCharge_GaisserH4a)) :
+ 	if eventcount > 0.0 :
+        	DomCharge_GaisserH4a[j] /= eventcount
+                DomCharge_GaisserH3a[j] /= eventcount
+                DomCharge_GaisserH4a_IT[j] /= eventcount 
+                DomCharge_Hoerandel[j] /= eventcount
+                DomCharge_Hoerandel5[j] /= eventcount 
+                DomCharge_Hoerandel_IT[j] /= eventcount 
+                DomCharge_GaisserHillas[j] /= eventcount 
+		
+tg_GaisserH4a = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a))
+tg_GaisserH3a = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH3a))
+tg_GaisserH4a_IT = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a_IT))
+tg_Hoerandel = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel))
+tg_Hoerandel5 = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel5))
+tg_Hoerandel_IT = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel_IT))
+tg_GaisserHillas = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserHillas))
 
 
 fout.cd()

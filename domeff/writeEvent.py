@@ -72,6 +72,7 @@ class EventWriter(icetray.I3Module):
 	    if self.eventId == 0 :
 		runinfo = self.run.row
 		runinfo['nevents'] = cwm['NEvents']
+		runinfo.append()
         else :
 	    print('fail')
             event['weight_GaisserH4a'] = 1.0
@@ -81,6 +82,8 @@ class EventWriter(icetray.I3Module):
             event['weight_Hoerandel'] = 1.0
             event['weight_Hoerandel5'] = 1.0
             event['weight_Hoerandel_IT'] = 1.0
+
+	event.append()
 
         # Loop over the DOM hits and add them to the DOM table
         for i in range(len(frame['DOM_TotalCharge'])):
