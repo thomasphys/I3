@@ -17,8 +17,17 @@ DomCharge_GaisserH4a_IT  = np.zeros(40,dtype=float)
 DomCharge_Hoerandel  = np.zeros(40,dtype=float)
 DomCharge_Hoerandel5  = np.zeros(40,dtype=float)
 DomCharge_Hoerandel_IT  = np.zeros(40,dtype=float)
+DomCharge_GaisserH4a_dc  = np.zeros(40,dtype=float)
+DomCharge_GaisserH3a_dc  = np.zeros(40,dtype=float)
+DomCharge_GaisserHillas_dc  = np.zeros(40,dtype=float)
+DomCharge_GaisserH4a_IT_dc  = np.zeros(40,dtype=float)
+DomCharge_Hoerandel_dc  = np.zeros(40,dtype=float)
+DomCharge_Hoerandel5_dc  = np.zeros(40,dtype=float)
+DomCharge_Hoerandel_IT_dc  = np.zeros(40,dtype=float)
 
 Distances = [0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0,100.0,105.0,110.0,115.0,120.0,125.0,130.0,135.0,140.0,145.0,150.0,155.0,160.0,165.0,170.0,175.0,180.0,185.0,190.0,195.0]
+DC_Strings = [26,27,37,46,45,35]
+IC_Strings = [17,18,19,28,38,47,56,55,54,44,34,25]
 
 files_dir = opts["data"]
 file_list_aux = os.listdir(files_dir)
@@ -35,6 +44,7 @@ for filename in file_list :
 	print(h5file)
 	domtable = h5file.root.doms
 	eventtable = h5file.root.events
+	runtable = h5file.root.runs
 
 	domindex = 0
 
@@ -42,6 +52,8 @@ for filename in file_list :
 		print('event = '+str(event['id']))
 		DomCharge_event = np.zeros(40,dtype=float)
 		DomCharge_norm = np.zeros(40,dtype=float)
+		DomCharge_event_dc = np.zeros(40,dtype=float)
+		DomCharge_norm_dc = np.zeros(40,dtype=float)
 		for dom in domtable.iterrows(domindex) :
 			print('dom index = '+str(domindex)+' dom event = ' + str(dom['eventId']))
 			if  event['id'] != dom['eventId'] :
@@ -52,8 +64,12 @@ for filename in file_list :
 			char = dom['totalCharge']
 			i_dist = (int)(dist/5.0)
 			if i_dist > 0 and i_dist < 40 :
-				DomCharge_event[i] += char
-				DomCharge_norm[i] += 1.0
+				if dom['string'] in DC_Strings :
+					DomCharge_event_dc[i] += char
+					DomCharge_norm_dc[i] += 1.0
+				if dom['string'] in IC_String :
+					DomCharge_event[i] += char
+					DomCharge_norm[i] += 1.0
 
 		for j in range(len(DomCharge_GaisserH4a)) :
 			if DomCharge_norm[j] > 0.0 :
@@ -64,6 +80,14 @@ for filename in file_list :
 				DomCharge_Hoerandel5[j] += event['weight_Hoerandel5']*DomCharge_event[j]/DomCharge_norm[j]
 				DomCharge_Hoerandel_IT[j] += event['weight_Hoerandel_IT']*DomCharge_event[j]/DomCharge_norm[j]
 				DomCharge_GaisserHillas[j] += event['weight_GaisserHillas']*DomCharge_event[j]/DomCharge_norm[j]
+			if DomCharge_norm_dc[j] > 0.0 :
+				DomCharge_GaisserH4a_dc[j] += event['weight_GaisserH4a']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
+				DomCharge_GaisserH3a_dc[j] += event['weight_GaisserH3a']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
+				DomCharge_GaisserH4a_IT_dc[j] += event['weight_GaisserH4a_IT']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
+				DomCharge_Hoerandel_dc[j] += event['weight_Hoerandel']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
+				DomCharge_Hoerandel5_dc[j] += event['weight_Hoerandel5']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
+				DomCharge_Hoerandel_IT_dc[j] += event['weight_Hoerandel_IT']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
+				DomCharge_GaisserHillas_dc[j] += event['weight_GaisserHillas']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
 		eventcount = eventcount + 1
 
 	h5file.close()
@@ -86,6 +110,14 @@ tg_Hoerandel5 = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharg
 tg_Hoerandel_IT = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel_IT))
 tg_GaisserHillas = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserHillas))
 
+tg_GaisserH4a_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a_cd))
+tg_GaisserH3a_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH3a_cd))
+tg_GaisserH4a_IT_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a_IT_cd))
+tg_Hoerandel_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel_cd))
+tg_Hoerandel5_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel5_cd))
+tg_Hoerandel_IT_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel_IT_cd))
+tg_GaisserHillas_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserHillas_cd))
+
 
 fout.cd()
 tg_GaisserH4a.Write("GaisserH4a")
@@ -95,6 +127,13 @@ tg_Hoerandel.Write("Hoerandel")
 tg_Hoerandel5.Write("Hoerandel5")
 tg_Hoerandel_IT.Write("Hoerandel_IT")
 tg_GaisserHillas.Write("GaisserHillas")
+tg_GaisserH4a_dc.Write("GaisserH4a_dc")
+tg_GaisserH3a_dc.Write("GaisserH3a_dc")
+tg_GaisserH4a_IT_dc.Write("GaisserH4a_IT_dc")
+tg_Hoerandel_dc.Write("Hoerandel_dc")
+tg_Hoerandel5_dc.Write("Hoerandel5_dc")
+tg_Hoerandel_IT_dc.Write("Hoerandel_IT_dc")
+tg_GaisserHillas_dc.Write("GaisserHillas_dc")
 fout.Close()
 
 
