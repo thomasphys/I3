@@ -8,24 +8,24 @@ from tables import open_file
 def find_error_bootstrap(values,weights):
 # this needs to be eddited, I do not thing this was programmed corerctly.
 
-    total = len(values)
-    sum_weights = sum([weights[i] for i in range(0,len(weights))])
+	total = len(values)
+	sum_weights = sum([weights[i] for i in range(0,len(weights))])
 	mu = sum([vales[i]*weights[i] for i in range(0,len(weights))])
 	mu = mu/sum_weights
-    std_mu = []
-    for j in range(0,11) :
-    	means = []
-    	size = 0.1 + (0.065)*j
-    	sum_weights = 0.0
-    	for i in range(0,100):
-        	resampled = np.random.randint(low=0.0, high=total, size=size)
-        	sum_weights = sum([weights[i] for i in resampled])
-        	mu = sum([charge_list[i]*weights[i] for i in resampled])
-        	mu = mu/sum_weights
-        	means.append(mu)
-    	std_mu.append(np.std(means,ddof=1))
+	std_mu = []
+	for j in range(0,11) :
+		means = []
+		size = 0.1 + (0.065)*j
+		sum_weights = 0.0
+		for i in range(0,100):
+			resampled = np.random.randint(low=0.0, high=total, size=size)
+			sum_weights = sum([weights[i] for i in resampled])
+			mu = sum([charge_list[i]*weights[i] for i in resampled])
+			mu = mu/sum_weights
+			means.append(mu)
+			std_mu.append(np.std(means,ddof=1))
 
-    return std_mu_limit
+	return std_mu_limit
 
 def calc_charge_info(total_charge_dict):
 
@@ -45,48 +45,37 @@ def calc_charge_info(total_charge_dict):
     Contains the mean distance, charge, and error of each thing.
     """
 
-    mean_dist = []
-    charge = []
-    error = []
+	mean_dist = []
+	charge = []
+	error = []
 
-    for bounds, data in total_charge_dict.items():
-        
+	for bounds, data in total_charge_dict.items():
         print(bounds)
         charges= data[0]
         weights = data[1]
         
-        # Defining the weighted average
-
-        mu = sum([ weights[i]*charges[i] for i in range(0,len(charges))]) 
-        mu = mu/sum(weights)
-
-        # We use the standard IC procedure to calculate the statistical error for the
-        # weighted average
-
-        # There are three main terms
-        
-        # 1) The  weighted sum of charges, and its variance
-        
-        wsc = sum([ weights[i]*charges[i] for i in range(0,len(charges))])
-        var_wsc = sum([(weights[i]*charges[i])**2 for i in range(0,len(charges))]) 
-
-        # 2) The sum of weights and its variance 
-
-        sw = sum(weights)
-        var_sw = sum([weights[i]**2 for i in range(0,len(charges))])
-
-        # 3) The covariance associated to both sums of weights 
-
-        cov = sum([charges[i]*(weights[i]**2) for i in range(0,len(charges))])
-
-        # The error in the weighted average of charges is given by the variance of the quantity 
-        # wsc/sw; a division of two sums of weights (for two sets of weights that are correlated). 
-
-        std_mu = var_wsc/(wsc)**2
-        std_mu += var_sw/(sw)**2
-        std_mu -= 2.*cov/(sw*wsc)
-        std_mu = std_mu**(1./2.)
-        std_mu *= mu
+		# Defining the weighted average
+		mu = sum([ weights[i]*charges[i] for i in range(0,len(charges))]) 
+		mu = mu/sum(weights)
+		
+		# We use the standard IC procedure to calculate the statistical error for the
+		# weighted average
+		# There are three main terms
+		# 1) The  weighted sum of charges, and its variance
+		wsc = sum([ weights[i]*charges[i] for i in range(0,len(charges))])
+		var_wsc = sum([(weights[i]*charges[i])**2 for i in range(0,len(charges))]) 
+		# 2) The sum of weights and its variance 
+		sw = sum(weights)
+		var_sw = sum([weights[i]**2 for i in range(0,len(charges))])
+		# 3) The covariance associated to both sums of weights 
+		cov = sum([charges[i]*(weights[i]**2) for i in range(0,len(charges))])
+		# The error in the weighted average of charges is given by the variance of the quantity 
+		# wsc/sw; a division of two sums of weights (for two sets of weights that are correlated). \
+		std_mu = var_wsc/(wsc)**2
+		std_mu += var_sw/(sw)**2
+		std_mu -= 2.*cov/(sw*wsc)
+		std_mu = std_mu**(1./2.)
+		std_mu *= mu
 
 def ComputeWeightedMeanandError(value,weight):
 	nelements = len(value)
