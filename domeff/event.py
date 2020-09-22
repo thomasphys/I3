@@ -23,11 +23,22 @@ class Particle(IsDescription):
 
 class Run(IsDescription):
     nevents   = UInt32Col()
-    starttime = Float64Col()
-    endtime   = Float64Col()
+    startTime = Float64Col()
+    endTime   = Float64Col()
+
+class Corsica(IsDescription):
+    primaryEnergy        = Float64Col()
+    primaryType          = UInt32Col()
+    primarySpectralIndex = Float64Col()
+    energyPrimaryMin     = Float64Col()
+    energyPrimaryMax     = Float64Col()
+    areaSum              = Float64Col()
+
+class Time(IsDescription) :
+    tag = StringCol()
 
 class Event(IsDescription):
-    id                     = UInt32Col()    # ID number of the event
+    eventId                = UInt32Col()    # ID number of the event
     dcHitsIn               = UInt32Col()    # Number of hits inside the deep core analysis region
     dcHitsOut              = UInt32Col()    # Number of hits outside the deep core analysis region
     icHitsIn               = UInt32Col()    # Number of hits inside the IceCube analysis region
@@ -37,18 +48,14 @@ class Event(IsDescription):
     nHits                  = UInt32Col()    # Number of DOM hits in this event
     primary                = Particle()     # Polyplopia primary particle
     reco                   = Particle()     # Reconstructed particle track
-    weight_GaisserH4a      = Float64Col()   # Event weight based on GaisserH4a flux model
-    weight_GaisserH3a      = Float64Col()   # Event weight based on GaisserH3a flux model
-    weight_GaisserH4a_IT   = Float64Col()   # Event weight based on GaisserH4a_IT flux model
-    weight_GaisserHillas   = Float64Col()   # Event weight based on GaisserHillas flux model
-    weight_Hoerandel       = Float64Col()   # Event weight based on Hoerandel flux model
-    weight_Hoerandel5      = Float64Col()   # Event weight based on Hoerandel5 flux model
-    weight_Hoerandel_IT    = Float64Col()   # Event weight based on Hoerandel_IT flux model
+    corsica                = Corsica()
+    startTime              = Time()
+    endTime                = Time()
 
 class DOM(IsDescription):
     eventId           = UInt32Col()   # ID number of the event this DOM belongs to
-    string = UInt16Col()       # String containing the DOM
-    om     = UInt16Col()       # Opitcal module number of the DOM
+    string            = UInt16Col()       # String containing the DOM
+    om                = UInt16Col()       # Opitcal module number of the DOM
     recoDist          = Float64Col()
     distAboveEndpoint = Float64Col()  # Distance of the DOM above the endpoint of the track
     impactAngle       = Float64Col()

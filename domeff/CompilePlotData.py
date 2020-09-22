@@ -4,6 +4,8 @@ import ROOT
 import numpy as np
 import argparse
 from tables import open_file
+from icecube.weighting.fluxes import  GaisserH4a, GaisserH3a, GaisserH4a_IT, GaisserHillas, Hoerandel, Hoerandel5, Hoerandel_IT
+from icecube.weighting import weighting
 
 def find_error_bootstrap(values,weights):
 # this needs to be eddited, I do not thing this was programmed corerctly.
@@ -30,29 +32,29 @@ def find_error_bootstrap(values,weights):
 def calc_charge_info(total_charge_dict):
 
     
-    """
-    Calculate the mean distance of the bin, (average) charge, and error in average charge
+	"""
+	Calculate the mean distance of the bin, (average) charge, and error in average charge
     
-    Parameters
-    ----------
+	Parameters
+	----------
     
-    total_charge_dict: dict
-    Contains the total_charge_dict data.
+	total_charge_dict: dict
+	Contains the total_charge_dict data.
 
-    Returns
-    -------
-    charge_info: dict
-    Contains the mean distance, charge, and error of each thing.
-    """
+	Returns
+	-------
+	charge_info: dict
+	Contains the mean distance, charge, and error of each thing.
+	"""
 
 	mean_dist = []
 	charge = []
 	error = []
 
 	for bounds, data in total_charge_dict.items():
-        print(bounds)
-        charges= data[0]
-        weights = data[1]
+		print(bounds)
+		charges= data[0]
+		weights = data[1]
         
 		# Defining the weighted average
 		mu = sum([ weights[i]*charges[i] for i in range(0,len(charges))]) 
@@ -115,13 +117,17 @@ def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	fout.cd()
 	Charge_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),np.array(y_data_ic),np.array(x_errors_ic),np.array(y_errors_ic))
 	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),np.array(y_data_dc),np.array(x_errors_dc),np.array(y_errors_dc))
-	Energy = ROOT.TH1F("","",1000,min(energy)*0.9,max(energy)*1.1)
-	Energy.Fill(len(energy),np.array(energy),np.array(weights))
-	Zenith = ROOT.TH1F("","",180,0,180)
-	Zenith.Fill(len(zenith),np.array(zenith),np.array(weights))
+	Energy = ROOT.TH1F("Energy","",1000,min(energy)*0.9,max(energy)*1.1)
+	Zenith = ROOT.TH1F("Zenith","",180,0,180)
 
-	Charge_Distance_IC->Write("Charge_Distance_IC")
-	Charge_Distance_DC->Write("Charge_Distance_DC")
+	for i in range(0,len(energy)) :
+		Energy.Fill(energy[i],weights[i])
+		Zenith.Fill(zenith[i],weights[i])
+
+	Charge_Distance_IC.Write("Charge_Distance_IC")
+	Charge_Distance_DC.Write("Charge_Distance_DC")
+	Energy.Write()
+	Zenith.Write()
 
 	fout.Close()
 
@@ -216,7 +222,13 @@ if __name__ == '__main__':
 	else :
 		file_list = [x for x in file_list_h5 if args.eff in x]
 
-
+	flux = GaisserH4a()
+	if args.flux == "GaisserH3a" : flux = GaisserH3a()
+	elif args.flux == "GaisserH4a_IT" : flux = GaisserH4a_IT()
+	elif args.flux == "GaisserHillas" : flux = GaisserHillas()
+	elif args.flux == "Hoerandel" : flux = Hoerandel()
+	elif args.flux == "Hoerandel5" : flux = Hoerandel5()
+	elif args.flux == "Hoerandel_IT" : flux = Hoerandel_IT()
 
 	eventcount = 0
 	
@@ -237,6 +249,13 @@ if __name__ == '__main__':
 
 			reconstructedE.append(event['reco/energy'])
 			zenith.append(event['reco/dir/zenith'])
+
+			pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
+            energy_integral = (event['/corsika/energyPrimaryMax']**(event['/corsika/primarySpectralIndex']+1)-event['/corsika/energyPrimaryMin']**(event['/corsika/primarySpectralIndex']+1))/(event['/corsika/primarySpectralIndex']+1)
+            energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
+            energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
+            
+
 			weights_E.append(event[weightname])
 
 			domindexstart = domindex
@@ -261,28 +280,28 @@ if __name__ == '__main__':
 		h5file.close()
 
  	
-	distance_dc = np.zeros(8,dtype=float)
-	distanceerror_dc = np.zeros(8,dtype=float)
-	charge_dc = np.zeros(8,dtype=float)
-	chargeerror_dc = np.zeros(8,dtype=float)
-	distance_ic = np.zeros(8,dtype=float)
-	distanceerror_ic = np.zeros(8,dtype=float)
-	charge_ic = np.zeros(8,dtype=float)
-	chargeerror_ic = np.zeros(8,dtype=float)
+	binneddistance_dc = np.zeros(8,dtype=float)
+	binneddistanceerror_dc = np.zeros(8,dtype=float)
+	binnedcharge_dc = np.zeros(8,dtype=float)
+	binnedchargeerror_dc = np.zeros(8,dtype=float)
+	binneddistance_ic = np.zeros(8,dtype=float)
+	binneddistanceerror_ic = np.zeros(8,dtype=float)
+	binnedcharge_ic = np.zeros(8,dtype=float)
+	binnedchargeerror_ic = np.zeros(8,dtype=float)
 
 	for i in range(0,8):
-		distance_dc[i] , distanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
-		charge_dc[i], chargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
-		distance_ic[i] , distanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
-		charge_ic[i], chargeerror_ic[i] = ComputeWeightedMeanandError(DomCharge_ic[i],weights_ic[i])
+		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
+		binnedcharge_dc[i], binnedchargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
+		binneddistance_ic[i] , binneddistanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
+		binnedcharge_ic[i], binnedchargeerror_ic[i] = ComputeWeightedMeanandError(DomCharge_ic[i],weights_ic[i])
 		
 
 
 	 outfilenamelist = args.output.split(".",1)
 	 if outfilenamelist[1] == "root" :
-	 	OutputRoot(args.output,distance_ic,distanceerror_ic,charge_ic,chargeerror_ic,distance_dc,distanceerror_dc,charge_dc,chargeerror_dc,reconstructedE,zenith,weights_E)
+	 	OutputRoot(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
 	 elif outfilenamelist[1] == "h5" :
-	 	OutputHDF5(args.output,distance_ic,distanceerror_ic,charge_ic,chargeerror_ic,distance_dc,distanceerror_dc,charge_dc,chargeerror_dc,reconstructedE,zenith,weights_E)
+	 	OutputHDF5(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
 	 elif outfilenamelist[1] == "pdf" :
 	 	print("not yet supported")
 
