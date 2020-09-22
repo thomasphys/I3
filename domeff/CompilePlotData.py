@@ -29,15 +29,14 @@ def find_error_bootstrap(values,weights):
 
 	return std_mu_limit
 
-def calc_charge_info(total_charge_dict):
+def calc_charge_info(values,weights):
 
     
 	"""
 	Calculate the mean distance of the bin, (average) charge, and error in average charge
-    
+
 	Parameters
 	----------
-    
 	total_charge_dict: dict
 	Contains the total_charge_dict data.
 
@@ -46,38 +45,31 @@ def calc_charge_info(total_charge_dict):
 	charge_info: dict
 	Contains the mean distance, charge, and error of each thing.
 	"""
-
-	mean_dist = []
-	charge = []
-	error = []
-
-	for bounds, data in total_charge_dict.items():
-		print(bounds)
-		charges= data[0]
-		weights = data[1]
         
-		# Defining the weighted average
-		mu = sum([ weights[i]*charges[i] for i in range(0,len(charges))]) 
-		mu = mu/sum(weights)
+	# Defining the weighted average
+	mu = sum([ weights[i]*values[i] for i in range(0,len(values))]) 
+	mu = mu/sum(weights)
 		
-		# We use the standard IC procedure to calculate the statistical error for the
-		# weighted average
-		# There are three main terms
-		# 1) The  weighted sum of charges, and its variance
-		wsc = sum([ weights[i]*charges[i] for i in range(0,len(charges))])
-		var_wsc = sum([(weights[i]*charges[i])**2 for i in range(0,len(charges))]) 
-		# 2) The sum of weights and its variance 
-		sw = sum(weights)
-		var_sw = sum([weights[i]**2 for i in range(0,len(charges))])
-		# 3) The covariance associated to both sums of weights 
-		cov = sum([charges[i]*(weights[i]**2) for i in range(0,len(charges))])
-		# The error in the weighted average of charges is given by the variance of the quantity 
-		# wsc/sw; a division of two sums of weights (for two sets of weights that are correlated). \
-		std_mu = var_wsc/(wsc)**2
-		std_mu += var_sw/(sw)**2
-		std_mu -= 2.*cov/(sw*wsc)
-		std_mu = std_mu**(1./2.)
-		std_mu *= mu
+	# We use the standard IC procedure to calculate the statistical error for the
+	# weighted average
+	# There are three main terms
+	# 1) The  weighted sum of charges, and its variance
+	wsc = sum([ weights[i]*values[i] for i in range(0,len(values))])
+	var_wsc = sum([(weights[i]*values[i])**2 for i in range(0,len(values))]) 
+	# 2) The sum of weights and its variance 
+	sw = sum(weights)
+	var_sw = sum([weights[i]**2 for i in range(0,len(values))])
+	# 3) The covariance associated to both sums of weights 
+	cov = sum([charges[i]*(weights[i]**2) for i in range(0,len(values))])
+	# The error in the weighted average of charges is given by the variance of the quantity 
+	# wsc/sw; a division of two sums of weights (for two sets of weights that are correlated). \
+	std_mu = var_wsc/(wsc)**2
+	std_mu += var_sw/(sw)**2
+	std_mu -= 2.*cov/(sw*wsc)
+	std_mu = std_mu**(1./2.)
+	std_mu *= mu
+
+	return mu , std_mu
 
 def ComputeWeightedMeanandError(value,weight):
 	nelements = len(value)
@@ -92,10 +84,10 @@ def ComputeWeightedMeanandError(value,weight):
 
 	for i in range(0,nelements) :
 		mean += weight[i]*value[i]
-		sumweights += weight[i]
+		sumweights = sumweights+weight[i]
 		if weight[i] > 0.0 : n_nonzero += 1.0
 
-	if sumweights <= 0.0 : 
+	if n_nonzero == 0.0 : 
 		print("Sum of weights is zero")
 		return 0.0,0.0
 
@@ -112,15 +104,16 @@ def ComputeWeightedMeanandError(value,weight):
 
 
 def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_error_dc,y_data_dc,y_error_dc,energy,zenith,weights) :
-	fout = ROOT.TFile.Open(opts["out"],"RECREATE")
+	fout = ROOT.TFile.Open(filename,"RECREATE")
 
 	fout.cd()
-	Charge_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),np.array(y_data_ic),np.array(x_errors_ic),np.array(y_errors_ic))
-	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),np.array(y_data_dc),np.array(x_errors_dc),np.array(y_errors_dc))
+
+	Charge_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),np.array(y_data_ic),np.array(x_error_ic),np.array(y_error_ic))
+	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),np.array(y_data_dc),np.array(x_error_dc),np.array(y_error_dc))
 	Energy = ROOT.TH1F("Energy","",1000,min(energy)*0.9,max(energy)*1.1)
 	Zenith = ROOT.TH1F("Zenith","",180,0,180)
+	for i in range(0,len(weights)) :
 
-	for i in range(0,len(energy)) :
 		Energy.Fill(energy[i],weights[i])
 		Zenith.Fill(zenith[i],weights[i])
 
@@ -186,21 +179,23 @@ def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
-                    default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
-    parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str,
-                    nargs = '+', default = "data")
-    parser.add_argument('-o', '--output', help='Name of output file.', type=str,
-                    nargs = '+', default = "out.root")
-    parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
-                    nargs = '+', default = "GaisserH4a")
-    parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
-                    nargs = '+',  default = [-180.0,180.0])
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
+				default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
+	parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str,
+				default = "data")
+	parser.add_argument('-o', '--output', help='Name of output file.', type=str,
+				default = "out.root")
+	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
+				default = "GaisserH4a")
+	parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
+				nargs = '+',  default = [-180.0,180.0])
     
-    args = parser.parse_args()
+	args = parser.parse_args()
 
-    DomCharge_ic  = [[],[],[],[],[],[],[],[]]
+	weightname = 'weight_'+args.flux
+
+	DomCharge_ic  = [[],[],[],[],[],[],[],[]]
 	weights_ic = [[],[],[],[],[],[],[],[]]
 	distance_ic = [[],[],[],[],[],[],[],[]]
 	DomCharge_dc  = [[],[],[],[],[],[],[],[]]
@@ -234,11 +229,9 @@ if __name__ == '__main__':
 	
 	for filename in file_list :
 		h5file = open_file(files_dir+filename, mode="r")
-		print('opening file ' + filename)
-		print(h5file)
 		domtable = h5file.root.doms
 		eventtable = h5file.root.events
-		runtable = h5file.root.runs
+		runtable = h5file.root.runinfo
 
 		domindex = 0
 
@@ -267,13 +260,13 @@ if __name__ == '__main__':
 				i_dist = (int)(dom['recoDist']/20.0)
 				if i_dist >= 0 and i_dist < 8 :
 					if dom['string'] in DC_Strings :
-						DomCharge_dc[idist].append(dom['totalCharge'])
-						weights_dc[idist].append(event[weightname])
-						distance_dc[idist].append(dom['recoDist'])
-					if dom['string'] in IC_String :
-						DomCharge_ic[idist].append(dom['totalCharge'])
-						weights_ic[idist].append(event[weightname])
-						distance_ic[idist].append(dom['recoDist'])
+						DomCharge_dc[i_dist].append(dom['totalCharge'])
+						weights_dc[i_dist].append(event[weightname])
+						distance_dc[i_dist].append(dom['recoDist'])
+					if dom['string'] in IC_Strings :
+						DomCharge_ic[i_dist].append(dom['totalCharge'])
+						weights_ic[i_dist].append(event[weightname])
+						distance_ic[i_dist].append(dom['recoDist'])
 				
 			eventcount = eventcount + 1
 
@@ -296,12 +289,12 @@ if __name__ == '__main__':
 		binnedcharge_ic[i], binnedchargeerror_ic[i] = ComputeWeightedMeanandError(DomCharge_ic[i],weights_ic[i])
 		
 
+	outfilenamelist = args.output.split(".",1)
+	if outfilenamelist[1] == "root" :
+		OutputRoot(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
+	elif outfilenamelist[1] == "h5" :
+		OutputHDF5(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
+	elif outfilenamelist[1] == "pdf" :
+		print("not yet supported")
 
-	 outfilenamelist = args.output.split(".",1)
-	 if outfilenamelist[1] == "root" :
-	 	OutputRoot(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
-	 elif outfilenamelist[1] == "h5" :
-	 	OutputHDF5(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
-	 elif outfilenamelist[1] == "pdf" :
-	 	print("not yet supported")
 
