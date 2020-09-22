@@ -2,138 +2,157 @@ import os, sys
 from tables import open_file
 import ROOT
 import numpy as np
+import argparse
+from tables import open_file
 
-opts = {}
+def ComputeWeightedMeanandError(value,weight):
+	nelements = len(value)
+	if len(weight) != nelements :
+		print("error lists are not of equal length")
+		return 0.0,0.0
 
-# I/O options
-opts["data"] = sys.argv[1]
-opts["eff"] = sys.argv[2]
-opts["out"] = sys.argv[3]
+	mean = 0.0;
+	sumweights = 0.0;
+	n_nonzero = 0.0;
+	sigma = 0.;
 
-DomCharge_GaisserH4a  = np.zeros(40,dtype=float)
-DomCharge_GaisserH3a  = np.zeros(40,dtype=float)
-DomCharge_GaisserHillas  = np.zeros(40,dtype=float)
-DomCharge_GaisserH4a_IT  = np.zeros(40,dtype=float)
-DomCharge_Hoerandel  = np.zeros(40,dtype=float)
-DomCharge_Hoerandel5  = np.zeros(40,dtype=float)
-DomCharge_Hoerandel_IT  = np.zeros(40,dtype=float)
-DomCharge_GaisserH4a_dc  = np.zeros(40,dtype=float)
-DomCharge_GaisserH3a_dc  = np.zeros(40,dtype=float)
-DomCharge_GaisserHillas_dc  = np.zeros(40,dtype=float)
-DomCharge_GaisserH4a_IT_dc  = np.zeros(40,dtype=float)
-DomCharge_Hoerandel_dc  = np.zeros(40,dtype=float)
-DomCharge_Hoerandel5_dc  = np.zeros(40,dtype=float)
-DomCharge_Hoerandel_IT_dc  = np.zeros(40,dtype=float)
+	for i in range(0,nelements) :
+		mean += weight[i]*value[i]
+		sumweights += weight[i]
+		if weight[i] > 0.0 : n_nonzero += 1.0
 
-Distances = [0.0,5.0,10.0,15.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,75.0,80.0,85.0,90.0,95.0,100.0,105.0,110.0,115.0,120.0,125.0,130.0,135.0,140.0,145.0,150.0,155.0,160.0,165.0,170.0,175.0,180.0,185.0,190.0,195.0]
-DC_Strings = [26,27,37,46,45,35]
-IC_Strings = [17,18,19,28,38,47,56,55,54,44,34,25]
+	if sumweights <= 0.0 : 
+		print("Sum of weights is zero")
+		return 0.0,0.0
 
-files_dir = opts["data"]
-file_list_aux = os.listdir(files_dir)
-file_list_h5 = [x for x in file_list_aux if '.h5' in x]
-file_list = [x for x in file_list_h5 if opts["eff"] in x]
+	mean = mean/sumweights
+	sumweights *= (n_nonzero-1.0)/n_nonzero
 
-fout = ROOT.TFile.Open(opts["out"],"RECREATE")
+	for i in range(0,nelements) :
+		sigma += weight[i]*(value[i]-mean)*(value[i]-mean)
 
-eventcount = 0
-	
-for filename in file_list :
-	h5file = open_file(files_dir+filename, mode="r")
-	print('opening file ' + filename)
-	print(h5file)
-	domtable = h5file.root.doms
-	eventtable = h5file.root.events
-	runtable = h5file.root.runs
+	sigma /= sumweights
 
-	domindex = 0
+	return mean,sigma
 
-	for event in eventtable.iterrows() :
-		print('event = '+str(event['id']))
-		DomCharge_event = np.zeros(40,dtype=float)
-		DomCharge_norm = np.zeros(40,dtype=float)
-		DomCharge_event_dc = np.zeros(40,dtype=float)
-		DomCharge_norm_dc = np.zeros(40,dtype=float)
-		for dom in domtable.iterrows(domindex) :
-			print('dom index = '+str(domindex)+' dom event = ' + str(dom['eventId']))
-			if  event['id'] != dom['eventId'] :
-				break
-			domindex += 1
 
-			dist = dom['recoDist']
-			char = dom['totalCharge']
-			i_dist = (int)(dist/5.0)
-			if i_dist > 0 and i_dist < 40 :
-				if dom['string'] in DC_Strings :
-					DomCharge_event_dc[i] += char
-					DomCharge_norm_dc[i] += 1.0
-				if dom['string'] in IC_String :
-					DomCharge_event[i] += char
-					DomCharge_norm[i] += 1.0
 
-		for j in range(len(DomCharge_GaisserH4a)) :
-			if DomCharge_norm[j] > 0.0 :
-				DomCharge_GaisserH4a[j] += event['weight_GaisserH4a']*DomCharge_event[j]/DomCharge_norm[j]
-				DomCharge_GaisserH3a[j] += event['weight_GaisserH3a']*DomCharge_event[j]/DomCharge_norm[j]
-				DomCharge_GaisserH4a_IT[j] += event['weight_GaisserH4a_IT']*DomCharge_event[j]/DomCharge_norm[j]
-				DomCharge_Hoerandel[j] += event['weight_Hoerandel']*DomCharge_event[j]/DomCharge_norm[j]
-				DomCharge_Hoerandel5[j] += event['weight_Hoerandel5']*DomCharge_event[j]/DomCharge_norm[j]
-				DomCharge_Hoerandel_IT[j] += event['weight_Hoerandel_IT']*DomCharge_event[j]/DomCharge_norm[j]
-				DomCharge_GaisserHillas[j] += event['weight_GaisserHillas']*DomCharge_event[j]/DomCharge_norm[j]
-			if DomCharge_norm_dc[j] > 0.0 :
-				DomCharge_GaisserH4a_dc[j] += event['weight_GaisserH4a']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
-				DomCharge_GaisserH3a_dc[j] += event['weight_GaisserH3a']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
-				DomCharge_GaisserH4a_IT_dc[j] += event['weight_GaisserH4a_IT']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
-				DomCharge_Hoerandel_dc[j] += event['weight_Hoerandel']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
-				DomCharge_Hoerandel5_dc[j] += event['weight_Hoerandel5']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
-				DomCharge_Hoerandel_IT_dc[j] += event['weight_Hoerandel_IT']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
-				DomCharge_GaisserHillas_dc[j] += event['weight_GaisserHillas']*DomCharge_event_dc[j]/DomCharge_norm_dc[j]
-		eventcount = eventcount + 1
+def OutputRoot(filename,x_data,x_error,y_data,y_error) :
+	fout = ROOT.TFile.Open(opts["out"],"RECREATE")
+
+	fout.cd()
+	tg_GaisserH4a = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a))
+	tg_GaisserH4a.Write("GaisserH4a")
+
+	fout.Close()
+
+
+def OutputHDF5(filename,x_data,x_error,y_data,y_error) :
+	h5file = open_file(filename, mode="w", title="DOM Calibration HDF5 File")
+
+	distancetable = self.h5file.create_table('/', 'distance', float, "Distance")
+	distanceErrortable = self.h5file.create_table('/', 'distanceError', float, "Distance error")
+	chargetable = self.h5file.create_table('/', 'charge', float, "Charge")
+	chargeErrortable = self.h5file.create_table('/', 'chargeError', float, "Charge error")
+
+	nelements = length(x_data)
+
+	distance = distancetable.row
+	distanceerror = distanceErrortable.row
+	charge = chargetable.row
+	chargeerror = chargeErrortable.row
+
+	for i in range(0,nelements) :
+		distance = x_data[i]
+		distanceerror = x_error[i]
+		charge = y_data[i]
+		chargeerror = y_error[i]
+		distance.append()
+		distanceerror.append()
+		charge.append()
+		chargeerror.append()
 
 	h5file.close()
 
- for j in range(len(DomCharge_GaisserH4a)) :
- 	if eventcount > 0.0 :
-        	DomCharge_GaisserH4a[j] /= eventcount
-                DomCharge_GaisserH3a[j] /= eventcount
-                DomCharge_GaisserH4a_IT[j] /= eventcount 
-                DomCharge_Hoerandel[j] /= eventcount
-                DomCharge_Hoerandel5[j] /= eventcount 
-                DomCharge_Hoerandel_IT[j] /= eventcount 
-                DomCharge_GaisserHillas[j] /= eventcount 
-		
-tg_GaisserH4a = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a))
-tg_GaisserH3a = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH3a))
-tg_GaisserH4a_IT = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a_IT))
-tg_Hoerandel = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel))
-tg_Hoerandel5 = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel5))
-tg_Hoerandel_IT = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel_IT))
-tg_GaisserHillas = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserHillas))
 
-tg_GaisserH4a_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a_cd))
-tg_GaisserH3a_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH3a_cd))
-tg_GaisserH4a_IT_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserH4a_IT_cd))
-tg_Hoerandel_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel_cd))
-tg_Hoerandel5_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel5_cd))
-tg_Hoerandel_IT_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_Hoerandel_IT_cd))
-tg_GaisserHillas_cd = ROOT.TGraph(len(Distances),np.array(Distances),np.array(DomCharge_GaisserHillas_cd))
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
+                    default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
+    parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str,
+                    nargs = '+', default = "data")
+    parser.add_argument('-o', '--output', help='Name of output file.', type=str,
+                    nargs = '+', default = "out.root")
+    parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
+                    nargs = '+', default = "GaisserH4a")
+    parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
+                    nargs = '+',  default = [0.0,40.0])
+    
+    args = parser.parse_args()
+
+    DomCharge_ic  = [[],[],[],[],[],[],[],[]]
+	weights_ic = [[],[],[],[],[],[],[],[]]
+	distance_ic = [[],[],[],[],[],[],[],[]]
+	DomCharge_dc  = [[],[],[],[],[],[],[],[]]
+	weights_dc = [[],[],[],[],[],[],[],[]]
+	distance_dc = [[],[],[],[],[],[],[],[]]
+	reconstructedE = []
+	weights_E = []
+
+	Distances = [0.0,20.0,40.0,60.0,80.0,100.0,120.0,140.0]
+	DC_Strings = [81,82,83,84,85,86]
+	IC_Strings = [17,18,19,25,26,27,28,34,38,44,47,56,54,55]
+
+	files_dir = args.data
+	file_list_aux = os.listdir(files_dir)
+	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
+	file_list = []
+	if args.eff == "data" :
+		print("need to write this part of code")
+	else :
+		file_list = [x for x in file_list_h5 if args.eff in x]
 
 
-fout.cd()
-tg_GaisserH4a.Write("GaisserH4a")
-tg_GaisserH3a.Write("GaisserH3a")
-tg_GaisserH4a_IT.Write("GaisserH4a_IT")
-tg_Hoerandel.Write("Hoerandel")
-tg_Hoerandel5.Write("Hoerandel5")
-tg_Hoerandel_IT.Write("Hoerandel_IT")
-tg_GaisserHillas.Write("GaisserHillas")
-tg_GaisserH4a_dc.Write("GaisserH4a_dc")
-tg_GaisserH3a_dc.Write("GaisserH3a_dc")
-tg_GaisserH4a_IT_dc.Write("GaisserH4a_IT_dc")
-tg_Hoerandel_dc.Write("Hoerandel_dc")
-tg_Hoerandel5_dc.Write("Hoerandel5_dc")
-tg_Hoerandel_IT_dc.Write("Hoerandel_IT_dc")
-tg_GaisserHillas_dc.Write("GaisserHillas_dc")
-fout.Close()
+
+	eventcount = 0
+	
+	for filename in file_list :
+		h5file = open_file(files_dir+filename, mode="r")
+		print('opening file ' + filename)
+		print(h5file)
+		domtable = h5file.root.doms
+		eventtable = h5file.root.events
+		runtable = h5file.root.runs
+
+		domindex = 0
+
+		for event in eventtable.iterrows() :
+
+			if event['reco/dir/zenith'] < args.zenithrange[0] or event['reco/dir/zenith'] > args.zenithrange[1] : 
+				continue;
+
+			for dom in domtable.iterrows(domindex) :
+				if  event['id'] != dom['eventId'] :
+					break
+				domindex += 1
+
+				i_dist = (int)(dom['recoDist']/20.0)
+				if i_dist >= 0 and i_dist < 8 :
+					if dom['string'] in DC_Strings :
+						DomCharge_dc[idist].append(dom['totalCharge'])
+						weights_dc[idist].append(event[weightname])
+						distance_dc[idist].append(dom['recoDist'])
+					if dom['string'] in IC_String :
+						DomCharge_ic[idist].append(dom['totalCharge'])
+						weights_ic[idist].append(event[weightname])
+						distance_ic[idist].append(dom['recoDist'])
+				
+			eventcount = eventcount + 1
+
+		h5file.close()
+
+ 	
+
 
 
