@@ -1,4 +1,4 @@
-"""
+ """
 This module contains functions for calculating the average charge for each bin from the total_charge_dict.
 """
 
