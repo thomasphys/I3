@@ -71,11 +71,82 @@ datafilename = opts["data"] + "{0:0{1}d}".format(opts["currentnumber"],5)
 tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[opts["gcd"], opts["datadir"]+datafilename+opts["filesuffix"]])
 
-# *********TEMPORARY FIX *********
-# Only allow the InIneSplit stream to pass
-def inIceSplitOnly(frame):
-    return frame["I3EventHeader"].sub_event_stream == "InIceSplit"
-tray.AddModule(inIceSplitOnly, 'InIceSplitOnly', Streams = [icetray.I3Frame.Physics])
+tray.AddModule(timestartfilter,'TimeStartFilter')
+# Filters
+
+# Filter the ones with sub_event_stream == InIceSplit
+tray.AddModule(in_ice, 'in_ice')
+
+#Thomas - remove minbias for now since only running one run. 
+# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
+#tray.AddModule(min_bias, 'min_bias')
+
+# Make sure that the length of SplitInIcePulses is >= 8
+tray.AddModule(SMT8, 'SMT8')
+
+# Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
+# tray.AddModule(MPEFit, 'MPEFit')
+
+    # Trigger check
+    # jeb-filter-2012
+    tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
+                   I3TriggerHierarchy='I3TriggerHierarchy',
+                   InIceSMTFlag='InIceSMTTriggered',
+                   IceTopSMTFlag='IceTopSMTTriggered',
+                   InIceStringFlag='InIceStringTriggered',
+                   #PhysMinBiasFlag='PhysMinBiasTriggered',
+                   #PhysMinBiasConfigID=106,
+                   DeepCoreSMTFlag='DeepCoreSMTTriggered',
+                   DeepCoreSMTConfigID=1010)
+
+    # Check that InIceSMTTriggered is true.
+    tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
+
+    # Generate the SRTInIcePulses, which are used for running basic reconstruction algorithms on data
+
+    from icecube.STTools.seededRT.configuration_services import I3DOMLinkSeededRTConfigurationService
+    seededRTConfig = I3DOMLinkSeededRTConfigurationService(
+                    ic_ic_RTRadius              = 150.0*I3Units.m,
+                    ic_ic_RTTime                = 1000.0*I3Units.ns,
+                    treat_string_36_as_deepcore = False,
+                    useDustlayerCorrection      = False,
+                    allowSelfCoincidence        = True
+    
+                    )
+
+    # Notice that we named the pulse series SRTInIcePulsesDOMeff to avoid
+    # repeating frame objects in the frames that originally had reconstuctions
+
+    tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
+                    InputHitSeriesMapName  = 'SplitInIcePulses',
+                    OutputHitSeriesMapName = 'SRTInIcePulsesDOMeff',
+                    STConfigService        = seededRTConfig,
+                    SeedProcedure          = 'HLCCoreHits',
+                    NHitsThreshold         = 2,
+                    MaxNIterations         = 3,
+                    Streams                = [icetray.I3Frame.Physics],
+                    If = lambda f: True
+    )
+
+
+    # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
+
+    tray.AddSegment(WimpHitCleaning, "WIMPstuff",
+                    seededRTConfig = seededRTConfig,
+                    If= lambda f: True,
+                    suffix='_WIMP_DOMeff'
+    )
+
+    if args.sim:
+        # Count the number of in ice muons and get the truth muon
+        tray.AddModule(get_truth_muon, 'get_truth_muon')
+        tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
+
+    # Geoanalysis
+
+    # Calculate the distance of each event to the detector border.
+    #tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
+    tray.AddModule(totaltimefilter,'TotalTimeFilter')
 
 
 #---- Generate filtered pulse series with same configuration as used by Nick and Sebastian -----
@@ -160,8 +231,9 @@ tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
                 fitname="SplineMPE",
                 )
 
-tray.AddModule(muon_zenith, 'MuonZenithFilter',
-               reco_fit='SplineMPE')
+#Thomas, will apply this later, want to study impact.
+#tray.AddModule(muon_zenith, 'MuonZenithFilter',
+#               reco_fit='SplineMPE')
     
 
 # -----Finite Reco------------------------------------------------------------
