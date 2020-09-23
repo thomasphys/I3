@@ -244,12 +244,12 @@ if __name__ == '__main__':
 			zenith.append(event['reco/dir/zenith'])
 
 			pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
-            energy_integral = (event['/corsika/energyPrimaryMax']**(event['/corsika/primarySpectralIndex']+1)-event['/corsika/energyPrimaryMin']**(event['/corsika/primarySpectralIndex']+1))/(event['/corsika/primarySpectralIndex']+1)
-            energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
-            energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
-            
-
-			weights_E.append(event[weightname])
+			energy_integral = event['/corsika/energyPrimaryMax']**(event['/corsika/primarySpectralIndex']+1)
+			energy_integral = energy_integral - event['/corsika/energyPrimaryMin']**(event['/corsika/primarySpectralIndex']+1)
+			energy_integral = energy_integral / (event['/corsika/primarySpectralIndex']+1)
+			energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
+			energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
+			weights_E.append(energy_weight)
 
 			domindexstart = domindex
 			for dom in domtable.iterrows(domindexstart) :

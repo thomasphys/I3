@@ -4,60 +4,62 @@
 from tables import *
 
 class Position(IsDescription):
-    x = Float64Col()
-    y = Float64Col()
-    z = Float64Col()
+	x = Float64Col()
+	y = Float64Col()
+	z = Float64Col()
 
 class Direction(IsDescription):
-    zenith  = Float64Col()
-    azimuth = Float64Col()
+	zenith  = Float64Col()
+	azimuth = Float64Col()
 
 class Particle(IsDescription):
-    id     = UInt32Col()  # Particle ID
-    pos    = Position()   # Starting vertex of the particle
-    dir    = Direction()  # Direction that the particle came from
-    time   = Float64Col()
-    energy = Float64Col() # Energy of the particle
-    speed  = Float64Col()
-    length = Float64Col()
+	id     = UInt32Col()  # Particle ID
+	pos    = Position()   # Starting vertex of the particle
+	dir    = Direction()  # Direction that the particle came from
+	time   = Float64Col()
+	energy = Float64Col() # Energy of the particle
+	speed  = Float64Col()
+	length = Float64Col()
 
 class Run(IsDescription):
-    nevents   = UInt32Col()
-    startTime = Float64Col()
-    endTime   = Float64Col()
+	nevents   = UInt32Col()
+	startTime = Float64Col()
+	endTime   = Float64Col()
+	runId     = UInt32Col()
+	subRunId  = UInt32Col()
 
-class Corsica(IsDescription):
-    primaryEnergy        = Float64Col()
-    primaryType          = UInt32Col()
-    primarySpectralIndex = Float64Col()
-    energyPrimaryMin     = Float64Col()
-    energyPrimaryMax     = Float64Col()
-    areaSum              = Float64Col()
+class Corsika(IsDescription):
+	primaryEnergy        = Float64Col()
+	primaryType          = UInt32Col()
+	primarySpectralIndex = Float64Col()
+	energyPrimaryMin     = Float64Col()
+	energyPrimaryMax     = Float64Col()
+	areaSum              = Float64Col()
 
 class Time(IsDescription) :
-    tag = StringCol()
+	tag = StringCol(37)
 
 class Event(IsDescription):
-    eventId                = UInt32Col()    # ID number of the event
-    dcHitsIn               = UInt32Col()    # Number of hits inside the deep core analysis region
-    dcHitsOut              = UInt32Col()    # Number of hits outside the deep core analysis region
-    icHitsIn               = UInt32Col()    # Number of hits inside the IceCube analysis region
-    icHitsOut              = UInt32Col()    # Number of hits outside the IceCube analysis region
-    recoEndpoint           = Position()  # Coordinates of the reconstructed track endpoint
-    firstHit               = UInt32Col()    # Index of the first DOM hit for this event
-    nHits                  = UInt32Col()    # Number of DOM hits in this event
-    primary                = Particle()     # Polyplopia primary particle
-    reco                   = Particle()     # Reconstructed particle track
-    corsica                = Corsica()
-    startTime              = Time()
-    endTime                = Time()
+	eventId                = UInt32Col()    # ID number of the event
+	dcHitsIn               = UInt32Col()    # Number of hits inside the deep core analysis region
+	dcHitsOut              = UInt32Col()    # Number of hits outside the deep core analysis region
+	icHitsIn               = UInt32Col()    # Number of hits inside the IceCube analysis region
+	icHitsOut              = UInt32Col()    # Number of hits outside the IceCube analysis region
+	recoEndpoint           = Position()  # Coordinates of the reconstructed track endpoint
+	firstHit               = UInt32Col()    # Index of the first DOM hit for this event
+	nHits                  = UInt32Col()    # Number of DOM hits in this event
+	primary                = Particle()     # Polyplopia primary particle
+	reco                   = Particle()     # Reconstructed particle track
+	corsika                = Corsika()
+	startTime              = Time()
+	endTime                = Time()
 
 class DOM(IsDescription):
-    eventId           = UInt32Col()   # ID number of the event this DOM belongs to
-    string            = UInt16Col()       # String containing the DOM
-    om                = UInt16Col()       # Opitcal module number of the DOM
-    recoDist          = Float64Col()
-    distAboveEndpoint = Float64Col()  # Distance of the DOM above the endpoint of the track
-    impactAngle       = Float64Col()
-    totalCharge       = Float64Col()  # Total charge seen by the DOM
-    minTimeResidual   = Float64Col()  # Minimum time residual for all pulses
+	eventId           = UInt32Col()   # ID number of the event this DOM belongs to
+	string            = UInt16Col()       # String containing the DOM
+	om                = UInt16Col()       # Opitcal module number of the DOM
+	recoDist          = Float64Col()
+	distAboveEndpoint = Float64Col()  # Distance of the DOM above the endpoint of the track
+	impactAngle       = Float64Col()
+	totalCharge       = Float64Col()  # Total charge seen by the DOM
+	minTimeResidual   = Float64Col()  # Minimum time residual for all pulses

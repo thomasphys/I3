@@ -94,7 +94,7 @@ seededRTConfig = I3DOMLinkSeededRTConfigurationService(
 # repeating frame objects in the frames that originally had reconstuctions
 tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
                InputHitSeriesMapName='SplitInIcePulses',
-               OutputHitSeriesMapName='SRTInIcePulsesDOMEff',
+               OutputHitSeriesMapName=options['pulses_name'],
                STConfigService=seededRTConfig,
                SeedProcedure='HLCCoreHits',
                NHitsThreshold=2,
