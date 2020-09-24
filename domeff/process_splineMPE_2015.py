@@ -28,7 +28,7 @@ opts["currentnumber"] = int(sys.argv[4])
 opts["filesuffix"] = sys.argv[5]
 opts["nevents"] = int(sys.argv[6])
 opts["out"] = sys.argv[7]
-opts["sim"]=bool(sys.argv[8])
+opts["sim"]= (sys.argv[8] == 'True' or sys.argv[8] == 'true')
 
 from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics

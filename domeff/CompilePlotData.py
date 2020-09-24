@@ -66,41 +66,50 @@ def calc_charge_info(values,weights):
 	std_mu = var_wsc/(wsc)**2
 	std_mu += var_sw/(sw)**2
 	std_mu -= 2.*cov/(sw*wsc)
-	std_mu = std_mu**(1./2.)
+	std_mu = std_mu**0.5
 	std_mu *= mu
 
 	return mu , std_mu
 
 def ComputeWeightedMeanandError(value,weight):
+
+	'''
+	This function computes the standard error of the mean for a weighted set following the bootstrap validated formulation here:
+	https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#:~:text=Statistical%20properties,-The%20weighted%20sample&text=can%20be%20called%20the%20standard,weights%20except%20one%20are%20zero.
+
+	'''
+
 	nelements = len(value)
 	if len(weight) != nelements :
 		print("error lists are not of equal length")
 		return 0.0,0.0
 
-	mean = 0.0;
-	sumweights = 0.0;
-	n_nonzero = 0.0;
-	sigma = 0.;
+	mean = 0.0
+	sumweights = 0.0
+	sumweights_sqr = 0.0
+	n_nonzero = 0.0
+	sigma = 0.
 
 	for i in range(0,nelements) :
-		mean += weight[i]*value[i]
 		sumweights = sumweights+weight[i]
+
+	#Compute mean
+	for i in range(0,nelements) :
+		mean += weight[i]*value[i]/sumweights
+		sumweights_sqr = sumweights_sqr+(weight[i]/sumweights)**2.0
 		if weight[i] > 0.0 : n_nonzero += 1.0
 
 	if n_nonzero == 0.0 : 
 		print("Sum of weights is zero")
-		return 0.0,0.0
-
-	mean = mean/sumweights
-	sumweights *= (n_nonzero-1.0)/n_nonzero
+		return 0.0,0.0	
 
 	for i in range(0,nelements) :
-		sigma += weight[i]*(value[i]-mean)**2.0
+		sigma += (weight[i]*(value[i]-mean)/sumweights)**2.0
 
-	sigma /= sumweights
+	#Compute standard error squared
+	sigma /= (n_nonzero-1.0)/n_nonzero
 
 	return mean,sigma**0.5
-
 
 
 def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_error_dc,y_data_dc,y_error_dc,energy,zenith,weights) :
@@ -183,11 +192,11 @@ if __name__ == '__main__':
 	parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
 				default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
 	parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str,
-				default = "data")
+				default = "eff100")
 	parser.add_argument('-o', '--output', help='Name of output file.', type=str,
 				default = "out.root")
 	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
-				default = "GaisserH4a")
+				default = "data")
 	parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
 				nargs = '+',  default = [-180.0,180.0])
     
@@ -211,11 +220,7 @@ if __name__ == '__main__':
 	files_dir = args.data
 	file_list_aux = os.listdir(files_dir)
 	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
-	file_list = []
-	if args.eff == "data" :
-		print("need to write this part of code")
-	else :
-		file_list = [x for x in file_list_h5 if args.eff in x]
+	file_list = [x for x in file_list_h5 if args.eff in x]
 
 	flux = GaisserH4a()
 	if args.flux == "GaisserH3a" : flux = GaisserH3a()
@@ -242,21 +247,23 @@ if __name__ == '__main__':
 
 			reconstructedE.append(event['reco/energy'])
 			zenith.append(event['reco/dir/zenith'])
-
-			pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
-			energy_integral = event['/corsika/energyPrimaryMax']**(event['/corsika/primarySpectralIndex']+1)
-			energy_integral = energy_integral - event['/corsika/energyPrimaryMin']**(event['/corsika/primarySpectralIndex']+1)
-			energy_integral = energy_integral / (event['/corsika/primarySpectralIndex']+1)
-			energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
-			energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
-			weights_E.append(energy_weight)
+			if args.flux != "data" :
+				pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
+				energy_integral = event['/corsika/energyPrimaryMax']**(event['/corsika/primarySpectralIndex']+1)
+				energy_integral = energy_integral - event['/corsika/energyPrimaryMin']**(event['/corsika/primarySpectralIndex']+1)
+				energy_integral = energy_integral / (event['/corsika/primarySpectralIndex']+1)
+				energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
+				energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
+				weights_E.append(energy_weight)
+			else :
+				weights_E.append(1.0)
 
 			domindexstart = domindex
 			for dom in domtable.iterrows(domindexstart) :
 				if  event['id'] != dom['eventId'] :
 					break
 				domindex += 1
-
+				if dom['impactAngle'] > 3.14/2.0 : continue
 				i_dist = (int)(dom['recoDist']/20.0)
 				if i_dist >= 0 and i_dist < 8 :
 					if dom['string'] in DC_Strings :
