@@ -32,10 +32,11 @@ opts["sim"]= (sys.argv[8] == 'True' or sys.argv[8] == 'true')
 
 from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics
+from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitCleaning
 from I3Tray import I3Tray, I3Units, load
 #from filters_InIceSplit import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered
 from filters_InIceSplit_2015 import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered, FiniteRecoFilter, muon_zenith
-from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoint, move_cut_variables
+from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoint, move_cut_variables, totaltimefilter,timestartfilter
 from geoanalysis import calc_dist_to_border
 from domanalysis import dom_data
 from writeEvent import EventWriter
@@ -87,66 +88,33 @@ tray.AddModule(SMT8, 'SMT8')
 # Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
 # tray.AddModule(MPEFit, 'MPEFit')
 
-    # Trigger check
-    # jeb-filter-2012
-    tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
-                   I3TriggerHierarchy='I3TriggerHierarchy',
-                   InIceSMTFlag='InIceSMTTriggered',
-                   IceTopSMTFlag='IceTopSMTTriggered',
-                   InIceStringFlag='InIceStringTriggered',
-                   #PhysMinBiasFlag='PhysMinBiasTriggered',
-                   #PhysMinBiasConfigID=106,
-                   DeepCoreSMTFlag='DeepCoreSMTTriggered',
-                   DeepCoreSMTConfigID=1010)
+# Trigger check
+# jeb-filter-2012
+tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
+               I3TriggerHierarchy='I3TriggerHierarchy',
+               InIceSMTFlag='InIceSMTTriggered',
+               IceTopSMTFlag='IceTopSMTTriggered',
+               InIceStringFlag='InIceStringTriggered',
+              #PhysMinBiasFlag='PhysMinBiasTriggered',
+              #PhysMinBiasConfigID=106,
+               DeepCoreSMTFlag='DeepCoreSMTTriggered',
+               DeepCoreSMTConfigID=1010)
 
-    # Check that InIceSMTTriggered is true.
-    tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
-
-    # Generate the SRTInIcePulses, which are used for running basic reconstruction algorithms on data
-
-    from icecube.STTools.seededRT.configuration_services import I3DOMLinkSeededRTConfigurationService
-    seededRTConfig = I3DOMLinkSeededRTConfigurationService(
-                    ic_ic_RTRadius              = 150.0*I3Units.m,
-                    ic_ic_RTTime                = 1000.0*I3Units.ns,
-                    treat_string_36_as_deepcore = False,
-                    useDustlayerCorrection      = False,
-                    allowSelfCoincidence        = True
-    
-                    )
-
-    # Notice that we named the pulse series SRTInIcePulsesDOMeff to avoid
-    # repeating frame objects in the frames that originally had reconstuctions
-
-    tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
-                    InputHitSeriesMapName  = 'SplitInIcePulses',
-                    OutputHitSeriesMapName = 'SRTInIcePulsesDOMeff',
-                    STConfigService        = seededRTConfig,
-                    SeedProcedure          = 'HLCCoreHits',
-                    NHitsThreshold         = 2,
-                    MaxNIterations         = 3,
-                    Streams                = [icetray.I3Frame.Physics],
-                    If = lambda f: True
-    )
+# Check that InIceSMTTriggered is true.
+tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 
 
-    # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
+# Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 
-    tray.AddSegment(WimpHitCleaning, "WIMPstuff",
-                    seededRTConfig = seededRTConfig,
-                    If= lambda f: True,
-                    suffix='_WIMP_DOMeff'
-    )
+#if opts["sim"]:
+	# Count the number of in ice muons and get the truth muon
+	#tray.AddModule(get_truth_muon, 'get_truth_muon')
+	#tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
 
-    if args.sim:
-        # Count the number of in ice muons and get the truth muon
-        tray.AddModule(get_truth_muon, 'get_truth_muon')
-        tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
-
-    # Geoanalysis
-
-    # Calculate the distance of each event to the detector border.
-    #tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
-    tray.AddModule(totaltimefilter,'TotalTimeFilter')
+# Geoanalysis
+# Calculate the distance of each event to the detector border.
+#tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
+tray.AddModule(totaltimefilter,'TotalTimeFilter')
 
 
 #---- Generate filtered pulse series with same configuration as used by Nick and Sebastian -----
@@ -176,12 +144,12 @@ tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
 
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 # Despite the unusual name this runs the FiniteReco cleaning on the pulse series.
-from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitCleaning
+
 tray.AddSegment(WimpHitCleaning, "WIMPstuff",
-                seededRTConfig=seededRTConfig,
-                If=lambda f: True,
-                suffix='_WIMP_DOMeff'
-                )
+                    seededRTConfig = seededRTConfig,
+                    If= lambda f: True,
+                    suffix='_WIMP_DOMeff'
+    )
 
 # ---- Linefit and SPEfit ---------------------------------------------------
 tray.AddSegment(SPE,'SPE',
