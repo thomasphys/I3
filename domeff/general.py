@@ -1,11 +1,67 @@
 """
 General functions that don't fit into one category.
 """
-
 from __future__ import print_function, division
-
+import time
 from icecube import dataclasses, finiteReco
+from icecube.dataclasses import I3Constants
+from icecube.phys_services import I3Calculator as calc
 
+def timestartMPE(frame):
+    t = time.time()
+    frame['TimeStartMPE'] = dataclasses.I3Double(t)
+def totaltimeMPE(frame):
+    t = time.time()
+    tstart = frame['TimeStartMPE'].value
+    frame['TotalTimeMPE'] = dataclasses.I3Double(t-tstart)
+
+def timestartSpline(frame):
+    t = time.time()
+    frame['TimeStartSpline'] = dataclasses.I3Double(t)
+def totaltimeSpline(frame):
+
+    t = time.time()
+    tstart = frame['TimeStartSpline'].value
+    frame['TotalTimeSpline'] = dataclasses.I3Double(t-tstart)
+
+def timestartall(frame):
+    t = time.time()
+    frame['TimeStartall'] = dataclasses.I3Double(t)
+def totaltimeall(frame):
+
+    t = time.time()
+    tstart = frame['TimeStartall'].value
+    frame['TotalTimeall'] = dataclasses.I3Double(t-tstart)
+
+def timestartfilter(frame):
+    t = time.time()
+    frame['TimeStartFilter'] = dataclasses.I3Double(t)
+def totaltimefilter(frame):
+
+    t = time.time()
+    tstart = frame['TimeStartFilter'].value
+    frame['TotalTimeFilter'] = dataclasses.I3Double(t-tstart)
+
+def movellhparams(frame,llhparams):
+# Moving FiniteReco LLH parameters to write them out'''
+
+    frame['FiniteRecoLLHRatio'] = dataclasses.I3Double(float(frame[llhparams].LLHStoppingTrack) - float(frame[llhparams].LLHInfTrack))
+
+def tot_charge(frame,reco_fit,pulses):
+    n_ice_group = I3Constants.n_ice_group
+    n_ice_phase = I3Constants.n_ice_phase
+    pulse_series = frame[pulses].apply(frame)
+    dom_geo = frame['I3Geometry'].omgeo.items()
+    total_charge = 0
+    for dom, geo in dom_geo:
+        dom_position = geo.position
+        mpe = frame[reco_fit]
+        if dom in pulse_series.keys():
+            for pulse in pulse_series[dom]:
+                time_res = calc.time_residual(mpe, dom_position, pulse.time, n_ice_group, n_ice_phase)
+                if time_res < 1000:
+                    total_charge += pulse.charge
+    frame['EventCharge'] = dataclasses.I3Double(total_charge)
 
 def get_truth_muon(frame):
     """

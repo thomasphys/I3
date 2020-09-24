@@ -212,10 +212,7 @@ if __name__ == '__main__':
 	file_list_aux = os.listdir(files_dir)
 	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
 	file_list = []
-	if args.eff == "data" :
-		print("need to write this part of code")
-	else :
-		file_list = [x for x in file_list_h5 if args.eff in x]
+	file_list = [x for x in file_list_h5 if args.eff in x]
 
 	flux = GaisserH4a()
 	if args.flux == "GaisserH3a" : flux = GaisserH3a()
