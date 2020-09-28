@@ -102,9 +102,9 @@ def ComputeWeightedMeanandError(value,weight):
 		mean2 += value[i]/nelements
 
 	print("weighted mean is:")
-	printf(mean)
-	printf("unweighted mean is:")
-	printf(mean2)
+	print(mean)
+	print("unweighted mean is:")
+	print(mean2)
 
 	if n_nonzero == 0.0 : 
 		print("Sum of weights is zero")

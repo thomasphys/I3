@@ -28,7 +28,7 @@ from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoin
 from geoanalysis import calc_dist_to_border
 from domanalysis import dom_data
 from writeEvent import EventWriter
-
+import argparse
 # Reconstructions
 
 from icecube.filterscripts.offlineL2.level2_Reconstruction_WIMP import FiniteReco
@@ -46,28 +46,28 @@ load('libfilterscripts')
 
 
 parser = argparse.ArgumentParser()
-  parser.add_argument('-d', '--datadir', help='Directory of data files.',type=str,
+parser.add_argument('-d', '--datadir', help='Directory of data files.',type=str,
         default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_')
-  parser.add_argument('-g', '--gcd', help='Geometry file.', type = str,
+parser.add_argument('-g', '--gcd', help='Geometry file.', type = str,
         default = "${I3_DATA}/GCD/GeoCalibDetectorStatus_AVG_55697-57531_PASS2_SPE.i3.gz")
-  parser.add_argument('-o', '--output', help='Name of output file.', type=str,
+parser.add_argument('-o', '--output', help='Name of output file.', type=str,
         default = "out.root")
-  parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
+parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
         nargs = '+',  default = [-180.0,180.0])
-  parser.add_argument('-q', '--energyrange', help='Range of muon Energies', type = float,
+parser.add_argument('-q', '--energyrange', help='Range of muon Energies', type = float,
         nargs = "+", default = [0.0, 9999999.00])
-  parser.add_argument('-s', '--sim', help='Is file simulation', type = bool, default = False)
-  parser.add_argument('-n', '--nevents', help='Number of events to process.', type = int, default = -1)
-  parser.add_argument('-t', '--datafiletype', help='Suffix of Datafiles', type = str, default = 'i3.bz2')
-  parser.add_argument('-r', '--runnnum', help='number to identify target file', type = int, default = 0)
-  parser.add_argument('-p', '--pulsename', help='Name of new pulse list', type = str, default = 'SRTInIcePulsesDOMEff')
-  parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 140.0)
-  args = parser.parse_args()
+parser.add_argument('-s', '--sim', help='Is file simulation', type = bool, default = False)
+parser.add_argument('-n', '--nevents', help='Number of events to process.', type = int, default = -1)
+parser.add_argument('-t', '--datafiletype', help='Suffix of Datafiles', type = str, default = 'i3.bz2')
+parser.add_argument('-r', '--runnnum', help='number to identify target file', type = int, default = 0)
+parser.add_argument('-p', '--pulsename', help='Name of new pulse list', type = str, default = 'SRTInIcePulsesDOMEff')
+parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 140.0)
+args = parser.parse_args()
 
-  dom_data_options = {}
+dom_data_options = {}
 #    options['pulses_name'] = 'SplitInIcePulses'
-    dom_data_options['pulses_name'] = args.pulsesname
-    dom_data_options['max_dist'] = args.maxdist
+dom_data_options['pulses_name'] = args.pulsesname
+dom_data_options['max_dist'] = args.maxdist
 
 
 tray = I3Tray()
@@ -79,24 +79,24 @@ tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
 
 if not args.sim :
-  tray.AddModule(timestartfilter,'TimeStartFilter')
-  # Filters
-  # Filter the ones with sub_event_stream == InIceSplit
-  tray.AddModule(in_ice, 'in_ice')
+	tray.AddModule(timestartfilter,'TimeStartFilter')
+	# Filters
+	# Filter the ones with sub_event_stream == InIceSplit
+	tray.AddModule(in_ice, 'in_ice')
 
-  #Thomas - remove minbias for now since only running one run. 
-  # Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
-  #tray.AddModule(min_bias, 'min_bias')
+	#Thomas - remove minbias for now since only running one run. 
+	# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
+	#tray.AddModule(min_bias, 'min_bias')
 
-  # Make sure that the length of SplitInIcePulses is >= 8
-  tray.AddModule(SMT8, 'SMT8')
+	# Make sure that the length of SplitInIcePulses is >= 8
+	tray.AddModule(SMT8, 'SMT8')
 
-  # Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
-  # tray.AddModule(MPEFit, 'MPEFit')
+	# Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
+	# tray.AddModule(MPEFit, 'MPEFit')
 
-  # Trigger check
-  # jeb-filter-2012
-  tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
+	# Trigger check
+	# jeb-filter-2012
+	tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                I3TriggerHierarchy='I3TriggerHierarchy',
                InIceSMTFlag='InIceSMTTriggered',
                IceTopSMTFlag='IceTopSMTTriggered',
@@ -107,14 +107,14 @@ if not args.sim :
                DeepCoreSMTConfigID=1010)
 
   # Check that InIceSMTTriggered is true.
-  tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
+	tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 
 
   # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 
 if args.sim :
 	# Count the number of in ice muons and get the truth muon
-  tray.AddModule(get_truth_muon, 'get_truth_muon')
+	tray.AddModule(get_truth_muon, 'get_truth_muon')
 	tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
 
 # Geoanalysis
