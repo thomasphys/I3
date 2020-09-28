@@ -204,12 +204,12 @@ if __name__ == '__main__':
 
 	weightname = 'weight_'+args.flux
 
-	DomCharge_ic  = [[],[],[],[],[],[],[],[]]
-	weights_ic = [[],[],[],[],[],[],[],[]]
-	distance_ic = [[],[],[],[],[],[],[],[]]
-	DomCharge_dc  = [[],[],[],[],[],[],[],[]]
-	weights_dc = [[],[],[],[],[],[],[],[]]
-	distance_dc = [[],[],[],[],[],[],[],[]]
+	DomCharge_ic  = [[],[],[],[],[],[],[]]
+	weights_ic = [[],[],[],[],[],[],[]]
+	distance_ic = [[],[],[],[],[],[],[]]
+	DomCharge_dc  = [[],[],[],[],[],[],[]]
+	weights_dc = [[],[],[],[],[],[],[]]
+	distance_dc = [[],[],[],[],[],[],[]]
 	reconstructedE = []
 	zenith = []
 	weights_E = []
@@ -242,16 +242,16 @@ if __name__ == '__main__':
 
 		for event in eventtable.iterrows() :
 
-			if event['reco/dir/zenith'] < args.zenithrange[0] or event['reco/dir/zenith'] > args.zenithrange[1] : 
+			if event['reco/dir/zenith'] < args.zenithrange[0]*3.14/180. or event['reco/dir/zenith'] > args.zenithrange[1]*3.14/180. : 
 				continue;
 
 			reconstructedE.append(event['reco/energy'])
 			zenith.append(event['reco/dir/zenith'])
 			if args.flux != "data" :
 				pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
-				energy_integral = event['/corsika/energyPrimaryMax']**(event['/corsika/primarySpectralIndex']+1)
-				energy_integral = energy_integral - event['/corsika/energyPrimaryMin']**(event['/corsika/primarySpectralIndex']+1)
-				energy_integral = energy_integral / (event['/corsika/primarySpectralIndex']+1)
+				energy_integral = event['corsika/energyPrimaryMax']**(event['corsika/primarySpectralIndex']+1)
+				energy_integral = energy_integral - event['corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
+				energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
 				energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
 				energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
 				weights_E.append(energy_weight)
@@ -260,25 +260,27 @@ if __name__ == '__main__':
 
 			domindexstart = domindex
 			for dom in domtable.iterrows(domindexstart) :
-				if  event['id'] != dom['eventId'] :
+				if  event['eventId'] != dom['eventId'] :
 					break
 				domindex += 1
 				if dom['impactAngle'] > 3.14/2.0 : continue
 				i_dist = (int)(dom['recoDist']/20.0)
-				if i_dist >= 0 and i_dist < 8 :
+				if i_dist >= 0 and i_dist < 7 :
 					if dom['string'] in DC_Strings :
 						DomCharge_dc[i_dist].append(dom['totalCharge'])
-						weights_dc[i_dist].append(event[weightname])
+						weights_dc[i_dist].append(weights_E[-1])
 						distance_dc[i_dist].append(dom['recoDist'])
 					if dom['string'] in IC_Strings :
 						DomCharge_ic[i_dist].append(dom['totalCharge'])
-						weights_ic[i_dist].append(event[weightname])
+						weights_ic[i_dist].append(weights_E[-1])
 						distance_ic[i_dist].append(dom['recoDist'])
 				
 			eventcount = eventcount + 1
 
 		h5file.close()
 
+	for i in range(0,len(distance_ic)) :
+		print(len(distance_ic[i]))
  	
 	binneddistance_dc = np.zeros(8,dtype=float)
 	binneddistanceerror_dc = np.zeros(8,dtype=float)
@@ -289,7 +291,7 @@ if __name__ == '__main__':
 	binnedcharge_ic = np.zeros(8,dtype=float)
 	binnedchargeerror_ic = np.zeros(8,dtype=float)
 
-	for i in range(0,8):
+	for i in range(0,len(distance_dc)):
 		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
 		binnedcharge_dc[i], binnedchargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
 		binneddistance_ic[i] , binneddistanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
