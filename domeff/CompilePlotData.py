@@ -221,8 +221,8 @@ if __name__ == '__main__':
 
 	files_dir = args.data
 	file_list_aux = os.listdir(files_dir)
-	file_list_h5 = [x for x in file_list_aux if '.h5' in x]a
-	file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(os.path.getsize(files_dir+x)) > 1000000 )]
+	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
+	file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 1000000 )]
 	
 	flux = GaisserH4a()
 	if args.flux == "GaisserH3a" : flux = GaisserH3a()
