@@ -199,6 +199,8 @@ if __name__ == '__main__':
 				default = "data")
 	parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
 				nargs = '+',  default = [-180.0,180.0])
+	parser.add_argument('-p', '--energyrange', help='Range of muon Energies', type = float,
+				nargs = "+", default = [0.0, 9999999.00])
     
 	args = parser.parse_args()
 
@@ -242,6 +244,11 @@ if __name__ == '__main__':
 
 		for event in eventtable.iterrows() :
 
+			#Energy Cut
+			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
+				continue;
+
+			#Zenith Cut
 			if event['reco/dir/zenith'] < args.zenithrange[0]*3.14/180. or event['reco/dir/zenith'] > args.zenithrange[1]*3.14/180. : 
 				continue;
 
@@ -250,7 +257,7 @@ if __name__ == '__main__':
 			if args.flux != "data" :
 				pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
 				energy_integral = event['corsika/energyPrimaryMax']**(event['corsika/primarySpectralIndex']+1)
-				energy_integral = energy_integral - event['/corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
+				energy_integral = energy_integral - event['corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
 				energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
 				energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
 				energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
@@ -279,6 +286,8 @@ if __name__ == '__main__':
 
 		h5file.close()
 
+	for i in range(0,len(distance_ic)) :
+		print(len(distance_ic[i]))
  	
 	binneddistance_dc = np.zeros(8,dtype=float)
 	binneddistanceerror_dc = np.zeros(8,dtype=float)
@@ -289,7 +298,7 @@ if __name__ == '__main__':
 	binnedcharge_ic = np.zeros(8,dtype=float)
 	binnedchargeerror_ic = np.zeros(8,dtype=float)
 
-	for i in range(0,8):
+	for i in range(0,len(distance_dc)):
 		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
 		binnedcharge_dc[i], binnedchargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
 		binneddistance_ic[i] , binneddistanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
@@ -297,11 +306,11 @@ if __name__ == '__main__':
 		
 
 	outfilenamelist = args.output.split(".",1)
-	if outfilenamelist[1] == "root" :
+	if "root" in outfilenamelist[1] :
 		OutputRoot(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
-	elif outfilenamelist[1] == "h5" :
+	elif "h5" in outfilenamelist[1] :
 		OutputHDF5(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
-	elif outfilenamelist[1] == "pdf" :
+	elif "pdf" in outfilenamelist[1] :
 		print("not yet supported")
 
 

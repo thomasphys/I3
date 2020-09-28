@@ -18,18 +18,6 @@ sys.path.insert(0, parentdir)
 # Setup logging
 from icecube.icetray.i3logging import *
 
-opts = {}
-
-# I/O options
-opts["gcd"] = sys.argv[1]
-opts["datadir"] = sys.argv[2]
-opts["data"] = sys.argv[3]
-opts["currentnumber"] = int(sys.argv[4])
-opts["filesuffix"] = sys.argv[5]
-opts["nevents"] = int(sys.argv[6])
-opts["out"] = sys.argv[7]
-opts["sim"]= (sys.argv[8] == 'True' or sys.argv[8] == 'true')
-
 from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics
 from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitCleaning
@@ -56,41 +44,59 @@ load('libstatic-twc')
 #load('libjeb-filter-2012')
 load('libfilterscripts')
 
-# Don't touch, unless you know what you're doing
-options = {}
-#options['pulses_name'] = 'SplitInIcePulses'
-#options['pulses_name'] = 'SRTInIcePulsesDOMeff'
-options['pulses_name'] = 'SRTInIcePulsesDOMEff'
-options['max_dist'] = 140
-#options['partitions'] = 5
+
+parser = argparse.ArgumentParser()
+  parser.add_argument('-d', '--datadir', help='Directory of data files.',type=str,
+        default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_')
+  parser.add_argument('-g', '--gcd', help='Geometry file.', type = str,
+        default = "${I3_DATA}/GCD/GeoCalibDetectorStatus_AVG_55697-57531_PASS2_SPE.i3.gz")
+  parser.add_argument('-o', '--output', help='Name of output file.', type=str,
+        default = "out.root")
+  parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
+        nargs = '+',  default = [-180.0,180.0])
+  parser.add_argument('-q', '--energyrange', help='Range of muon Energies', type = float,
+        nargs = "+", default = [0.0, 9999999.00])
+  parser.add_argument('-s', '--sim', help='Is file simulation', type = bool, default = False)
+  parser.add_argument('-n', '--nevents', help='Number of events to process.', type = int, default = -1)
+  parser.add_argument('-t', '--datafiletype', help='Suffix of Datafiles', type = str, default = 'i3.bz2')
+  parser.add_argument('-r', '--runnnum', help='number to identify target file', type = int, default = 0)
+  parser.add_argument('-p', '--pulsename', help='Name of new pulse list', type = str, default = 'SRTInIcePulsesDOMEff')
+  parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 140.0)
+  args = parser.parse_args()
+
+  dom_data_options = {}
+#    options['pulses_name'] = 'SplitInIcePulses'
+    dom_data_options['pulses_name'] = args.pulsesname
+    dom_data_options['max_dist'] = args.maxdist
+
 
 tray = I3Tray()
 
-datafilename = opts["data"] + "{0:0{1}d}".format(opts["currentnumber"],5)
+datafilename = "{0:0{1}d}".format(args.runnum,5)
 
 # Read the files.
 tray.AddModule('I3Reader', 'I3Reader',
-               Filenamelist=[opts["gcd"], opts["datadir"]+datafilename+opts["filesuffix"]])
+               Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
 
-tray.AddModule(timestartfilter,'TimeStartFilter')
-# Filters
+if not args.sim :
+  tray.AddModule(timestartfilter,'TimeStartFilter')
+  # Filters
+  # Filter the ones with sub_event_stream == InIceSplit
+  tray.AddModule(in_ice, 'in_ice')
 
-# Filter the ones with sub_event_stream == InIceSplit
-tray.AddModule(in_ice, 'in_ice')
+  #Thomas - remove minbias for now since only running one run. 
+  # Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
+  #tray.AddModule(min_bias, 'min_bias')
 
-#Thomas - remove minbias for now since only running one run. 
-# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
-#tray.AddModule(min_bias, 'min_bias')
+  # Make sure that the length of SplitInIcePulses is >= 8
+  tray.AddModule(SMT8, 'SMT8')
 
-# Make sure that the length of SplitInIcePulses is >= 8
-tray.AddModule(SMT8, 'SMT8')
+  # Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
+  # tray.AddModule(MPEFit, 'MPEFit')
 
-# Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
-# tray.AddModule(MPEFit, 'MPEFit')
-
-# Trigger check
-# jeb-filter-2012
-tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
+  # Trigger check
+  # jeb-filter-2012
+  tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                I3TriggerHierarchy='I3TriggerHierarchy',
                InIceSMTFlag='InIceSMTTriggered',
                IceTopSMTFlag='IceTopSMTTriggered',
@@ -100,16 +106,16 @@ tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                DeepCoreSMTFlag='DeepCoreSMTTriggered',
                DeepCoreSMTConfigID=1010)
 
-# Check that InIceSMTTriggered is true.
-tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
+  # Check that InIceSMTTriggered is true.
+  tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 
 
-# Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
+  # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 
-#if opts["sim"]:
+if args.sim :
 	# Count the number of in ice muons and get the truth muon
-	#tray.AddModule(get_truth_muon, 'get_truth_muon')
-	#tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
+  tray.AddModule(get_truth_muon, 'get_truth_muon')
+	tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
 
 # Geoanalysis
 # Calculate the distance of each event to the detector border.
@@ -133,7 +139,7 @@ seededRTConfig = I3DOMLinkSeededRTConfigurationService(
 # repeating frame objects in the frames that originally had reconstuctions
 tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
                InputHitSeriesMapName='SplitInIcePulses',
-               OutputHitSeriesMapName=options['pulses_name'],
+               OutputHitSeriesMapName=args.pulsesname,
                STConfigService=seededRTConfig,
                SeedProcedure='HLCCoreHits',
                NHitsThreshold=2,
@@ -154,7 +160,7 @@ tray.AddSegment(WimpHitCleaning, "WIMPstuff",
 # ---- Linefit and SPEfit ---------------------------------------------------
 tray.AddSegment(SPE,'SPE',
                 If = lambda f: True,
-                Pulses=options['pulses_name'],
+                Pulses=args.pulsesname,
                 suffix='DOMeff',
                 LineFit= 'LineFit',
                 SPEFitSingle = 'SPEFitSingle',
@@ -165,7 +171,7 @@ tray.AddSegment(SPE,'SPE',
 
 # ---- MPEFit reconstruction ------------------------------------------------
 tray.AddSegment(MPE, 'MPE',
-                Pulses = options['pulses_name'],
+                Pulses = args.pulsesname,
                 Seed = 'SPEFit2',
                 #If = which_split(split_name='InIceSplit') & (lambda f:muon_wg(f)),
                 If = lambda f: True,
@@ -192,7 +198,7 @@ EnEstis = ["SplineMPETruncatedEnergy_SPICEMie_AllDOMS_Muon",
 # splineMPE with default configuration!
 tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
                 configuration="default",
-                PulsesName= options['pulses_name'],
+                PulsesName= args.pulsesname,
                 TrackSeedList=["MPEFitDOMeff"],
                 BareMuTimingSpline=timingSplinePath,
                 BareMuAmplitudeSpline=amplitudeSplinePath,
@@ -224,26 +230,26 @@ tray.AddModule(reco_endpoint, 'reco_endpoint',
 tray.AddModule(dom_data, 'dom_data',
 #               reco_fit='MPEFitDOMeff',
                reco_fit='SplineMPE',
-               options=options
+               options=dom_data_options
                )
  
 # General
 
 # Calculate cut variables
 tray.AddSegment(direct_hits.I3DirectHitsCalculatorSegment, 'I3DirectHits',
-                PulseSeriesMapName=options['pulses_name'],
+                PulseSeriesMapName=args.pulsesname,
 #                ParticleName='MPEFitDOMeff',
                 ParticleName='SplineMPE',
 #                OutputI3DirectHitsValuesBaseName='MPEFitDOMeffDirectHits')
                 OutputI3DirectHitsValuesBaseName='SplineMPEDirectHits'
                 )
 tray.AddSegment(hit_multiplicity.I3HitMultiplicityCalculatorSegment, 'I3HitMultiplicity',
-                PulseSeriesMapName=options['pulses_name'],
+                PulseSeriesMapName=args.pulsesname,
                 OutputI3HitMultiplicityValuesName='HitMultiplicityValues'
                 )
  
 tray.AddSegment(hit_statistics.I3HitStatisticsCalculatorSegment, 'I3HitStatistics',
-                PulseSeriesMapName=options['pulses_name'],
+                PulseSeriesMapName=args.pulsesname,
                 OutputI3HitStatisticsValuesName='HitStatisticsValues'
                 )
  
@@ -257,15 +263,9 @@ tray.AddModule(move_cut_variables, 'move_cut_variables',
 
 # Calculate ICAnalysisHits, DCAnalysisHits, ICNHits, and DCNHits
 tray.AddModule(count_hits, 'count_hits',
-               pulses_name=options['pulses_name'])
+               pulses_name=args.pulsesname)
  
-#    if args.sim:
-    # Get the truth muon energy
-#        tray.AddModule(muonTruthEnergy, 'get_truth_energy')
-#         tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
- 
-#    tray.AddModule(muonRecoEnergy, 'get_reco_energy',
-#                     suffix = 'DOMeff')
+
 
 # Geoanalysis
 # Calculate the distance of each event to the detector border.
@@ -274,7 +274,7 @@ tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
 # Write the data out to an HDF5 analysis file
 
 tray.AddModule(EventWriter, 'EventWriter',
-               FileName=opts["out"]+datafilename+'.h5')
+               FileName=args.out+datafilename+'.h5')
 
 # Write out the data to an I3 file
 #tray.AddModule('I3Writer', 'I3Writer',
@@ -285,7 +285,7 @@ tray.AddModule(EventWriter, 'EventWriter',
 #               )
     
 tray.AddModule('TrashCan', 'yeswecan')
-if opts['nevents'] > 0 :
+if args.nevents > 0 :
   tray.Execute(opts['nevents'])
 else :
   tray.Execute()
