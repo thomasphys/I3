@@ -66,7 +66,7 @@ args = parser.parse_args()
 
 dom_data_options = {}
 #    options['pulses_name'] = 'SplitInIcePulses'
-dom_data_options['pulses_name'] = args.pulsesname
+dom_data_options['pulses_name'] = args.pulsename
 dom_data_options['max_dist'] = args.maxdist
 
 

@@ -315,7 +315,7 @@ if __name__ == '__main__':
 	binneddistance_ic = np.zeros(7,dtype=float)
 	binneddistanceerror_ic = np.zeros(7,dtype=float)
 	binnedcharge_ic = np.zeros(7,dtype=float)
-	binnedchargeerror_ic = np.zeros(=7,dtype=float)
+	binnedchargeerror_ic = np.zeros(7,dtype=float)
 
 	for i in range(0,len(distance_dc)):
 		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
@@ -350,7 +350,7 @@ if __name__ == '__main__':
 	elif "h5" in outfilenamelist[1] :
 		OutputHDF5(args.output,
 				   binneddistance_ic,
-				   binneddistanceerror_ic
+				   binneddistanceerror_ic,
 				   binnedcharge_ic,
 				   binnedchargeerror_ic,
 				   binneddistance_dc,
