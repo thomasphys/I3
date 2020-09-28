@@ -136,12 +136,12 @@ def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 
 	fout.cd()
 
-	Charge_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),np.array(y_data_ic),np.array(x_error_ic),np.array(y_error_ic))
-	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),np.array(y_data_dc),np.array(x_error_dc),np.array(y_error_dc))
+	Charge_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),x_data_ic,y_data_ic,x_error_ic,y_error_ic)
+	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),x_data_dc,y_data_dc,x_error_dc,y_error_dc)
 	Energy = ROOT.TH1F("Energy","",1000,min(energy)*0.9,max(energy)*1.1)
 	Zenith = ROOT.TH1F("Zenith","",360,-180,180)
-	for i in range(0,len(weights)) :
 
+	for i in range(0,len(weights)) :
 		Energy.Fill(energy[i],weights[i])
 		Zenith.Fill(zenith[i]*180/3.14,weights[i])
 
@@ -308,14 +308,14 @@ if __name__ == '__main__':
 	for i in range(0,len(distance_ic)) :
 		print(len(distance_ic[i]))
  	
-	binneddistance_dc = np.zeros(8,dtype=float)
-	binneddistanceerror_dc = np.zeros(8,dtype=float)
-	binnedcharge_dc = np.zeros(8,dtype=float)
-	binnedchargeerror_dc = np.zeros(8,dtype=float)
-	binneddistance_ic = np.zeros(8,dtype=float)
-	binneddistanceerror_ic = np.zeros(8,dtype=float)
-	binnedcharge_ic = np.zeros(8,dtype=float)
-	binnedchargeerror_ic = np.zeros(8,dtype=float)
+	binneddistance_dc = np.zeros(7,dtype=float)
+	binneddistanceerror_dc = np.zeros(7,dtype=float)
+	binnedcharge_dc = np.zeros(7,dtype=float)
+	binnedchargeerror_dc = np.zeros(7,dtype=float)
+	binneddistance_ic = np.zeros(7,dtype=float)
+	binneddistanceerror_ic = np.zeros(7,dtype=float)
+	binnedcharge_ic = np.zeros(7,dtype=float)
+	binnedchargeerror_ic = np.zeros(=7,dtype=float)
 
 	for i in range(0,len(distance_dc)):
 		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
@@ -334,9 +334,32 @@ if __name__ == '__main__':
 
 	outfilenamelist = args.output.split(".",1)
 	if "root" in outfilenamelist[1] :
-		OutputRoot(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
+		OutputRoot(args.output,
+					np.array(binneddistance_ic),
+					np.array(binneddistanceerror_ic),
+					np.array(binnedcharge_ic),
+					np.array(innedchargeerror_ic),
+					np.array(binneddistance_dc),
+					np.array(binneddistanceerror_dc),
+					np.array(binnedcharge_dc),
+					np.array(binnedchargeerror_dc),
+					reconstructedE,
+					zenith,
+					weights_E)
+
 	elif "h5" in outfilenamelist[1] :
-		OutputHDF5(args.output,binneddistance_ic,binneddistanceerror_ic,binnedcharge_ic,binnedchargeerror_ic,binneddistance_dc,binneddistanceerror_dc,binnedcharge_dc,binnedchargeerror_dc,reconstructedE,zenith,weights_E)
+		OutputHDF5(args.output,
+				   binneddistance_ic,
+				   binneddistanceerror_ic
+				   binnedcharge_ic,
+				   binnedchargeerror_ic,
+				   binneddistance_dc,
+				   binneddistanceerror_dc,
+				   binnedcharge_dc,
+				   binnedchargeerror_dc,
+				   reconstructedE,
+				   zenith,
+				   weights_E)
 	elif "pdf" in outfilenamelist[1] :
 		print("not yet supported")
 
