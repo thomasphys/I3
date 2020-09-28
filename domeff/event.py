@@ -3,6 +3,17 @@
 #
 from tables import *
 
+class DataPoint(IsDescription):
+	meancharge = Float64Col()
+	sigmacharge = Float64Col()
+	meandistance = Float64Col()
+	sigmadistance = Float64Col()
+
+class Flux(IsDescription):
+	energy = Float64Col()
+	zenith = Float64Col()
+	weight = Float64Col()
+
 class Position(IsDescription):
 	x = Float64Col()
 	y = Float64Col()

@@ -6,6 +6,7 @@ import argparse
 from tables import open_file
 from icecube.weighting.fluxes import  GaisserH4a, GaisserH3a, GaisserH4a_IT, GaisserHillas, Hoerandel, Hoerandel5, Hoerandel_IT
 from icecube.weighting import weighting
+from event import *
 
 def find_error_bootstrap(values,weights):
 # this needs to be eddited, I do not thing this was programmed corerctly.
@@ -155,52 +156,36 @@ def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 
 def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_error_dc,y_data_dc,y_error_dc,energy,zenith,weights) :
 	h5file = open_file(filename, mode="w", title="DOM Calibration HDF5 File")
-
-	distancetable_ic = h5file.create_table('/', 'distance_ic', float, "Distance for IC DOMs")
-	distanceErrortable_ic = h5file.create_table('/', 'distanceError_ic', float, "Distance error for IC DOMs")
-	chargetable_ic = h5file.create_table('/', 'charge_ic', float, "Charge for IC DOMs")
-	chargeErrortable_ic = h5file.create_table('/', 'chargeError_ic', float, "Charge error for IC DOMs")
-
-	distancetable_dc = h5file.create_table('/', 'distance_dc', float, "Distance for DC DOMs")
-	distanceErrortable_dc = h5file.create_table('/', 'distanceError_dc', float, "Distance error for DC DOMs")
-	chargetable_dc = h5file.create_table('/', 'charge_dc', float, "Charge for DC DOMs")
-	chargeErrortable_dc = h5file.create_table('/', 'chargeError_dc', float, "Charge error for DC DOMs")
-
-	energytable = h5file.create_table('/', 'energy', float, "Reconstructed muon energy")
-	weightstable = h5file.create_table('/', 'weight', float, "Event weights")
-	zenithtable = h5file.create_table('/', 'zenith', float, "Reconstructed zenith angle")
-
+	
+	icecube = h5file.create_table('/', 'icecube', DataPoint, "IceCube Charge vs Distance data")
+	deapcore = h5file.create_table('/', 'deapcore', DataPoint, "DeepCore Charge vs Distance data")
+	flux = h5file.create_table('/', 'flux', Flux, "Information on the events")
 
 	nelements = len(x_data)
 
-	distance = distancetable.row
-	distanceerror = distanceErrortable.row
-	charge = chargetable.row
-	chargeerror = chargeErrortable.row
+	icrow = icecube.row
+	dcrow = deapcore.row
+	fluxrow = flux.row
 
 	for i in range(0,nelements) :
-		distance = x_data[i]
-		distanceerror = x_error[i]
-		charge = y_data[i]
-		chargeerror = y_error[i]
-		distance.append()
-		distanceerror.append()
-		charge.append()
-		chargeerror.append()
+		icrow['meandistance'] = x_data_ic[i]
+		icrow['sigmadistance'] = x_error_ic[i]
+		icrow['meancharge'] = y_data_ic[i]
+		icrow['sigmacharge'] = y_error_ic[i]
+		icrow.append()
+		dcrow['meandistance'] = x_data_dc[i]
+		dcrow['sigmadistance'] = x_error_dc[i]
+		dcrow['meancharge'] = y_data_dc[i]
+		dcrow['sigmacharge'] = y_error_dc[i]
+		dcrow.append()
 
 	nelements = len(energy)
 
-	energyrow = energytable.row
-	weightsrow = weightstable.row
-	zenithtrow = zenithtable.row
-
 	for i in range(0,nelements) :
-		energyrow = energy[i]
-		weightsrow = weights[i]
-		zenithrow = zenith[i]
-		energyrow.append()
-		weightsrow.append()
-		zenithrow.append()
+		fluxrow['energy'] = energy[i]
+		fluxrow['weight'] = weights[i]
+		fluxrow['zenith'] = zenith[i]
+		fluxrow.append()
 
 	h5file.close()
 
@@ -338,7 +323,7 @@ if __name__ == '__main__':
 					np.array(binneddistance_ic),
 					np.array(binneddistanceerror_ic),
 					np.array(binnedcharge_ic),
-					np.array(innedchargeerror_ic),
+					np.array(binnedchargeerror_ic),
 					np.array(binneddistance_dc),
 					np.array(binneddistanceerror_dc),
 					np.array(binnedcharge_dc),
