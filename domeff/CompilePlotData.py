@@ -92,12 +92,19 @@ def ComputeWeightedMeanandError(value,weight):
 
 	for i in range(0,nelements) :
 		sumweights = sumweights+weight[i]
-
-	#Compute mean
-	for i in range(0,nelements) :
-		mean += weight[i]*value[i]/sumweights
 		sumweights_sqr = sumweights_sqr+(weight[i]/sumweights)**2.0
 		if weight[i] > 0.0 : n_nonzero += 1.0
+
+	#Compute mean
+	mean2 = 0.0
+	for i in range(0,nelements) :
+		mean += weight[i]*value[i]/sumweights
+		mean2 += value[i]/nelements
+
+	print("weighted mean is:")
+	printf(mean)
+	printf("unweighted mean is:")
+	printf(mean2)
 
 	if n_nonzero == 0.0 : 
 		print("Sum of weights is zero")
@@ -109,7 +116,7 @@ def ComputeWeightedMeanandError(value,weight):
 	#Compute standard error squared
 	sigma /= (n_nonzero-1.0)/n_nonzero
 
-	return mean,sigma**0.5
+	return mean, sigma**0.5
 
 
 def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_error_dc,y_data_dc,y_error_dc,energy,zenith,weights) :
@@ -120,11 +127,11 @@ def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	Charge_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),np.array(y_data_ic),np.array(x_error_ic),np.array(y_error_ic))
 	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),np.array(y_data_dc),np.array(x_error_dc),np.array(y_error_dc))
 	Energy = ROOT.TH1F("Energy","",1000,min(energy)*0.9,max(energy)*1.1)
-	Zenith = ROOT.TH1F("Zenith","",180,0,180)
+	Zenith = ROOT.TH1F("Zenith","",360,-180,180)
 	for i in range(0,len(weights)) :
 
 		Energy.Fill(energy[i],weights[i])
-		Zenith.Fill(zenith[i],weights[i])
+		Zenith.Fill(zenith[i]*180/3.14,weights[i])
 
 	Charge_Distance_IC.Write("Charge_Distance_IC")
 	Charge_Distance_DC.Write("Charge_Distance_DC")
@@ -223,7 +230,7 @@ if __name__ == '__main__':
 	file_list_aux = os.listdir(files_dir)
 	file_list_h5 = [x for x in file_list_aux if '.h5' in x]a
 	file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(os.path.getsize(files_dir+x)) > 1000000 )]
-	
+
 	flux = GaisserH4a()
 	if args.flux == "GaisserH3a" : flux = GaisserH3a()
 	elif args.flux == "GaisserH4a_IT" : flux = GaisserH4a_IT()
@@ -272,7 +279,7 @@ if __name__ == '__main__':
 				domindex += 1
 				if dom['impactAngle'] > 3.14/2.0 : continue
 				i_dist = (int)(dom['recoDist']/20.0)
-				if i_dist >= 0 and i_dist < 7 :
+				if i_dist > -1 and i_dist < 7 :
 					if dom['string'] in DC_Strings :
 						DomCharge_dc[i_dist].append(dom['totalCharge'])
 						weights_dc[i_dist].append(weights_E[-1])
