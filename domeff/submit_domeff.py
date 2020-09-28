@@ -40,7 +40,7 @@ eval `/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/setup.sh`
 
 /cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t .i3.zst -o {} -s {}
 
-'''.format(opts["gcd"],files_dir+"/"+filenameprefix,opts["nevents"],opts["out"]+"/"+filenameprefix,opts["sim"])
+'''.format(opts["gcd"],files_dir+"/"+filenameprefix,opts["out"]+"/"+filenameprefix,opts["sim"])
 procesfilename = 'domeff_process_' + folder + '.sh'
 with open(opts["out"] + '/jobscripts/' + procesfilename, 'w') as ofile:
 	ofile.write(job_string)
