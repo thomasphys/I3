@@ -71,6 +71,18 @@ def calc_charge_info(values,weights):
 
 	return mu , std_mu
 
+def ComputeMeanandError(value,weight) :
+
+	nelements = len(value)
+	for i in range(0,nelements) :
+		mean += value[i]/nelements
+
+	for i in range(0,nelements) :
+		sigma += ((value[i]-mean)**2.0)/nelements
+
+	return mean, sigma**0.5
+
+
 def ComputeWeightedMeanandError(value,weight):
 
 	'''
@@ -307,9 +319,17 @@ if __name__ == '__main__':
 
 	for i in range(0,len(distance_dc)):
 		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
+		print(binneddistance_dc[i])
+		print(binneddistanceerror_dc[i])
 		binnedcharge_dc[i], binnedchargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
+		print(binnedcharge_dc[i])
+		print(binnedchargeerror_dc[i])
 		binneddistance_ic[i] , binneddistanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
+		print(binneddistance_ic[i])
+		print(binneddistanceerror_ic[i])
 		binnedcharge_ic[i], binnedchargeerror_ic[i] = ComputeWeightedMeanandError(DomCharge_ic[i],weights_ic[i])
+		print(binnedcharge_ic[i])
+		print(binnedchargeerror_ic[i])
 		
 
 	outfilenamelist = args.output.split(".",1)
