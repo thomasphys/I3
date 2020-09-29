@@ -59,7 +59,7 @@ parser.add_argument('-q', '--energyrange', help='Range of muon Energies', type =
 parser.add_argument('-s', '--sim', help='Is file simulation', type = bool, default = False)
 parser.add_argument('-n', '--nevents', help='Number of events to process.', type = int, default = -1)
 parser.add_argument('-t', '--datafiletype', help='Suffix of Datafiles', type = str, default = 'i3.bz2')
-parser.add_argument('-r', '--runnnum', help='number to identify target file', type = int, default = 0)
+parser.add_argument('-r', '--runnum', help='number to identify target file', type = int, default = 0)
 parser.add_argument('-p', '--pulsename', help='Name of new pulse list', type = str, default = 'SRTInIcePulsesDOMEff')
 parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 140.0)
 args = parser.parse_args()
@@ -78,11 +78,12 @@ datafilename = "{0:0{1}d}".format(args.runnum,5)
 tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
 
+# Filter the ones with sub_event_stream == InIceSplit
+tray.AddModule(in_ice, 'in_ice')
+
 if not args.sim :
 	tray.AddModule(timestartfilter,'TimeStartFilter')
 	# Filters
-	# Filter the ones with sub_event_stream == InIceSplit
-	tray.AddModule(in_ice, 'in_ice')
 
 	#Thomas - remove minbias for now since only running one run. 
 	# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
@@ -97,7 +98,7 @@ if not args.sim :
 	# Trigger check
 	# jeb-filter-2012
 	tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
-               I3TriggerHierarchy='I3TriggerHierarchy',
+              I3TriggerHierarchy='I3TriggerHierarchy',
                InIceSMTFlag='InIceSMTTriggered',
                IceTopSMTFlag='IceTopSMTTriggered',
                InIceStringFlag='InIceStringTriggered',
@@ -110,17 +111,13 @@ if not args.sim :
 	tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 
 
-  # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
-
-if args.sim :
-	# Count the number of in ice muons and get the truth muon
-	tray.AddModule(get_truth_muon, 'get_truth_muon')
-	tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
+# Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 
 # Geoanalysis
 # Calculate the distance of each event to the detector border.
 #tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
-tray.AddModule(totaltimefilter,'TotalTimeFilter')
+#Thomas - this is crashing, solve this.
+#tray.AddModule(totaltimefilter,'TotalTimeFilter')
 
 
 #---- Generate filtered pulse series with same configuration as used by Nick and Sebastian -----
@@ -139,7 +136,7 @@ seededRTConfig = I3DOMLinkSeededRTConfigurationService(
 # repeating frame objects in the frames that originally had reconstuctions
 tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
                InputHitSeriesMapName='SplitInIcePulses',
-               OutputHitSeriesMapName=args.pulsesname,
+               OutputHitSeriesMapName=args.pulsename,
                STConfigService=seededRTConfig,
                SeedProcedure='HLCCoreHits',
                NHitsThreshold=2,
@@ -160,7 +157,7 @@ tray.AddSegment(WimpHitCleaning, "WIMPstuff",
 # ---- Linefit and SPEfit ---------------------------------------------------
 tray.AddSegment(SPE,'SPE',
                 If = lambda f: True,
-                Pulses=args.pulsesname,
+                Pulses=args.pulsename,
                 suffix='DOMeff',
                 LineFit= 'LineFit',
                 SPEFitSingle = 'SPEFitSingle',
@@ -171,7 +168,7 @@ tray.AddSegment(SPE,'SPE',
 
 # ---- MPEFit reconstruction ------------------------------------------------
 tray.AddSegment(MPE, 'MPE',
-                Pulses = args.pulsesname,
+                Pulses = args.pulsename,
                 Seed = 'SPEFit2',
                 #If = which_split(split_name='InIceSplit') & (lambda f:muon_wg(f)),
                 If = lambda f: True,
@@ -198,7 +195,7 @@ EnEstis = ["SplineMPETruncatedEnergy_SPICEMie_AllDOMS_Muon",
 # splineMPE with default configuration!
 tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
                 configuration="default",
-                PulsesName= args.pulsesname,
+                PulsesName= args.pulsename,
                 TrackSeedList=["MPEFitDOMeff"],
                 BareMuTimingSpline=timingSplinePath,
                 BareMuAmplitudeSpline=amplitudeSplinePath,
@@ -237,19 +234,19 @@ tray.AddModule(dom_data, 'dom_data',
 
 # Calculate cut variables
 tray.AddSegment(direct_hits.I3DirectHitsCalculatorSegment, 'I3DirectHits',
-                PulseSeriesMapName=args.pulsesname,
+                PulseSeriesMapName=args.pulsename,
 #                ParticleName='MPEFitDOMeff',
                 ParticleName='SplineMPE',
 #                OutputI3DirectHitsValuesBaseName='MPEFitDOMeffDirectHits')
                 OutputI3DirectHitsValuesBaseName='SplineMPEDirectHits'
                 )
 tray.AddSegment(hit_multiplicity.I3HitMultiplicityCalculatorSegment, 'I3HitMultiplicity',
-                PulseSeriesMapName=args.pulsesname,
+                PulseSeriesMapName=args.pulsename,
                 OutputI3HitMultiplicityValuesName='HitMultiplicityValues'
                 )
  
 tray.AddSegment(hit_statistics.I3HitStatisticsCalculatorSegment, 'I3HitStatistics',
-                PulseSeriesMapName=args.pulsesname,
+                PulseSeriesMapName=args.pulsename,
                 OutputI3HitStatisticsValuesName='HitStatisticsValues'
                 )
  
@@ -263,7 +260,7 @@ tray.AddModule(move_cut_variables, 'move_cut_variables',
 
 # Calculate ICAnalysisHits, DCAnalysisHits, ICNHits, and DCNHits
 tray.AddModule(count_hits, 'count_hits',
-               pulses_name=args.pulsesname)
+               pulses_name=args.pulsename)
  
 
 
@@ -271,10 +268,16 @@ tray.AddModule(count_hits, 'count_hits',
 # Calculate the distance of each event to the detector border.
 tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
 
+if args.sim :
+        # Count the number of in ice muons and get the truth muon
+        tray.AddModule(get_truth_muon, 'get_truth_muon')
+        tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
+
+
 # Write the data out to an HDF5 analysis file
 
 tray.AddModule(EventWriter, 'EventWriter',
-               FileName=args.out+datafilename+'.h5')
+               FileName=args.output+datafilename+'.h5')
 
 # Write out the data to an I3 file
 #tray.AddModule('I3Writer', 'I3Writer',
