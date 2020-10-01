@@ -3,6 +3,20 @@
 #
 from tables import *
 
+class State(IsDescription):
+	data = StringCol(500)
+	eff = StringCol(500)
+	flux =StringCol(500)
+	zenithmin = Float64Col()
+	zenithmax = Float64Col()
+	energymin = Float64Col()
+	impactanglemin = Float64Col()
+	impactanglemax = Float64Col()
+	trackendpoint = Float64Col()
+	cherdistmin = Float64Col()
+	cherdistmax = Float64Col()
+	binwidth = Float64Col()
+
 class DataPoint(IsDescription):
 	meancharge = Float64Col()
 	sigmacharge = Float64Col()

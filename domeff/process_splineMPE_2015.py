@@ -17,7 +17,6 @@ sys.path.insert(0, parentdir)
 
 # Setup logging
 from icecube.icetray.i3logging import *
-
 from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics
 from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitCleaning
@@ -30,7 +29,6 @@ from domanalysis import dom_data
 from writeEvent import EventWriter
 import argparse
 # Reconstructions
-
 from icecube.filterscripts.offlineL2.level2_Reconstruction_WIMP import FiniteReco
 from icecube.filterscripts.offlineL2.level2_Reconstruction_Muon import SPE, MPE
 from icecube.filterscripts.offlineL2.PhotonTables import InstallTables

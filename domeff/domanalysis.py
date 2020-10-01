@@ -126,8 +126,7 @@ def dom_data(frame, reco_fit, options):
             # Calculate the point at which direct Cherenkov light hitting the DOM would have been emitted
             # at and require that this be above the end point of the track
             cherenkov_pos = calc.cherenkov_position(reco_track, dom_position, n_ice_group, n_ice_phase)
-            dist_above_endpoint = calc.distance_along_track(reco_track, reco_endpoint) \
-                                  - calc.distance_along_track(reco_track, cherenkov_pos)
+            dist_above_endpoint = calc.distance_along_track(reco_track, reco_endpoint) - calc.distance_along_track(reco_track, cherenkov_pos)
             if dist_above_endpoint <= 0:
                 continue
 

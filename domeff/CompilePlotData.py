@@ -114,11 +114,6 @@ def ComputeWeightedMeanandError(value,weight):
 		mean += weight[i]*value[i]/sumweights
 		mean2 += value[i]/nelements
 
-	print("weighted mean is:")
-	print(mean)
-	print("unweighted mean is:")
-	print(mean2)
-
 	if n_nonzero == 0.0 : 
 		print("Sum of weights is zero")
 		return 0.0,0.0	
@@ -154,18 +149,34 @@ def OutputRoot(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	fout.Close()
 
 
-def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_error_dc,y_data_dc,y_error_dc,energy,zenith,weights) :
+def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_error_dc,y_data_dc,y_error_dc,energy,zenith,weights,args) :
 	h5file = open_file(filename, mode="w", title="DOM Calibration HDF5 File")
 	
 	icecube = h5file.create_table('/', 'icecube', DataPoint, "IceCube Charge vs Distance data")
 	deapcore = h5file.create_table('/', 'deapcore', DataPoint, "DeepCore Charge vs Distance data")
 	flux = h5file.create_table('/', 'flux', Flux, "Information on the events")
+	state = h5file.create_table('/','state',State,"Information on the data cuts")
 
 	nelements = len(x_data)
 
 	icrow = icecube.row
 	dcrow = deapcore.row
 	fluxrow = flux.row
+	staterow - state.row
+
+	staterow['data'] = args.data
+	staterow['eff'] = args.eff
+	staterow['flux'] = args.flux
+	staterow['zenithmin'] = args.zenithrange[0]
+	staterow['zenithmax'] = args.zenithrange[1]
+	staterow['energymin'] = args.energyrange[0]
+	staterow['impactanglemin'] = args.energyrange[1]
+	staterow['impactanglemax'] = args.impactrange[0]
+	staterow['trackendpoint'] = args.impactrange[1]
+	staterow['cherdistmin'] = args.cherdist[0]
+	staterow['cherdistmax'] = args.cherdist[1]
+	staterow['binwidth'] = args.binwidth
+	staterow.append()
 
 	for i in range(0,nelements) :
 		icrow['meandistance'] = x_data_ic[i]
@@ -205,20 +216,33 @@ if __name__ == '__main__':
 				nargs = '+',  default = [-180.0,180.0])
 	parser.add_argument('-p', '--energyrange', help='Range of muon Energies', type = float,
 				nargs = "+", default = [0.0, 9999999.00])
+	parser.add_argument('-i','--impactrange',help='Range of DOM impact parameters to include', 
+				type = float, nargs = "+", default = [0.0,180.0])
+	parser.add_argument('-t','--trackendpoint',help='Distance from track end point to include',
+				type = float, default = 200.)
+	parser.add_argument('-c','--cherdist', help='Distance from track to include', type = float, 
+				nargs = "+", default = [0.0,140.])
+	parser.add_argument('-b','--binwidth', help='Width to bin distances', type = float, 
+				nargs = "+", default = 20.0)
     
 	args = parser.parse_args()
 
 	weightname = 'weight_'+args.flux
 
-	DomCharge_ic  = [[],[],[],[],[],[],[]]
-	weights_ic = [[],[],[],[],[],[],[]]
-	distance_ic = [[],[],[],[],[],[],[]]
-	DomCharge_dc  = [[],[],[],[],[],[],[]]
-	weights_dc = [[],[],[],[],[],[],[]]
-	distance_dc = [[],[],[],[],[],[],[]]
+	# compute how many 20m bins to use.
+	nbins = 1 + int(args.cherdist / args.binwidth)
+
+	DomCharge_ic  = [[] for i in range(nbins)]
+	weights_ic = [[] for i in range(nbins)]
+	distance_ic = [[] for i in range(nbins)]
+	DomCharge_dc  = [[] for i in range(nbins)]
+	weights_dc = [[] for i in range(nbins)]
+	distance_dc = [[] for i in range(nbins)]
 	reconstructedE = []
 	zenith = []
 	weights_E = []
+	EnergyTruth = []
+	ZenithTruth = []
 
 	DC_Strings = [81,82,83,84,85,86]
 	IC_Strings = [17,18,19,25,26,27,28,34,38,44,47,56,54,55]
@@ -235,8 +259,6 @@ if __name__ == '__main__':
 	elif args.flux == "Hoerandel" : flux = Hoerandel()
 	elif args.flux == "Hoerandel5" : flux = Hoerandel5()
 	elif args.flux == "Hoerandel_IT" : flux = Hoerandel_IT()
-
-	eventcount = 0
 	
 	for filename in file_list :
 		h5file = open_file(files_dir+filename, mode="r")
@@ -274,9 +296,11 @@ if __name__ == '__main__':
 				if  event['eventId'] != dom['eventId'] :
 					break
 				domindex += 1
-				if dom['impactAngle'] > 3.14/2.0 : continue
-				i_dist = (int)(dom['recoDist']/20.0)
-				if i_dist > -1 and i_dist < 7 :
+				if dom['impactAngle'] < args.impactrange[0] or  dom['impactAngle'] > args.impactrange[1]: continue
+				if dom['distAboveEndpoint'] < args.trackendpoint : continue
+				if dom['recoDist'] < args.cherdist[0] or dom['recoDist'] > args.cherdist[1] : continue 
+				i_dist = (int)(dom['recoDist']/args.binwidth)
+				if i_dist > -1 and i_dist < nbins :
 					if dom['string'] in DC_Strings :
 						DomCharge_dc[i_dist].append(dom['totalCharge'])
 						weights_dc[i_dist].append(weights_E[-1])
@@ -285,13 +309,8 @@ if __name__ == '__main__':
 						DomCharge_ic[i_dist].append(dom['totalCharge'])
 						weights_ic[i_dist].append(weights_E[-1])
 						distance_ic[i_dist].append(dom['recoDist'])
-				
-			eventcount = eventcount + 1
 
 		h5file.close()
-
-	for i in range(0,len(distance_ic)) :
-		print(len(distance_ic[i]))
  	
 	binneddistance_dc = np.zeros(7,dtype=float)
 	binneddistanceerror_dc = np.zeros(7,dtype=float)
@@ -304,17 +323,9 @@ if __name__ == '__main__':
 
 	for i in range(0,len(distance_dc)):
 		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
-		print(binneddistance_dc[i])
-		print(binneddistanceerror_dc[i])
 		binnedcharge_dc[i], binnedchargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
-		print(binnedcharge_dc[i])
-		print(binnedchargeerror_dc[i])
 		binneddistance_ic[i] , binneddistanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
-		print(binneddistance_ic[i])
-		print(binneddistanceerror_ic[i])
 		binnedcharge_ic[i], binnedchargeerror_ic[i] = ComputeWeightedMeanandError(DomCharge_ic[i],weights_ic[i])
-		print(binnedcharge_ic[i])
-		print(binnedchargeerror_ic[i])
 		
 
 	outfilenamelist = args.output.split(".",1)
@@ -344,7 +355,8 @@ if __name__ == '__main__':
 				   binnedchargeerror_dc,
 				   reconstructedE,
 				   zenith,
-				   weights_E)
+				   weights_E,
+				   args)
 	elif "pdf" in outfilenamelist[1] :
 		print("not yet supported")
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 
 # import required icecube-related stuff
 from icecube import icetray, dataclasses, simclasses, dataio
