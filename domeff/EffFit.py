@@ -1,6 +1,5 @@
 import numpy as np
 from array import array as arr
-import matplotlib . pyplot as plt
 from tables import open_file
 from iminuit import Minuit
 
@@ -35,7 +34,7 @@ currentdata = []
 
 def XinterpolationsandYequivError(dist,data):
 
-    distbin = 0
+	distbin = 0
 	while data[distbin]['meandistance'] < dist : ++distbin
 
 	x_weight = (dist-data[distbin-1]['meandistance'])/(data[distbin]-data[distbin-1])
@@ -79,26 +78,27 @@ def GetYequivError(distbin,data) :
 	return (data[distbin+1]['sigmacharge']**2.0+ yequiv**2.0)**0.5
 
 
-def calcChi2(eff,data,sim):
+def calcChi2(eff):
 	chisq = 0.0
 	for i in range(1,len(data)-1) :
-		simval ,  simerror = SimCharge(eff,data[i]['meandistance'],sim)
-		dataval = data[i]['meancharge']
-		dataerror = GetYequivError(i,data)
+		simval ,  simerror = SimCharge(eff,currentdata[i]['meandistance'],currenteff)
+		dataval = currentdata[i]['meancharge']
+		dataerror = GetYequivError(i,currentdata)
 		chisq += ((simval-dataval)**2.0)/(dataerror*dataerror+simerror*simerror)
 	return chisq
 
 currenteff = eff_ic
 currentdata = data_ic
 
-m = Minuit(calcChi2, eff = 1.0)
+kwargs = dict(eff=1.0, error_eff=0.1,limit_eff=(0.91,1.19))
+m = Minuit(calcChi2,**kwargs)
 print("Fit IceCube DOM Efficiency")
 m.migrad()
 
 currenteff = eff_dc
 currentdata = data_dc
 
-m = Minuit(calcChi2, eff = 1.0)
+m = Minuit(calcChi2, **kwargs)
 print("Fit DeepCore DOM Efficiency")
 m.migrad()
 

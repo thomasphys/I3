@@ -157,12 +157,12 @@ def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	flux = h5file.create_table('/', 'flux', Flux, "Information on the events")
 	state = h5file.create_table('/','state',State,"Information on the data cuts")
 
-	nelements = len(x_data)
+	nelements = len(x_data_ic)
 
 	icrow = icecube.row
 	dcrow = deapcore.row
 	fluxrow = flux.row
-	staterow - state.row
+	staterow = state.row
 
 	staterow['data'] = args.data
 	staterow['eff'] = args.eff
@@ -220,7 +220,7 @@ if __name__ == '__main__':
 	parser.add_argument('-i','--impactrange',help='Range of DOM impact parameters to include', 
 				type = float, nargs = "+", default = [0.0,180.0])
 	parser.add_argument('-t','--trackendpoint',help='Distance from track end point to include',
-				type = float, default = 200.)
+				type = float, default = 50.)
 	parser.add_argument('-c','--cherdist', help='Distance from track to include', type = float, 
 				nargs = "+", default = [0.0,140.])
 	parser.add_argument('-b','--binwidth', help='Width to bin distances', type = float, 
@@ -231,7 +231,7 @@ if __name__ == '__main__':
 	weightname = 'weight_'+args.flux
 
 	# compute how many 20m bins to use.
-	nbins = 1 + int(args.cherdist / args.binwidth)
+	nbins = int(args.cherdist[1] / args.binwidth)
 
 	DomCharge_ic  = [[] for i in range(nbins)]
 	weights_ic = [[] for i in range(nbins)]
@@ -252,8 +252,9 @@ if __name__ == '__main__':
 	files_dir = args.data
 	file_list_aux = os.listdir(files_dir)
 	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
-	file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 1000000 )]
-	
+	#file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 1000000 )]
+	file_list = [x for x in file_list_h5 if (args.eff in x)]
+
 	flux = GaisserH4a()
 	if args.flux == "GaisserH3a" : flux = GaisserH3a()
 	elif args.flux == "GaisserH4a_IT" : flux = GaisserH4a_IT()
@@ -267,6 +268,8 @@ if __name__ == '__main__':
 		domtable = h5file.root.doms
 		eventtable = h5file.root.events
 		runtable = h5file.root.runinfo
+
+		domindex = 0
 
 		for event in eventtable.iterrows() :
 
@@ -292,11 +295,18 @@ if __name__ == '__main__':
 				weights_E.append(1.0)
 
 			alldomcharge = 0.0;
-			for dom in domtable.iterrows() if dom['eventId'] == event['eventId'] :
+			for dom in domtable.iterrows(domindex) :
+				if dom['eventId'] == event['eventId'] :
+					domindex += 1
+				else :
+					break
 				alldomcharge += dom['totalCharge']
-				if dom['impactAngle'] < args.impactrange[0] or  dom['impactAngle'] > args.impactrange[1]: continue
-				if dom['distAboveEndpoint'] < args.trackendpoint : continue
-				if dom['recoDist'] < args.cherdist[0] or dom['recoDist'] > args.cherdist[1] : continue 
+				if dom['impactAngle'] < args.impactrange[0] or  dom['impactAngle'] > args.impactrange[1]: 
+					continue
+				if dom['distAboveEndpoint'] < args.trackendpoint : 
+					continue
+				if dom['recoDist'] < args.cherdist[0] or dom['recoDist'] > args.cherdist[1] : 
+					continue 
 				i_dist = (int)(dom['recoDist']/args.binwidth)
 				if i_dist > -1 and i_dist < nbins :
 					if dom['string'] in DC_Strings :
@@ -310,21 +320,23 @@ if __name__ == '__main__':
 			totalcharge.append(alldomcharge)
 
 		h5file.close()
- 	
-	binneddistance_dc = np.zeros(7,dtype=float)
-	binneddistanceerror_dc = np.zeros(7,dtype=float)
-	binnedcharge_dc = np.zeros(7,dtype=float)
-	binnedchargeerror_dc = np.zeros(7,dtype=float)
-	binneddistance_ic = np.zeros(7,dtype=float)
-	binneddistanceerror_ic = np.zeros(7,dtype=float)
-	binnedcharge_ic = np.zeros(7,dtype=float)
-	binnedchargeerror_ic = np.zeros(7,dtype=float)
+
+	
+	binneddistance_dc = np.zeros(nbins,dtype=float)
+	binneddistanceerror_dc = np.zeros(nbins,dtype=float)
+	binnedcharge_dc = np.zeros(nbins,dtype=float)
+	binnedchargeerror_dc = np.zeros(nbins,dtype=float)
+	binneddistance_ic = np.zeros(nbins,dtype=float)
+	binneddistanceerror_ic = np.zeros(nbins,dtype=float)
+	binnedcharge_ic = np.zeros(nbins,dtype=float)
+	binnedchargeerror_ic = np.zeros(nbins,dtype=float)
 
 	for i in range(0,len(distance_dc)):
-		binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
-		binnedcharge_dc[i], binnedchargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
-		binneddistance_ic[i] , binneddistanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
-		binnedcharge_ic[i], binnedchargeerror_ic[i] = ComputeWeightedMeanandError(DomCharge_ic[i],weights_ic[i])
+		if len(weights_ic[i]) > 0 :
+			binneddistance_dc[i] , binneddistanceerror_dc[i] = ComputeWeightedMeanandError(distance_dc[i],weights_dc[i])
+			binnedcharge_dc[i], binnedchargeerror_dc[i] = ComputeWeightedMeanandError(DomCharge_dc[i],weights_dc[i])
+			binneddistance_ic[i] , binneddistanceerror_ic[i] = ComputeWeightedMeanandError(distance_ic[i],weights_ic[i])
+			binnedcharge_ic[i], binnedchargeerror_ic[i] = ComputeWeightedMeanandError(DomCharge_ic[i],weights_ic[i])
 		
 
 	outfilenamelist = args.output.split(".",1)
