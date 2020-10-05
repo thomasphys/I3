@@ -4,29 +4,30 @@
 from tables import *
 
 class State(IsDescription):
-	data = StringCol(500)
-	eff = StringCol(500)
-	flux =StringCol(500)
-	zenithmin = Float64Col()
-	zenithmax = Float64Col()
-	energymin = Float64Col()
+	data           = StringCol(500)
+	eff            = StringCol(500)
+	flux           = StringCol(500)
+	zenithmin      = Float64Col()
+	zenithmax      = Float64Col()
+	energymin      = Float64Col()
 	impactanglemin = Float64Col()
 	impactanglemax = Float64Col()
-	trackendpoint = Float64Col()
-	cherdistmin = Float64Col()
-	cherdistmax = Float64Col()
-	binwidth = Float64Col()
+	trackendpoint  = Float64Col()
+	cherdistmin    = Float64Col()
+	cherdistmax    = Float64Col()
+	binwidth       = Float64Col()
 
 class DataPoint(IsDescription):
-	meancharge = Float64Col()
-	sigmacharge = Float64Col()
-	meandistance = Float64Col()
+	meancharge    = Float64Col()
+	sigmacharge   = Float64Col()
+	meandistance  = Float64Col()
 	sigmadistance = Float64Col()
 
 class Flux(IsDescription):
-	energy = Float64Col()
-	zenith = Float64Col()
-	weight = Float64Col()
+	totalcharge = Float64Col()
+	energy      = Float64Col()
+	zenith      = Float64Col()
+	weight      = Float64Col()
 
 class Position(IsDescription):
 	x = Float64Col()
@@ -78,6 +79,7 @@ class Event(IsDescription):
 	corsika                = Corsika()
 	startTime              = Time()
 	endTime                = Time()
+	totalcharge            = Float64Col()
 
 class DOM(IsDescription):
 	eventId           = UInt32Col()   # ID number of the event this DOM belongs to

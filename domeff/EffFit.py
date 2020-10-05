@@ -53,14 +53,14 @@ def XinterpolationsandYequivError(dist,data):
 
 	return charge , yerror
 
-def SimCharge_(eff,dist): 
+def SimCharge_(eff,dist,sim): 
 	#Get efficiency curves to interpolate between.
 	binmin = int((x-0.9)/0.1)
 	binmax = binmin+1
 
 	# interpolate x  values for lower curve
-	chargelow, errorlow = XinterpolationsandYequivError(dist,currenteff[binmin])
-	chargehigh, errorhigh = XinterpolationsandYequivError(dist,currenteff[binmax])
+	chargelow, errorlow = XinterpolationsandYequivError(dist,sim[binmin])
+	chargehigh, errorhigh = XinterpolationsandYequivError(dist,sim[binmax])
 
 	#interpolate between two curves.
 	y_weight = (x-(0.9+0.1*binmin))/0.1
@@ -79,11 +79,11 @@ def GetYequivError(distbin,data) :
 	return (data[distbin+1]['sigmacharge']**2.0+ yequiv**2.0)**0.5
 
 
-def calcChi2(eff):
+def calcChi2(eff,data,sim):
 	chisq = 0.0
-	for i in range(1,len(currentdata)-1) :
-		simval ,  simerror = SimCharge(eff,currentdata[i]['meandistance'])
-		dataval = currentdata[i]['meancharge']
+	for i in range(1,len(data)-1) :
+		simval ,  simerror = SimCharge(eff,data[i]['meandistance'],sim)
+		dataval = data[i]['meancharge']
 		dataerror = GetYequivError(i,data)
 		chisq += ((simval-dataval)**2.0)/(dataerror*dataerror+simerror*simerror)
 	return chisq

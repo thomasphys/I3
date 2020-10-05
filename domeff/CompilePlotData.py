@@ -196,6 +196,7 @@ def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 		fluxrow['energy'] = energy[i]
 		fluxrow['weight'] = weights[i]
 		fluxrow['zenith'] = zenith[i]
+		fluxrow['totalcharge'] = totalcharge[i]
 		fluxrow.append()
 
 	h5file.close()
@@ -243,6 +244,7 @@ if __name__ == '__main__':
 	weights_E = []
 	EnergyTruth = []
 	ZenithTruth = []
+	totalcharge = []
 
 	DC_Strings = [81,82,83,84,85,86]
 	IC_Strings = [17,18,19,25,26,27,28,34,38,44,47,56,54,55]
@@ -265,8 +267,6 @@ if __name__ == '__main__':
 		domtable = h5file.root.doms
 		eventtable = h5file.root.events
 		runtable = h5file.root.runinfo
-
-		domindex = 0
 
 		for event in eventtable.iterrows() :
 
@@ -291,11 +291,9 @@ if __name__ == '__main__':
 			else :
 				weights_E.append(1.0)
 
-			domindexstart = domindex
-			for dom in domtable.iterrows(domindexstart) :
-				if  event['eventId'] != dom['eventId'] :
-					break
-				domindex += 1
+			alldomcharge = 0.0;
+			for dom in domtable.iterrows() if dom['eventId'] == event['eventId'] :
+				alldomcharge += dom['totalCharge']
 				if dom['impactAngle'] < args.impactrange[0] or  dom['impactAngle'] > args.impactrange[1]: continue
 				if dom['distAboveEndpoint'] < args.trackendpoint : continue
 				if dom['recoDist'] < args.cherdist[0] or dom['recoDist'] > args.cherdist[1] : continue 
@@ -309,6 +307,7 @@ if __name__ == '__main__':
 						DomCharge_ic[i_dist].append(dom['totalCharge'])
 						weights_ic[i_dist].append(weights_E[-1])
 						distance_ic[i_dist].append(dom['recoDist'])
+			totalcharge.append(alldomcharge)
 
 		h5file.close()
  	
