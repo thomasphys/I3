@@ -72,6 +72,7 @@ class Event(IsDescription):
 	icHitsIn               = UInt32Col()    # Number of hits inside the IceCube analysis region
 	icHitsOut              = UInt32Col()    # Number of hits outside the IceCube analysis region
 	recoEndpoint           = Position()  # Coordinates of the reconstructed track endpoint
+	recoLogL               = Float64Col()
 	firstHit               = UInt32Col()    # Index of the first DOM hit for this event
 	nHits                  = UInt32Col()    # Number of DOM hits in this event
 	primary                = Particle()     # Polyplopia primary particle
@@ -79,7 +80,10 @@ class Event(IsDescription):
 	corsika                = Corsika()
 	startTime              = Time()
 	endTime                = Time()
-	totalcharge            = Float64Col()
+	totalCharge            = Float64Col()
+	borderDistance         = Float64Col()
+	directHits             = UInt32Col()
+	stopLikeRatio          = Float64Col()
 
 class DOM(IsDescription):
 	eventId           = UInt32Col()   # ID number of the event this DOM belongs to

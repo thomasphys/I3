@@ -23,7 +23,7 @@ from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitClean
 from I3Tray import I3Tray, I3Units, load
 #from filters_InIceSplit import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered
 from filters_InIceSplit_2015 import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered, FiniteRecoFilter, muon_zenith
-from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoint, move_cut_variables, totaltimefilter,timestartfilter
+from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoint, move_cut_variables, totaltimefilter,timestartfilter, tot_charge, movellhparams
 from geoanalysis import calc_dist_to_border
 from domanalysis import dom_data
 from writeEvent import EventWriter
@@ -213,12 +213,19 @@ tray.AddSegment(FiniteReco,'FiniteReco',
 ##                Pulses = 'SRTInIcePulses')
 tray.AddModule(FiniteRecoFilter, 'FiniteRecoFilter')
 
+tray.AddModule(movellhparams, "MoveLLHParams")
+
 
 # -----Endpoint---------------------------------------------------------------
 # Add the reconstructed event endpoint to the frame.
 tray.AddModule(reco_endpoint, 'reco_endpoint',
                endpoint_fit='FiniteRecoFitDOMeff'
                )
+
+tray.AddModule(tot_charge,'tot_charge',
+                reco_fit='SplineMPE',
+                pulses = args.pulsename,
+              )
 
 # DOManalysis
 # This uses the MPEFit's to calculate TotalCharge, RecoDistance, etc.

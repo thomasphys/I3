@@ -41,6 +41,18 @@ class EventWriter(icetray.I3Module):
 		event['reco/dir/azimuth'] = frame['SplineMPE'].dir.azimuth
 		event['startTime/tag'] = frame['I3EventHeader'].start_time
 		event['endTime/tag'] = frame['I3EventHeader'].end_time
+		event['dcHitsIn'] = frame['DCAnalysisHits']    
+		event['dcHitsOut'] = frame['DCNHits']    
+		event['icHitsIn'] = frame['ICAnalysisHits']    
+		event['icHitsOut'] = frame['ICNHits']   
+		event['borderDistance'] = frame['DistToBorder']
+		event['recoLogL'] = frame['rlogl']
+		event['directHits'] = frame['NDirDoms']
+		event['totalCharge'] = frame['EventCharge']
+		event['stopLikeRatio'] = frame['FiniteRecoLLHRatio']
+
+
+		
 
 		if frame.Has('CorsikaWeightMap'):
     

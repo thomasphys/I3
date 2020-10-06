@@ -153,7 +153,7 @@ def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	h5file = open_file(filename, mode="w", title="DOM Calibration HDF5 File")
 	
 	icecube = h5file.create_table('/', 'icecube', DataPoint, "IceCube Charge vs Distance data")
-	deapcore = h5file.create_table('/', 'deapcore', DataPoint, "DeepCore Charge vs Distance data")
+	deapcore = h5file.create_table('/', 'deepcore', DataPoint, "DeepCore Charge vs Distance data")
 	flux = h5file.create_table('/', 'flux', Flux, "Information on the events")
 	state = h5file.create_table('/','state',State,"Information on the data cuts")
 
@@ -163,6 +163,9 @@ def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	dcrow = deapcore.row
 	fluxrow = flux.row
 	staterow = state.row
+
+	#h5file.root._v_attrs.event_cuts = event_cuts
+    #h5file.root._v_attrs.dom_cuts = dom_cuts
 
 	staterow['data'] = args.data
 	staterow['eff'] = args.eff
@@ -214,20 +217,28 @@ if __name__ == '__main__':
 	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
 				default = "data")
 	parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
-				nargs = '+',  default = [-180.0,180.0])
+				nargs = 2,  default = [-180.0,180.0])
 	parser.add_argument('-p', '--energyrange', help='Range of muon Energies', type = float,
-				nargs = "+", default = [0.0, 9999999.00])
+				nargs = 2, default = [0.0, 9999999.00])
 	parser.add_argument('-i','--impactrange',help='Range of DOM impact parameters to include', 
 				type = float, nargs = "+", default = [0.0,180.0])
 	parser.add_argument('-t','--trackendpoint',help='Distance from track end point to include',
-				type = float, default = 50.)
+				type = float, default = 100.)
 	parser.add_argument('-c','--cherdist', help='Distance from track to include', type = float, 
-				nargs = "+", default = [0.0,140.])
-	parser.add_argument('-b','--binwidth', help='Width to bin distances', type = float, 
-				nargs = "+", default = 20.0)
-    
-	args = parser.parse_args()
+				nargs = 2, default = [0.0,140.])
+	parser.add_argument('-w','--binwidth', help='Width to bin distances', type = float, default = 20.0)
+	parser.add_argument('-r','--residual', help='time residual region', type = float, 
+				nargs = 2, default = [-15.0,75.0])
+	parser.add_argument('-h','--hitsout',help='Max number of hits outside analysis region',type = int, defalt = 20)
+	parser.add_argument('-b','--boarder',help='Distance from bottom and side of detector.',type = float, 
+						nargs = 2, default = [-400.0, 100.0])
+	parser.add_argument('-n', '--nhits', help='Min number of direct hit DOMs and Max number of Outside analysis hits', 
+						type = int, nargs = 2, default = [5,20])
+	parser.add_argument('-l', '--likelihood', help='Fit likelyhoods, FiniteReco Likelihood ratio and SplineMPE Rlogl', type = float,
+						nargs = 2, default = [10.,10.])
 
+
+	args = parser.parse_args()
 	weightname = 'weight_'+args.flux
 
 	# compute how many 20m bins to use.
@@ -275,11 +286,23 @@ if __name__ == '__main__':
 
 			#Energy Cut
 			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
-				continue;
+				continue
 
 			#Zenith Cut
 			if event['reco/dir/zenith'] < args.zenithrange[0]*3.14/180. or event['reco/dir/zenith'] > args.zenithrange[1]*3.14/180. : 
-				continue;
+				continue
+
+			#Stopping Point Cut
+			if event['recoEndpoint/pos/z'] < args.boarder[0] or event['borderDistance'] < args.boarder[1] :
+				continue 
+
+			#Likelihood cuts
+			if event['stopLikeRatio'] < args.likelihood[0] or event['recoLogL'] > args.likelihood[1] :
+				continue
+
+			#direct hists
+			if event['directHits'] < args.nhits[0] or (event['dcHitsOut']+event['icHitsOut'])> args.nhhits[1] :
+				continue
 
 			reconstructedE.append(event['reco/energy'])
 			zenith.append(event['reco/dir/zenith'])
@@ -310,13 +333,13 @@ if __name__ == '__main__':
 				i_dist = (int)(dom['recoDist']/args.binwidth)
 				if i_dist > -1 and i_dist < nbins :
 					if dom['string'] in DC_Strings :
-						DomCharge_dc[i_dist].append(dom['totalCharge'])
-						weights_dc[i_dist].append(weights_E[-1])
-						distance_dc[i_dist].append(dom['recoDist'])
+							DomCharge_dc[i_dist].append(dom['totalCharge'])
+							weights_dc[i_dist].append(weights_E[-1])
+							distance_dc[i_dist].append(dom['recoDist'])
 					if dom['string'] in IC_Strings :
-						DomCharge_ic[i_dist].append(dom['totalCharge'])
-						weights_ic[i_dist].append(weights_E[-1])
-						distance_ic[i_dist].append(dom['recoDist'])
+							DomCharge_ic[i_dist].append(dom['totalCharge'])
+							weights_ic[i_dist].append(weights_E[-1])
+							distance_ic[i_dist].append(dom['recoDist'])
 			totalcharge.append(alldomcharge)
 
 		h5file.close()
