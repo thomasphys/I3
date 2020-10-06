@@ -17,7 +17,7 @@ sys.path.insert(0, parentdir)
 
 # Setup logging
 from icecube.icetray.i3logging import *
-from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
+from icecube import dataio, icetray, finiteReco, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics
 from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitCleaning
 from I3Tray import I3Tray, I3Units, load
@@ -213,7 +213,17 @@ tray.AddSegment(FiniteReco,'FiniteReco',
 ##                Pulses = 'SRTInIcePulses')
 tray.AddModule(FiniteRecoFilter, 'FiniteRecoFilter')
 
-tray.AddModule(movellhparams, "MoveLLHParams")
+tray.AddService("I3GulliverFinitePhPnhFactory","finitephpnh",
+   InputReadout        = 'RTTWOfflinePulses_FR_WIMP_DOMeff')
+
+tray.AddModule("I3StartStopLProb","FiniteRecoStartStopLLH",
+   Name        = "StartStopProb",
+   ServiceName = "finitephpnh"
+)
+
+tray.AddModule(movellhparams, "MoveLLHParams",
+		llhparams = 'StartStopProb_StartStopParams',
+	      )
 
 
 # -----Endpoint---------------------------------------------------------------
