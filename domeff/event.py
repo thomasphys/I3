@@ -67,10 +67,10 @@ class Time(IsDescription) :
 
 class Event(IsDescription):
 	eventId                = UInt32Col()    # ID number of the event
-	dcHitsIn               = UInt32Col()    # Number of hits inside the deep core analysis region
-	dcHitsOut              = UInt32Col()    # Number of hits outside the deep core analysis region
-	icHitsIn               = UInt32Col()    # Number of hits inside the IceCube analysis region
-	icHitsOut              = UInt32Col()    # Number of hits outside the IceCube analysis region
+	dcHitsIn               = Float64Col()    # Number of hits inside the deep core analysis region
+	dcHitsOut              = Float64Col()    # Number of hits outside the deep core analysis region
+	icHitsIn               = Float64Col()    # Number of hits inside the IceCube analysis region
+	icHitsOut              = Float64Col()    # Number of hits outside the IceCube analysis region
 	recoEndpoint           = Position()  # Coordinates of the reconstructed track endpoint
 	recoLogL               = Float64Col()
 	firstHit               = UInt32Col()    # Index of the first DOM hit for this event

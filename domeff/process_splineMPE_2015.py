@@ -214,16 +214,21 @@ tray.AddSegment(FiniteReco,'FiniteReco',
 tray.AddModule(FiniteRecoFilter, 'FiniteRecoFilter')
 
 tray.AddService("I3GulliverFinitePhPnhFactory","finitephpnh",
-   InputReadout        = 'RTTWOfflinePulses_FR_WIMP_DOMeff')
+   InputReadout  = 'RTTWOfflinePulses_FR_WIMP_DOMeff'
+   #InputReadout = args.pulsename
+   #InputReadout = 'SplitInIcePulses',
+   #InputReadout = 'FiniteRecoFitDOMeff'
+   #InputReadout = 'InIceDSTPulses'
+)
 
 tray.AddModule("I3StartStopLProb","FiniteRecoStartStopLLH",
    Name        = "FiniteRecoFitDOMeff",
    ServiceName = "finitephpnh"
 )
 
-tray.AddModule(movellhparams, "MoveLLHParams",
-		llhparams = 'FiniteRecoFitDOMeff_StartStopParams',
-	      )
+#tray.AddModule(movellhparams, "MoveLLHParams",
+#		llhparams = 'FiniteRecoFitDOMeff_StartStopParams',
+#	      )
 
 
 # -----Endpoint---------------------------------------------------------------

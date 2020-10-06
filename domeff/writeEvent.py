@@ -41,15 +41,15 @@ class EventWriter(icetray.I3Module):
 		event['reco/dir/azimuth'] = frame['SplineMPE'].dir.azimuth
 		event['startTime/tag'] = frame['I3EventHeader'].start_time
 		event['endTime/tag'] = frame['I3EventHeader'].end_time
-		event['dcHitsIn'] = frame['DCAnalysisHits']    
-		event['dcHitsOut'] = frame['DCNHits']    
-		event['icHitsIn'] = frame['ICAnalysisHits']    
-		event['icHitsOut'] = frame['ICNHits']   
-		event['borderDistance'] = frame['DistToBorder']
-		event['recoLogL'] = frame['rlogl']
-		event['directHits'] = frame['NDirDoms']
-		event['totalCharge'] = frame['EventCharge']
-		event['stopLikeRatio'] = frame['FiniteRecoLLHRatio']
+		event['dcHitsIn'] = frame['DCAnalysisHits'].value    
+		event['dcHitsOut'] = frame['DCNHits'].value    
+		event['icHitsIn'] = frame['ICAnalysisHits'].value    
+		event['icHitsOut'] = frame['ICNHits'].value   
+		event['borderDistance'] = frame['DistToBorder'].value
+		event['recoLogL'] = frame['rlogl'].value
+		event['directHits'] = frame['NDirDoms'].value
+		event['totalCharge'] = frame['EventCharge'].value
+		#event['stopLikeRatio'] = frame['FiniteRecoLLHRatio'].value
 
 
 		

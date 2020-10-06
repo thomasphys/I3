@@ -32,9 +32,9 @@ job_string = '''#!/bin/bash
 
 eval `/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/setup.sh`
 
-/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py {} {}/ {} $1 .i3.bz2 {} {}/datahd5/ {}
+/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {}/{} -r $1 -t .i3.bz2 -o {} -s {}
 
-'''.format(opts["gcd"],files_dir,filenameprefix,opts["nevents"],opts["out"],opts["sim"])
+'''.format(opts["gcd"],files_dir,filenameprefix,opts["out"],opts["sim"])
 procesfilename = 'domeff_process_' + folder + '.sh'
 with open(opts["out"] + '/jobscripts/' + procesfilename, 'w') as ofile:
 	ofile.write(job_string)
@@ -66,4 +66,4 @@ submissionfilename = 'domeff_process_' + folder + '.submit'
 with open(opts["out"] + '/submissionscripts/' + submissionfilename, 'w') as ofile:
 	ofile.write(submit_string)
 
-submit = subprocess.Popen(['condor_submit',opts["out"] + '/submissionscripts/' + submissionfilename])
+#submit = subprocess.Popen(['condor_submit',opts["out"] + '/submissionscripts/' + submissionfilename])
