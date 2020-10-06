@@ -217,12 +217,12 @@ tray.AddService("I3GulliverFinitePhPnhFactory","finitephpnh",
    InputReadout        = 'RTTWOfflinePulses_FR_WIMP_DOMeff')
 
 tray.AddModule("I3StartStopLProb","FiniteRecoStartStopLLH",
-   Name        = "StartStopProb",
+   Name        = "FiniteRecoFitDOMeff",
    ServiceName = "finitephpnh"
 )
 
 tray.AddModule(movellhparams, "MoveLLHParams",
-		llhparams = 'StartStopProb_StartStopParams',
+		llhparams = 'FiniteRecoFitDOMeff_StartStopParams',
 	      )
 
 
