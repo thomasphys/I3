@@ -209,26 +209,16 @@ tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
 tray.AddSegment(InstallTables, 'InstallPhotonTables')
 tray.AddSegment(FiniteReco,'FiniteReco',
                 suffix = 'DOMeff',
-                Pulses = 'RTTWOfflinePulses_FR_WIMP_DOMeff')
-##                Pulses = 'SRTInIcePulses')
+	#	InputTrackName = 'SplineMPE',
+		Pulses = args.pulsename,
+                #Pulses = 'RTTWOfflinePulses_FR_WIMP_DOMeff')
+##                Pulses = 'SRTInIcePulses'
+		)
 tray.AddModule(FiniteRecoFilter, 'FiniteRecoFilter')
 
-tray.AddService("I3GulliverFinitePhPnhFactory","finitephpnh",
-   InputReadout  = 'RTTWOfflinePulses_FR_WIMP_DOMeff'
-   #InputReadout = args.pulsename
-   #InputReadout = 'SplitInIcePulses',
-   #InputReadout = 'FiniteRecoFitDOMeff'
-   #InputReadout = 'InIceDSTPulses'
+tray.AddModule(movellhparams, "MoveLLHParams",
+		llhparams = 'FiniteRecoLlhDOMeff',	      
 )
-
-tray.AddModule("I3StartStopLProb","FiniteRecoStartStopLLH",
-   Name        = "FiniteRecoFitDOMeff",
-   ServiceName = "finitephpnh"
-)
-
-#tray.AddModule(movellhparams, "MoveLLHParams",
-#		llhparams = 'FiniteRecoFitDOMeff_StartStopParams',
-#	      )
 
 
 # -----Endpoint---------------------------------------------------------------
@@ -300,12 +290,12 @@ tray.AddModule(EventWriter, 'EventWriter',
                FileName=args.output+datafilename+'.h5')
 
 # Write out the data to an I3 file
-#tray.AddModule('I3Writer', 'I3Writer',
-#               FileName=opts["out"]+'.i3.gz',
-#               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
-#               DropOrphanStreams=[icetray.I3Frame.DAQ],
-#               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
-#               )
+tray.AddModule('I3Writer', 'I3Writer',
+               FileName=args.output+datafilename+'.i3.gz',
+               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
+               DropOrphanStreams=[icetray.I3Frame.DAQ],
+               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
+               )
     
 tray.AddModule('TrashCan', 'yeswecan')
 if args.nevents > 0 :

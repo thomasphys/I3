@@ -49,7 +49,7 @@ class EventWriter(icetray.I3Module):
 		event['recoLogL'] = frame['rlogl'].value
 		event['directHits'] = frame['NDirDoms'].value
 		event['totalCharge'] = frame['EventCharge'].value
-		#event['stopLikeRatio'] = frame['FiniteRecoLLHRatio'].value
+		event['stopLikeRatio'] = frame['FiniteRecoLLHRatio'].value
 
 
 		
