@@ -59,7 +59,8 @@ parser.add_argument('-n', '--nevents', help='Number of events to process.', type
 parser.add_argument('-t', '--datafiletype', help='Suffix of Datafiles', type = str, default = 'i3.bz2')
 parser.add_argument('-r', '--runnum', help='number to identify target file', type = int, default = 0)
 parser.add_argument('-p', '--pulsename', help='Name of new pulse list', type = str, default = 'SRTInIcePulsesDOMEff')
-parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 140.0)
+parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 200.0)
+
 args = parser.parse_args()
 
 dom_data_options = {}
@@ -67,6 +68,12 @@ dom_data_options = {}
 dom_data_options['pulses_name'] = args.pulsename
 dom_data_options['max_dist'] = args.maxdist
 
+dkimlevel
+
+def dataskim(frame) :
+  global skimlevel
+  random = phys_service.I3GSLRandomService.uniform()
+  return random < skimlevel
 
 tray = I3Tray()
 

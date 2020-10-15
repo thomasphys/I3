@@ -88,6 +88,7 @@ def dom_data(frame, reco_fit, options):
 
     # Initialize the vectors containing the per DOM data
     frame['DOM_TotalCharge'] = dataclasses.I3VectorDouble()
+    frame['DOM_TotalCharge_300ns'] = dataclasses.I3VectorDouble()
     frame['DOM_String'] = dataclasses.I3VectorDouble()
     frame['DOM_OM'] = dataclasses.I3VectorDouble()
     frame['DOM_DistAboveEndpoint'] = dataclasses.I3VectorDouble()
@@ -145,7 +146,8 @@ def dom_data(frame, reco_fit, options):
             frame['DOM_ImpactAngle'].append(impact_angle)
 
             # Calculate the total charge and the time residual for the DOM
-            total_charge = 0
+            total_charge = 0.0
+            total_charge_300ns = 0.0
             min_time_residual = 1000.
             # If there are pulses, sum the charge of the ones with a time residual less than 1000 ns.
             if dom in pulse_series.keys():
@@ -154,7 +156,10 @@ def dom_data(frame, reco_fit, options):
                     min_time_residual = min(min_time_residual,time_res)
                     if time_res < 1000.:
                         total_charge += pulse.charge
+                    if time_res > -100. and time_res < 300. :
+                        total_charge_300ns += pulse.charge
             frame['DOM_TotalCharge'].append(total_charge)
+            frame['DOM_TotalCharge_300ns'].append(total_charge_300ns) 
             frame['DOM_MinTimeResidual'].append(min_time_residual)
 
     # After all that, if none of the DOMs made it through, get rid of this

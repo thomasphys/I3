@@ -10,7 +10,7 @@ from __future__ import print_function, division
 
 import math
 
-from icecube import dataclasses
+from icecube import dataclasses, phys_services
 
 
 def in_ice(frame):

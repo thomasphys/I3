@@ -80,6 +80,7 @@ class EventWriter(icetray.I3Module):
 			dom['string']            = frame['DOM_String'][i]
 			dom['om']                = frame['DOM_OM'][i]
 			dom['totalCharge']       = frame['DOM_TotalCharge'][i]
+			dom['totalCharge_300ns'] = frame['DOM_TotalCharge_300ns'][i]
 			dom['distAboveEndpoint'] = frame['DOM_DistAboveEndpoint'][i]
 			dom['impactAngle']       = frame['DOM_ImpactAngle'][i]
 			dom['minTimeResidual']   = frame['DOM_MinTimeResidual'][i]

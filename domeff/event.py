@@ -93,4 +93,5 @@ class DOM(IsDescription):
 	distAboveEndpoint = Float64Col()  # Distance of the DOM above the endpoint of the track
 	impactAngle       = Float64Col()
 	totalCharge       = Float64Col()  # Total charge seen by the DOM
+	totalCharge_300ns = Float64Col()  # Total charge seen by the DOM within a time residual of -100ns to 300 ns.
 	minTimeResidual   = Float64Col()  # Minimum time residual for all pulses
