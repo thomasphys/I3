@@ -409,6 +409,8 @@ if __name__ == '__main__':
 	elif args.flux == "Hoerandel" : flux = Hoerandel()
 	elif args.flux == "Hoerandel5" : flux = Hoerandel5()
 	elif args.flux == "Hoerandel_IT" : flux = Hoerandel_IT()
+
+	eventcount = 0
 	
 	for filename in file_list :
 		h5file = open_file(files_dir+filename, mode="r")
@@ -422,25 +424,25 @@ if __name__ == '__main__':
 
 			#Energy Cut
 			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
-				#print("Event killed by energy Cut")
-				#print(event['reco/energy'])
+				print("Event killed by energy Cut")
+				print(event['reco/energy'])
 				continue
 
 			#Zenith Cut
 			if event['reco/dir/zenith'] < args.zenithrange[0]*3.14/180. or event['reco/dir/zenith'] > args.zenithrange[1]*3.14/180. : 
-				#print("Event Killed by Zenith Cut")
-				#print(event['reco/dir/zenith'])
+				print("Event Killed by Zenith Cut")
+				print(event['reco/dir/zenith'])
 				continue
 
 			#Stopping Point Cut
 			if event['recoEndpoint/z'] < args.boarder[0] :
-				#print("Event killed by Bottom Distance Cut")
-				#print(event['recoEndpoint/z'])
+				print("Event killed by Bottom Distance Cut")
+				print(event['recoEndpoint/z'])
 				continue
 
 			if event['borderDistance'] < args.boarder[1] :
-				#print("Event killed by Detector Edge Cut")
-				#print(event['borderDistance'])
+				print("Event killed by Detector Edge Cut")
+				print(event['borderDistance'])
 				continue 
 
 			#Likelihood cuts
@@ -451,14 +453,14 @@ if __name__ == '__main__':
 
 			 #Likelihood cuts
                         if event['recoLogL'] > args.likelihood[1] :
-				#print("Event killed by Likelihood check")
-				#print(event['recoLogL'])
+				print("Event killed by Likelihood check")
+				print(event['recoLogL'])
                                 continue
 
 			#direct hists
 			if event['directHits'] < args.nhits[0]:
-				#print("Event killed by N Direct Hists Cut")
-				#print(event['directHits'])
+				print("Event killed by N Direct Hists Cut")
+				print(event['directHits'])
 				continue
 
 			#if (event['dcHitsOut']+event['icHitsOut'])> args.nhits[1] :
@@ -467,6 +469,7 @@ if __name__ == '__main__':
 			#	continue
 
 			#print("Event Passed")
+			eventcount += 1
 			weight = 1.0
 			if args.flux != "data" :
 				pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
@@ -552,7 +555,8 @@ if __name__ == '__main__':
 					bin_distance_ic[i_dist].append(dom['recoDist'])
 
 		h5file.close()
-
+	
+	print("Total number of events = %d" % (eventcount))
 	
 	binneddistance_dc = np.zeros(nbins,dtype=float)
 	binneddistanceerror_dc = np.zeros(nbins,dtype=float)
