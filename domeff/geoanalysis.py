@@ -42,6 +42,40 @@ def get_coordinates(omgeo, strings):
 
     return coords
 
+def calc_dist_to_border_mctruth(frame):
+    """
+    Calculate the signed minimum distance of the reconsructed endpoint to the
+    detector border.
+
+    Events inside the detector are given positive distances, and events outside
+    negative.
+
+    Adds To Frame
+    -------------
+    DistToBorder : I3Double
+        The signed minimum distance of the reconstructed endpoint to the detector
+        border.
+    """
+
+    mc_endpoint = frame['TruthEndpoint']
+    endpoint = (mc_endpoint.x, mc_endpoint.y)
+
+    omgeo = frame['I3Geometry'].omgeo
+    border_strings = [1, 2, 3, 4, 5, 6, 13, 21, 30, 40, 50, 59, 67, 74, 73, 72, 78, 77, 76, 75, 68, 60, 51, 41, 31, 22, 14, 7]  # For IC86
+
+    # Get the (x, y) coordinates of the border doms.
+    detector_border = get_coordinates(omgeo, border_strings)
+
+    dist = point_to_polygon_dist(endpoint, detector_border)
+
+    inside = point_in_polygon(endpoint, detector_border)
+
+    # Endpoints outside detector get negative distances.
+    if not inside:
+        dist = -dist
+
+    frame['TruthDistToBorder'] = dataclasses.I3Double(dist)
+
 
 def calc_dist_to_border(frame):
     """

@@ -21,7 +21,7 @@ def in_ice(frame):
     return event_header.sub_event_stream == 'InIceSplit'
 
 
-def min_bias(frame):
+def min_bias(frame, reco_fit, options):
     """
     Check that condition_passed and prescale_passed for FilterMinBias_11 are
     both True. .. moved it to 'filterMinBias_13

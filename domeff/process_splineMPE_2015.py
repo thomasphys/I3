@@ -23,7 +23,7 @@ from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitClean
 from I3Tray import I3Tray, I3Units, load
 #from filters_InIceSplit import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered
 from filters_InIceSplit_2015 import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered, FiniteRecoFilter, muon_zenith
-from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoint, move_cut_variables, totaltimefilter,timestartfilter, tot_charge, movellhparams
+from general import get_truth_muon, get_truth_endpoint, calc_dist_to_border_mctruth, count_hits, reco_endpoint, move_cut_variables, totaltimefilter,timestartfilter, tot_charge, movellhparams
 from geoanalysis import calc_dist_to_border
 from domanalysis import dom_data
 from writeEvent import EventWriter
@@ -289,6 +289,7 @@ if args.sim :
         # Count the number of in ice muons and get the truth muon
         tray.AddModule(get_truth_muon, 'get_truth_muon')
         tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
+        tray.AddModule(calc_dist_to_border_mctruth,'calc_dist_to_border_mctruth')
 
 
 # Write the data out to an HDF5 analysis file

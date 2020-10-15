@@ -71,7 +71,8 @@ class Event(IsDescription):
 	dcHitsOut              = Float64Col()    # Number of hits outside the deep core analysis region
 	icHitsIn               = Float64Col()    # Number of hits inside the IceCube analysis region
 	icHitsOut              = Float64Col()    # Number of hits outside the IceCube analysis region
-	recoEndpoint           = Position()  # Coordinates of the reconstructed track endpoint
+	recoEndPoint           = Position()  # Coordinates of the reconstructed track endpoint
+	truthEndPoint          = Position()
 	recoLogL               = Float64Col()
 	firstHit               = UInt32Col()    # Index of the first DOM hit for this event
 	nHits                  = UInt32Col()    # Number of DOM hits in this event
@@ -82,6 +83,7 @@ class Event(IsDescription):
 	endTime                = Time()
 	totalCharge            = Float64Col()
 	borderDistance         = Float64Col()
+	truthBorderDistance    = Float64Col()
 	directHits             = UInt32Col()
 	stopLikeRatio          = Float64Col()
 

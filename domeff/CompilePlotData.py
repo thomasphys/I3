@@ -7,6 +7,7 @@ from tables import open_file
 from icecube.weighting.fluxes import  GaisserH4a, GaisserH3a, GaisserH4a_IT, GaisserHillas, Hoerandel, Hoerandel5, Hoerandel_IT
 from icecube.weighting import weighting
 from event import *
+from I3Tray import OMKey
 
 weights_ic = []
 weights_dc = []

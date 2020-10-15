@@ -37,6 +37,12 @@ class EventWriter(icetray.I3Module):
 		event['reco/pos/x'] = frame['SplineMPE'].pos.x
 		event['reco/pos/y'] = frame['SplineMPE'].pos.y
 		event['reco/pos/z'] = frame['SplineMPE'].pos.z
+		event['recoEndPoint/x'] = frame['RecoEndpoint'].x
+		event['recoEndPoint/y'] = frame['RecoEndpoint'].y
+		event['recoEndPoint/z'] = frame['RecoEndpoint'].z
+		event['truthEndPoint/x'] = frame['TruthEndpoint'].x
+		event['truthEndPoint/y'] = frame['TruthEndpoint'].y
+		event['truthEndPoint/z'] = frame['TruthEndpoint'].z
 		event['reco/dir/zenith']  = frame['SplineMPE'].dir.zenith
 		event['reco/dir/azimuth'] = frame['SplineMPE'].dir.azimuth
 		event['startTime/tag'] = frame['I3EventHeader'].start_time
@@ -46,6 +52,7 @@ class EventWriter(icetray.I3Module):
 		event['icHitsIn'] = frame['ICAnalysisHits'].value    
 		event['icHitsOut'] = frame['ICNHits'].value   
 		event['borderDistance'] = frame['DistToBorder'].value
+		event['truthBorderDistance'] = frame['TruthDistToBorder'].value
 		event['recoLogL'] = frame['rlogl'].value
 		event['directHits'] = frame['NDirDoms'].value
 		event['totalCharge'] = frame['EventCharge'].value
