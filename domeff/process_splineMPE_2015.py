@@ -216,8 +216,8 @@ tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
 tray.AddSegment(InstallTables, 'InstallPhotonTables')
 tray.AddSegment(FiniteReco,'FiniteReco',
                 suffix = 'DOMeff',
-	#	InputTrackName = 'SplineMPE',
-		Pulses = args.pulsename,
+                InputTrackName = 'SplineMPE',
+		            Pulses = args.pulsename,
                 #Pulses = 'RTTWOfflinePulses_FR_WIMP_DOMeff')
 ##                Pulses = 'SRTInIcePulses'
 		)
