@@ -34,6 +34,11 @@ directHits_dc = []
 HitsOut_ic = []
 HitsOut_dc = [] 
 
+ImpactAll_ic = ROOT.TH1F("ImpactAll_IC","",1000,0.0,ROOT.TMath.Pi())
+ImpactAll_dc = ROOT.TH1F("ImpactAll_DC","",1000,0.0,ROOT.TMath.Pi())
+Impact_seeMPE_ic = ROOT.TH1F("ImpactseeMPE_IC","",1000,0.0,ROOT.TMath.Pi())
+Impact_seeMPE_dc = ROOT.TH1F("ImpactseeMPE_DC","",1000,0.0,ROOT.TMath.Pi())
+
 binneddistance_dc = np.zeros(1,dtype=float)
 binneddistanceerror_dc = np.zeros(1,dtype=float)
 binnedcharge_dc = np.zeros(1,dtype=float)
@@ -85,19 +90,17 @@ def calc_charge_info(values,weights):
 	charge_info: dict
 	Contains the mean distance, charge, and error of each thing.
 	"""
-        
-	# Defining the weighted average
-	mu = sum([ weights[i]*values[i] for i in range(0,len(values))]) 
-	mu = mu/sum(weights)
 		
 	# We use the standard IC procedure to calculate the statistical error for the
 	# weighted average
 	# There are three main terms
 	# 1) The  weighted sum of charges, and its variance
 	wsc = sum([ weights[i]*values[i] for i in range(0,len(values))])
+	sw = sum(weights) 
+	# Defining the weighted average
+	mu = wsc/sw
 	var_wsc = sum([(weights[i]*values[i])**2 for i in range(0,len(values))]) 
 	# 2) The sum of weights and its variance 
-	sw = sum(weights)
 	var_sw = sum([weights[i]**2 for i in range(0,len(values))])
 	# 3) The covariance associated to both sums of weights 
 	cov = sum([values[i]*(weights[i]**2) for i in range(0,len(values))])
@@ -200,6 +203,10 @@ def OutputRoot(filename) :
 	global binneddistanceerror_ic
 	global binnedcharge_ic
 	global binnedchargeerror_ic
+	global ImpactAll_ic
+	global ImpactAll_dc
+	global Impact_seeMPE_ic
+	global Impact_seeMPE_dc
 
 	x_data_ic = np.array(binneddistance_ic),
 	x_error_ic = np.array(binneddistanceerror_ic),
@@ -284,6 +291,10 @@ def OutputRoot(filename) :
 	RecoLogL_DC.Write()
 	DirectHits_DC.Write()
 	HitsOut_DC.Write()
+	ImpactAll_ic.Write()
+	ImpactAll_dc.Write()
+	Impact_seeMPE_ic.Write()
+	Impact_seeMPE_dc.Write()
 
 	fout.Close()
 
@@ -531,6 +542,9 @@ if __name__ == '__main__':
 					bin_DomCharge300_dc[i_dist].append(dom['totalCharge300'])
 					bin_weights_dc[i_dist].append(weight)
 					bin_distance_dc[i_dist].append(dom['recoDist'])
+					ImpactAll_dc.Fill(dom['impactAngle '],weight)
+					if dom['totalCharge'] > 0.0 :
+						Impact_seeMPE_dc.Fill(dom['impactAngle '],weight)
 				if dom['string'] in IC_Strings :
 					#print("IC DOM Passed")
 					if event['icHitsOut']> args.nhits[1] :
@@ -554,6 +568,9 @@ if __name__ == '__main__':
 					bin_DomCharge300_ic[i_dist].append(dom['totalCharge300'])
 					bin_weights_ic[i_dist].append(weight)
 					bin_distance_ic[i_dist].append(dom['recoDist'])
+					ImpactAll_ic.Fill(dom['impactAngle '],weight)
+					if dom['totalCharge'] > 0.0 :
+						Impact_seeMPE_ic.Fill(dom['impactAngle '],weight)
 
 		h5file.close()
 	
