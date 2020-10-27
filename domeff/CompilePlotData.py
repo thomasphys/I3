@@ -367,7 +367,7 @@ if __name__ == '__main__':
 	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
 				default = "data")
 	parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
-				nargs = 2,  default = [-180.0,180.0])
+				nargs = 2,  default = [40.,90.])
 	parser.add_argument('-p', '--energyrange', help='Range of muon Energies', type = float,
 				nargs = 2, default = [0.0, 9999999.00])
 	parser.add_argument('-i','--impactrange',help='Range of DOM impact parameters to include', 
@@ -553,7 +553,7 @@ if __name__ == '__main__':
 					bin_DomCharge300_dc[i_dist].append(dom['totalCharge_300ns'])
 					bin_weights_dc[i_dist].append(weight)
 					bin_distance_dc[i_dist].append(dom['recoDist'])
-					ImpactAll_dc.Fill(dom['impactAngle'],weight)
+					ImpactAll_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 					if dom['totalCharge'] > 0.0 :
 						Impact_seeMPE_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 				if dom['string'] in IC_Strings :
@@ -579,7 +579,7 @@ if __name__ == '__main__':
 					bin_DomCharge300_ic[i_dist].append(dom['totalCharge_300ns'])
 					bin_weights_ic[i_dist].append(weight)
 					bin_distance_ic[i_dist].append(dom['recoDist'])
-					ImpactAll_ic.Fill(dom['impactAngle'],weight)
+					ImpactAll_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 					if dom['totalCharge'] > 0.0 :
 						Impact_seeMPE_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 
