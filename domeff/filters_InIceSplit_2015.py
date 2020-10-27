@@ -74,8 +74,7 @@ def FiniteRecoFilter(frame):
     """
     Check that the fit_status of FiniteReco is OK.
     """
-    finiteReco = frame['FiniteRecoFitDOMeff']
-    return (finiteReco.fit_status == dataclasses.I3Particle.OK)
+    return frame['FiniteRecoFitDOMeff'].fit_status == dataclasses.I3Particle.OK
 
 
 def InIceSMTTriggered(frame):
