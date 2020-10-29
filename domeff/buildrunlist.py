@@ -1,11 +1,15 @@
 import json
 import argparse
 import os, sys
+import ROOT
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', help='Input good run list.',type=str,default = '')
 parser.add_argument('-o', '--output', help='Output file list.',type=str,default = '')
 args = parser.parse_args()
+
+#leave out leap years
+monthdays = {31,29,31,30,31,30,31,31,30,31,30,31}
 
 def GetDay(date) :
 	datelist = date.split(" ",1)
@@ -48,7 +52,7 @@ data = json.load(file)
 
 runnum = []
 runbin = []
-length = [ 0.0 for i in range(12*31)]
+length = [ 0.0 for i in range(sum(monthdays))]
 
 for run in data['runs']:
 	if 'short' in run['reason_i3'] :
@@ -67,8 +71,11 @@ for run in data['runs']:
 	runnum.append(int(run['run']))
 	month = GetMonth(run['good_tstart'])
 	day = GetDay(run['good_tstart'])
+	if(monthdays[month-1] < day) :
+		continue
 	year = GetYear(run['good_tstart'])
-	runbin.append((month-1)*31+(day-1))
+	bin = sum([monthdays[i] for i in range(month)]) + day-1
+	runbin.append(sum([monthdays[i] for i in range(month)]) + day-1)
 
 	#print("data = %d %d %d bin = %d duration = %f"% (year,month,day,runbin[-1],GetDuration(run['good_tstart'],run['good_tstop'])))
 	length[runbin[-1]] += GetDuration(run['good_tstart'],run['good_tstop'])
@@ -79,7 +86,7 @@ for value in length :
 		min_val = value
 file.close()
 
-file = open(args.output,'w')
+file = open(args.output+".txt",'w')
 
 for i in range(len(runnum)) :
 	file.write("%d %f\n" % (runnum[i],min_val/length[runbin[i]]))
@@ -90,4 +97,11 @@ for i in range(1,13) :
 			print("%d %d" % (i,j))
 
 file.close()
+
+fout = ROOT.TFile.Open(args.output+".root","RECREATE")
+DaysExposure = ROOT.TH1F("Exposure","",len(monthdays),0.5,len(monthdays)+0.5)
+for i in range(len(length)) :
+	DaysExposure.SetBinContent(i+1,length[i])
+DaysExposure.Write()
+fout.Close()
 
