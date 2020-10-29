@@ -23,12 +23,13 @@ from icecube.filterscripts.offlineL2.level2_HitCleaning_WIMP import WimpHitClean
 from I3Tray import I3Tray, I3Units, load
 #from filters_InIceSplit import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered
 from filters_InIceSplit_2015 import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered, FiniteRecoFilter, muon_zenith
-from general import get_truth_muon, get_truth_endpoint, calc_dist_to_border_mctruth, count_hits, reco_endpoint, move_cut_variables, totaltimefilter,timestartfilter, tot_charge, movellhparams
-from geoanalysis import calc_dist_to_border
+from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoint, move_cut_variables, totaltimefilter,timestartfilter, tot_charge, movellhparams
+from geoanalysis import calc_dist_to_border, calc_dist_to_border_mctruth
 from domanalysis import dom_data
 from writeEvent import EventWriter
 import argparse
 # Reconstructions
+from icecube.filterscripts.offlineL2 import Globals
 from icecube.filterscripts.offlineL2.level2_Reconstruction_WIMP import FiniteReco
 from icecube.filterscripts.offlineL2.level2_Reconstruction_Muon import SPE, MPE
 from icecube.filterscripts.offlineL2.PhotonTables import InstallTables
@@ -42,6 +43,19 @@ load('libstatic-twc')
 #load('libjeb-filter-2012')
 load('libfilterscripts')
 
+def printtag(frame,message) :
+#	print(message)
+	return True
+
+eventcount1 = 0.0
+def countevents1(frame) :
+	global eventcount1
+	eventcount1 += 1.0
+
+eventcount2 = 0.0
+def countevents2(frame) :
+	global eventcount2
+        eventcount2 += 1.0
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--datadir', help='Directory of data files.',type=str,
@@ -68,13 +82,6 @@ dom_data_options = {}
 dom_data_options['pulses_name'] = args.pulsename
 dom_data_options['max_dist'] = args.maxdist
 
-dkimlevel
-
-def dataskim(frame) :
-  global skimlevel
-  random = phys_service.I3GSLRandomService.uniform()
-  return random < skimlevel
-
 tray = I3Tray()
 
 datafilename = "{0:0{1}d}".format(args.runnum,5)
@@ -83,8 +90,14 @@ datafilename = "{0:0{1}d}".format(args.runnum,5)
 tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
 
+tray.AddModule(printtag, 'printtag_newevent',message = "new event")
 # Filter the ones with sub_event_stream == InIceSplit
 tray.AddModule(in_ice, 'in_ice')
+tray.AddModule(countevents1,"count1")
+tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
+# Make sure that the length of SplitInIcePulses is >= 8
+tray.AddModule(SMT8, 'SMT8')
+tray.AddModule(printtag, 'printtag_SMT8',message = "passed SMT8")
 
 if not args.sim :
 	tray.AddModule(timestartfilter,'TimeStartFilter')
@@ -109,18 +122,11 @@ if not args.sim :
                DeepCoreSMTFlag='DeepCoreSMTTriggered',
                DeepCoreSMTConfigID=1010)
 
-  # Check that InIceSMTTriggered is true.
+	# Check that InIceSMTTriggered is true.
 	tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 
 
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
-
-# Geoanalysis
-# Calculate the distance of each event to the detector border.
-#tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
-#Thomas - this is crashing, solve this.
-#tray.AddModule(totaltimefilter,'TotalTimeFilter')
-
 
 #---- Generate filtered pulse series with same configuration as used by Nick and Sebastian -----
 # Generate the SRTInIcePulses, which are used for running basic reconstruction algorithms on data
@@ -147,6 +153,8 @@ tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
                If=lambda f: True
                )
 
+tray.AddModule(printtag, 'printtag_I3seed',message = "passed I3SeededRTCleaning")
+
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 # Despite the unusual name this runs the FiniteReco cleaning on the pulse series.
 
@@ -155,6 +163,8 @@ tray.AddSegment(WimpHitCleaning, "WIMPstuff",
                     If= lambda f: True,
                     suffix='_WIMP_DOMeff'
     )
+
+tray.AddModule(printtag, 'printtag_WIMPClean',message = "passed WIMP Hit Cleaning")
 
 # ---- Linefit and SPEfit ---------------------------------------------------
 tray.AddSegment(SPE,'SPE',
@@ -168,6 +178,7 @@ tray.AddSegment(SPE,'SPE',
                 N_iter = 2
                 )
 
+tray.AddModule(printtag, 'printtag_SPE',message = "passed SPE")
 # ---- MPEFit reconstruction ------------------------------------------------
 tray.AddSegment(MPE, 'MPE',
                 Pulses = args.pulsename,
@@ -178,7 +189,12 @@ tray.AddSegment(MPE, 'MPE',
                 MPEFit = 'MPEFit',
                 MPEFitCramerRao = 'MPEFitCramerRao'
                 )
+
+tray.AddModule(printtag, 'printtag_MPE',message = "passed MPE")
+
 tray.AddModule(MPEFit, 'MPEFit')
+
+tray.AddModule(printtag, 'printtag_MPEFit',message = "passed MPEfit")
 
 # -----Spline Reco -------------------------------------------------------
 #spline paths Madison
@@ -204,6 +220,7 @@ tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
                 fitname="SplineMPE",
                 )
 
+tray.AddModule(printtag, 'printtag_splineMPE',message = "passed SplineMPE")
 #Thomas, will apply this later, want to study impact.
 #tray.AddModule(muon_zenith, 'MuonZenithFilter',
 #               reco_fit='SplineMPE')
@@ -211,18 +228,66 @@ tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
 
 # -----Finite Reco------------------------------------------------------------
 tray.AddSegment(InstallTables, 'InstallPhotonTables')
-tray.AddSegment(FiniteReco,'FiniteReco',
-                suffix = 'DOMeff',
-                InputTrackName = 'SplineMPE',
-		            Pulses = args.pulsename,
-                #Pulses = 'RTTWOfflinePulses_FR_WIMP_DOMeff')
+#tray.AddSegment(FiniteReco,'FiniteReco',
+#                suffix = 'DOMeff',
+#                #InputTrackName = 'SplineMPE',
+#		Pulses = args.pulsename,
+                #Pulses = 'RTTWOfflinePulses_FR_WIMP_DOMeff',
 ##                Pulses = 'SRTInIcePulses'
-		)
+#		)
+
+
+ic86 = [ 21, 29, 39, 38, 30, 40, 50, 59, 49, 58, 67, 66, 74, 73, 65, 72, 78, 48, 57, 47,
+	46, 56, 63, 64, 55, 71, 70, 76, 77, 75, 69, 60, 68, 61, 62, 52, 44, 53, 54, 45,
+	18, 27, 36, 28, 19, 20, 13, 12, 6, 5, 11, 4, 10, 3, 2, 83, 37, 26, 17, 8, 9, 16,
+	25, 85, 84, 82, 81, 86, 35, 34, 24, 15, 23, 33, 43, 32, 42, 41, 51,
+	31, 22, 14, 7, 1, 79, 80] # Taken from http://wiki.icecube.wisc.edu/index.php/Deployment_order
+
+#icetray.load('finiteReco', False)
+tray.AddService('I3GulliverFinitePhPnhFactory', 'GulliverPhPnh',
+		InputReadout = args.pulsename,
+		PhotorecName = Globals.PhotonicsServiceFiniteReco,
+		ProbName = 'PhPnhPhotorec', # Use photorec tables to calculate probabilities
+		RCylinder = 200, # Radius around the track in which probabilities are considered
+		SelectStrings = ic86,)
+
+#first guess to start-stop points
+tray.AddModule('I3StartStopPoint', 'GulliverVertexReco',
+		Name = 'SplineMPE', 
+		InputRecoPulses = args.pulsename,
+		ExpectedShape = 70, # Contained track, this way the start AND stop point are reconstructed
+		CylinderRadius = 200, # Cylinder radius for the cut calculation,  take care to use Cylinder Radius ==200
+		If = lambda f: True,)
+
+tray.AddModule(printtag, 'printtag_startstoppoint',message = "passed I3StartStopPoint")
+#starting/stopping probability
+tray.AddModule('I3StartStopLProb', 'GulliverFiniteRecoLlh',
+	Name = 'SplineMPE_Finite', # Name of the input track with _Finite added from I3StartStopPoint
+	ServiceName = 'GulliverPhPnh', # Name of the service is the instance name from I3GulliverFinitePhPnhFactory
+	If = lambda f: True,)
+
+tray.AddModule(printtag, 'printtag_LProb',message = "passed LProb")
+	
+# rename the finiteReco track
+tray.AddModule('Rename', 'Gulliver_FiniteRecoRename',
+		Keys = ['SplineMPE_Finite', 'FiniteRecoFitDOMeff'],)
+	
+# rename the finitRecoLlh
+tray.AddModule('Rename', 'Gulliver_FiniteRecoLlhRename',
+		Keys = ['GulliverFiniteRecoLlh_StartStopParams', 'FiniteRecoLlhDOMeff'],)  # Name is instance name of I3StartStopLProb with _StartStopParams added
+	                 		
+# rename the finiteReco cuts
+tray.AddModule('Rename', 'Gulliver' + '_FiniteRecoCutsRename' + 'DOMeff',
+		Keys = ['SplineMPE_FiniteCuts', 'FiniteRecoCutsDOMeff'],) # Name of the input track with _FiniteCuts added from I3StartStopPoint
+
 tray.AddModule(FiniteRecoFilter, 'FiniteRecoFilter')
+tray.AddModule(printtag, 'printtag_FiniteRecoFilter',message = "passed FiniteRecoFilter")
 
 tray.AddModule(movellhparams, "MoveLLHParams",
 		llhparams = 'FiniteRecoLlhDOMeff',	      
 )
+
+tray.AddModule(printtag, 'printtag_move',message = "passed MOveLLHParams")
 
 
 # -----Endpoint---------------------------------------------------------------
@@ -231,10 +296,14 @@ tray.AddModule(reco_endpoint, 'reco_endpoint',
                endpoint_fit='FiniteRecoFitDOMeff'
                )
 
+tray.AddModule(printtag, 'printtag_reco_endpoint',message = "passed reco_endpoint")
+
 tray.AddModule(tot_charge,'tot_charge',
                 reco_fit='SplineMPE',
                 pulses = args.pulsename,
               )
+
+tray.AddModule(printtag, 'printtag_tot_charge',message = "passed tot_charge")
 
 # DOManalysis
 # This uses the MPEFit's to calculate TotalCharge, RecoDistance, etc.
@@ -243,7 +312,7 @@ tray.AddModule(dom_data, 'dom_data',
                reco_fit='SplineMPE',
                options=dom_data_options
                )
- 
+tray.AddModule(printtag, 'printtag_dom_data',message = "passed dom_data")
 # General
 
 # Calculate cut variables
@@ -254,16 +323,21 @@ tray.AddSegment(direct_hits.I3DirectHitsCalculatorSegment, 'I3DirectHits',
 #                OutputI3DirectHitsValuesBaseName='MPEFitDOMeffDirectHits')
                 OutputI3DirectHitsValuesBaseName='SplineMPEDirectHits'
                 )
+
+tray.AddModule(printtag, 'printtag_directhits',message = "passed directhits")
+
 tray.AddSegment(hit_multiplicity.I3HitMultiplicityCalculatorSegment, 'I3HitMultiplicity',
                 PulseSeriesMapName=args.pulsename,
                 OutputI3HitMultiplicityValuesName='HitMultiplicityValues'
                 )
+
+tray.AddModule(printtag, 'printtag_hitmultiplicity',message = "pssed hitmultiplicity")
  
 tray.AddSegment(hit_statistics.I3HitStatisticsCalculatorSegment, 'I3HitStatistics',
                 PulseSeriesMapName=args.pulsename,
                 OutputI3HitStatisticsValuesName='HitStatisticsValues'
                 )
- 
+tray.AddModule(printtag, 'printtag_hitstats',message = "passed hit_stats")
 # Move the cut variables into the top level of the frame.
 tray.AddModule(move_cut_variables, 'move_cut_variables',
 #               direct_hits_name='MPEFitDOMeffDirectHits',
@@ -271,36 +345,39 @@ tray.AddModule(move_cut_variables, 'move_cut_variables',
                direct_hits_name='SplineMPEDirectHits',
                fit_params_name='SplineMPEFitParams'
                )
-
+tray.AddModule(printtag, 'printtag_movecuts',message = "passed move_cuts")
 # Calculate ICAnalysisHits, DCAnalysisHits, ICNHits, and DCNHits
 tray.AddModule(count_hits, 'count_hits',
                pulses_name=args.pulsename)
  
-
+tray.AddModule(printtag, 'printtag_hitcount',message = "passed hitcount")
 
 # Geoanalysis
 # Calculate the distance of each event to the detector border.
 tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
 
-if args.sim :
-        # Count the number of in ice muons and get the truth muon
-        tray.AddModule(get_truth_muon, 'get_truth_muon')
-        tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
-        tray.AddModule(calc_dist_to_border_mctruth,'calc_dist_to_border_mctruth')
+tray.AddModule(printtag, 'printtag_dist to border',message = "pssed dist_to_border")
 
+#if args.sim :
+        # Count the number of in ice muons and get the truth muon
+        #tray.AddModule(get_truth_muon, 'get_truth_muon')
+        #tray.AddModule(get_truth_endpoint, 'get_truth_endpoint')
+        #tray.AddModule(calc_dist_to_border_mctruth,'calc_dist_to_border_mctruth')
+	#tray.AddModule(printtag, 'printtag_simstuff',message = "passed sim stuff")
 
 # Write the data out to an HDF5 analysis file
 
 tray.AddModule(EventWriter, 'EventWriter',
                FileName=args.output+datafilename+'.h5')
-
+tray.AddModule(countevents2,"count2")
+tray.AddModule(printtag, 'printtag_writer',message = "passed writer")
 # Write out the data to an I3 file
-tray.AddModule('I3Writer', 'I3Writer',
-               FileName=args.output+datafilename+'.i3.gz',
-               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
-               DropOrphanStreams=[icetray.I3Frame.DAQ],
-               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
-               )
+#tray.AddModule('I3Writer', 'I3Writer',
+#               FileName=args.output+datafilename+'.i3.gz',
+#               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
+#               DropOrphanStreams=[icetray.I3Frame.DAQ],
+#               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
+#               )
     
 tray.AddModule('TrashCan', 'yeswecan')
 if args.nevents > 0 :
@@ -308,3 +385,4 @@ if args.nevents > 0 :
 else :
   tray.Execute()
 tray.Finish()
+print("events %f / %f passed" % (eventcount1,eventcount2)) 

@@ -61,6 +61,7 @@ class Corsika(IsDescription):
 	energyPrimaryMin     = Float64Col()
 	energyPrimaryMax     = Float64Col()
 	areaSum              = Float64Col()
+	nEvents              = Float64Col()
 
 class Time(IsDescription) :
 	tag = StringCol(37)
