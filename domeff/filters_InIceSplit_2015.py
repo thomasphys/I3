@@ -68,7 +68,8 @@ def muon_zenith(frame,reco_fit):
     """
     muon = frame[reco_fit]
     angle = math.degrees(muon.dir.zenith)
-    return (muon.fit_status == dataclasses.I3Particle.OK and 40 < angle < 70)
+    #return (muon.fit_status == dataclasses.I3Particle.OK and 40 < angle < 70)
+    return (muon.fit_status == dataclasses.I3Particle.OK)
 
 def FiniteRecoFilter(frame):
     """

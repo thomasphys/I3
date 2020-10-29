@@ -92,23 +92,20 @@ if not args.sim :
 
 	#Thomas - remove minbias for now since only running one run. 
 	# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
-	#tray.AddModule(min_bias, 'min_bias')
+	tray.AddModule(min_bias, 'min_bias')
 
 	# Make sure that the length of SplitInIcePulses is >= 8
 	tray.AddModule(SMT8, 'SMT8')
 
-	# Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
-	# tray.AddModule(MPEFit, 'MPEFit')
-
 	# Trigger check
 	# jeb-filter-2012
 	tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
-              I3TriggerHierarchy='I3TriggerHierarchy',
+               I3TriggerHierarchy='I3TriggerHierarchy',
                InIceSMTFlag='InIceSMTTriggered',
                IceTopSMTFlag='IceTopSMTTriggered',
                InIceStringFlag='InIceStringTriggered',
-              #PhysMinBiasFlag='PhysMinBiasTriggered',
-              #PhysMinBiasConfigID=106,
+               PhysMinBiasFlag='PhysMinBiasTriggered',
+               PhysMinBiasConfigID=106,
                DeepCoreSMTFlag='DeepCoreSMTTriggered',
                DeepCoreSMTConfigID=1010)
 
