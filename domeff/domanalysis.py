@@ -100,7 +100,16 @@ def dom_data(frame, reco_fit, options):
 
     # Find all doms above the reconstructed z coord of endpoint and
     # within the specified distance interval of the track
+
+    maxdist = 0.0
+    closez = 0.0
+    endpoint = 0.0
+    alldom = 0.0
+    wrongstring = 0.0
+
     for dom, geo in dom_geo:  # (OMKey, I3OMGeo)
+
+        alldom += 1.0
 
         # We want to get DOMs that are in the IC/DC strings and below the dust
         # layer (40 and below for IC, 11 and below for DC).
@@ -118,10 +127,12 @@ def dom_data(frame, reco_fit, options):
             # If the DOM is outside the maximum distance from the track or the track's position of
             # closest approach to the DOM is above the level of the DOM then skip this DOM
             if reco_dist > options['max_dist']:
+		maxdist += 1.0
                 continue
             # Keep if track is below DOM
             clos_app_pos = calc.closest_approach_position(reco_track, dom_position)
             if clos_app_pos.z > dom_position.z:
+		closez += 1.0
                 continue
 
             # Calculate the point at which direct Cherenkov light hitting the DOM would have been emitted
@@ -129,6 +140,7 @@ def dom_data(frame, reco_fit, options):
             cherenkov_pos = calc.cherenkov_position(reco_track, dom_position, n_ice_group, n_ice_phase)
             dist_above_endpoint = calc.distance_along_track(reco_track, reco_endpoint) - calc.distance_along_track(reco_track, cherenkov_pos)
             if dist_above_endpoint <= 0:
+		endpoint += 1.0
                 continue
 
             # We have survived to this point in the loop so now we need to store the data for this
@@ -158,10 +170,13 @@ def dom_data(frame, reco_fit, options):
                         total_charge += pulse.charge
                     if time_res > -100. and time_res < 300. :
                         total_charge_300ns += pulse.charge
+	    #print("appending vectors")
             frame['DOM_TotalCharge'].append(total_charge)
             frame['DOM_TotalCharge_300ns'].append(total_charge_300ns) 
             frame['DOM_MinTimeResidual'].append(min_time_residual)
-
+        else :
+	    wrongstring += 1.0
     # After all that, if none of the DOMs made it through, get rid of this
     # frame.
+    #print("maxdist = %f closez = %f and endpoint = %f wrongstring = %f total = %f" % (maxdist,closez,endpoint,wrongstring,alldom) )
     return len(frame['DOM_TotalCharge']) != 0

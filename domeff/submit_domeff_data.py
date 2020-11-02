@@ -16,14 +16,16 @@ files_dir = opts["data"]
 folderlist = files_dir.split("/",1000)
 folder = folderlist[len(folderlist)-2] + '_' + folderlist[len(folderlist)-1]
 file_list_aux = os.listdir(files_dir)
-file_list = [x for x in file_list_aux if '.i3.bz2' in x]
+file_list = [x for x in file_list_aux if ('.i3.bz2' in x and '_IT' not in x)]
 
 totaljobs = len(file_list)
 filecutsuff = file_list[0].replace('.i3.bz2', '')
 filenamelist = filecutsuff.split("_",20)
 filenameprefix = filenamelist[0]
-for i in range(len(filenamelist)-3) :
-	filenameprefix = filenameprefix + "_" + filenamelist[i+1]
+for i in range(1,len(filenamelist)) :
+	if "Subrun" in filenamelist[i] :
+		break
+	filenameprefix = filenameprefix + "_" + filenamelist[i]
 filenameprefix = filenameprefix + "_Subrun000"
 
 startnumber = 9999999999

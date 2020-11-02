@@ -8,6 +8,7 @@ from icecube.weighting.fluxes import  GaisserH4a, GaisserH3a, GaisserH4a_IT, Gai
 from icecube.weighting import weighting
 from event import *
 from I3Tray import OMKey
+from array import array
 
 weights_ic = []
 weights_dc = []
@@ -34,10 +35,16 @@ directHits_dc = []
 HitsOut_ic = []
 HitsOut_dc = [] 
 
-ImpactAll_ic = ROOT.TH1F("ImpactAll_IC","",1000,0.0,ROOT.TMath.Pi())
-ImpactAll_dc = ROOT.TH1F("ImpactAll_DC","",1000,0.0,ROOT.TMath.Pi())
-Impact_seeMPE_ic = ROOT.TH1F("ImpactseeMPE_IC","",1000,0.0,ROOT.TMath.Pi())
-Impact_seeMPE_dc = ROOT.TH1F("ImpactseeMPE_DC","",1000,0.0,ROOT.TMath.Pi())
+ImpactAll_ic = ROOT.TH1F("ImpactAll_IC","",1000,-1.0,1.0)
+ImpactAll_dc = ROOT.TH1F("ImpactAll_DC","",1000,-1.0,1.0)
+Impact_seeMPE_ic = ROOT.TH1F("ImpactseeMPE_IC","",1000,-1.0,1.0)
+Impact_seeMPE_dc = ROOT.TH1F("ImpactseeMPE_DC","",1000,-1.0,1.0)
+
+Impact_vs_Zenith_ic = ROOT.TH2F("Impact_vs_Zenith_IC","",200,-1.0,1.0,200,-1.0,1.0)
+Impact_vs_Zenith_dc = ROOT.TH2F("Impact_vs_Zenith_DC","",200,-1.0,1.0,200,-1.0,1.0)
+
+TotalCharge_vs_Zenith_ic = ROOT.TH2F("TotalCharge_vs_Zenith_IC","",200,-1.0,1.0,1000,0.0,3000.0)
+TotalCharge_vs_Zenith_dc = ROOT.TH2F("TotalCharge_vs_Zenith_DC","",200,-1.0,1.0,1000,0.0,3000.0)
 
 binneddistance_dc = np.zeros(1,dtype=float)
 binneddistanceerror_dc = np.zeros(1,dtype=float)
@@ -207,19 +214,23 @@ def OutputRoot(filename) :
 	global ImpactAll_dc
 	global Impact_seeMPE_ic
 	global Impact_seeMPE_dc
+	global Impact_vs_Zenith_ic
+	global Impact_vs_Zenith_dc
+	global TotalCharge_vs_Zenith_ic
+	global TotalCharge_vs_Zenith_dc
 
-	x_data_ic = np.array(binneddistance_ic),
-	x_error_ic = np.array(binneddistanceerror_ic),
-	y_data_ic = np.array(binnedcharge_ic),
-	y_error_ic = np.array(binnedchargeerror_ic),
-	y300_data_ic = np.array(binnedcharge300_ic),
-	y300_error_ic = np.array(binnedcharge300error_ic),
-	x_data_dc = np.array(binneddistance_dc),
-	x_error_dc = np.array(binneddistanceerror_dc),
-	y_data_dc = np.array(binnedcharge_dc),
-	y_error_dc = np.array(binnedchargeerror_dc),
-	y300_data_dc = np.array(binnedcharge300_dc),
-	y300_error_dc = np.array(binnedcharge300error_dc),
+	x_data_ic = array('f',binneddistance_ic)
+	x_error_ic = array('f',binneddistanceerror_ic)
+	y_data_ic = array('f',binnedcharge_ic)
+	y_error_ic = array('f',binnedchargeerror_ic)
+	y300_data_ic = array('f',binnedcharge300_ic)
+	y300_error_ic = array('f',binnedcharge300error_ic)
+	x_data_dc = array('f',binneddistance_dc)
+	x_error_dc = array('f',binneddistanceerror_dc)
+	y_data_dc = array('f',binnedcharge_dc)
+	y_error_dc = array('f',binnedchargeerror_dc)
+	y300_data_dc = array('f',binnedcharge300_dc)
+	y300_error_dc = array('f',binnedcharge300error_dc)
 
 	fout = ROOT.TFile.Open(filename+".root","RECREATE")
 
@@ -229,23 +240,23 @@ def OutputRoot(filename) :
 	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),x_data_dc,y_data_dc,x_error_dc,y_error_dc)
 	Charge300_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),x_data_ic,y300_data_ic,x_error_ic,y300_error_ic)
 	Charge300_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),x_data_dc,y300_data_dc,x_error_dc,y300_error_dc)
-	TotalCharge_IC = ROOT.TH1F("TotalCharge_IC","",1000,min(totalcharge_ic)*0.9,max(totalcharge_ic)*1.1)
-	Zenith_IC = ROOT.TH1F("Zenith_IC","",180,0,180)
+	TotalCharge_IC = ROOT.TH1F("TotalCharge_IC","",1000,0,3000)
+	Zenith_IC = ROOT.TH1F("Zenith_IC","",200,-1.0,1.0)
 	RecEnergy_IC = ROOT.TH1F("RecEnergy_IC","",1000,min(reconstructedE_ic)*0.9,max(reconstructedE_ic)*1.1)
 	EndPointZ_IC = ROOT.TH1F("EndPointX_IC","",1000,min(recoEndpoint_ic)*0.9,max(recoEndpoint_ic)*1.1)
 	BoarderDist_IC = ROOT.TH1F("BoarderDist_IC","",1000,min(borderDistance_ic)*0.9,max(borderDistance_ic)*1.1)
 	StopLikeRatio_IC = ROOT.TH1F("StopLikeRatio_IC","",1000,min(stopLikeRatio_ic )*0.9,max(stopLikeRatio_ic)*1.1)
 	RecoLogL_IC = ROOT.TH1F("RecoLogL_IC","",1000,min(recoLogL_ic)*0.9,max(recoLogL_ic)*1.1)
-	DirectHits_IC = ROOT.TH1F("DirectHits_IC","",1000,min(directHits_ic)*0.9,max(directHits_ic)*1.1)
-	HitsOut_IC = ROOT.TH1F("HitsOut_IC","",1000,min(HitsOut_ic)*0.9,max(HitsOut_ic)*1.1)
-	TotalCharge_DC = ROOT.TH1F("TotalCharge_DC","",1000,min(totalcharge_dc)*0.9,max(totalcharge_dc)*1.1)
-	Zenith_DC = ROOT.TH1F("Zenith_DC","",180,0,180)
+	DirectHits_IC = ROOT.TH1F("DirectHits_IC","",71,-0.5,70.5)
+	HitsOut_IC = ROOT.TH1F("HitsOut_IC","",1000,0,max(HitsOut_ic)*1.1)
+	TotalCharge_DC = ROOT.TH1F("TotalCharge_DC","",1000,0,3000)
+	Zenith_DC = ROOT.TH1F("Zenith_DC","",200,-1.0,1.0)
 	RecEnergy_DC = ROOT.TH1F("RecEnergy_DC","",1000,min(reconstructedE_dc)*0.9,max(reconstructedE_dc)*1.1)
 	EndPointZ_DC = ROOT.TH1F("EndPointX_DC","",1000,min(recoEndpoint_dc)*0.9,max(recoEndpoint_dc)*1.1)
 	BoarderDist_DC = ROOT.TH1F("BoarderDist_DC","",1000,min(borderDistance_dc)*0.9,max(borderDistance_dc)*1.1)
 	StopLikeRatio_DC = ROOT.TH1F("StopLikeRatio_DC","",1000,min(stopLikeRatio_dc)*0.9,max(stopLikeRatio_dc)*1.1)
 	RecoLogL_DC = ROOT.TH1F("RecoLogL_DC","",1000,min(recoLogL_dc)*0.9,max(recoLogL_dc)*1.1)
-	DirectHits_DC = ROOT.TH1F("DirectHits_DC","",1000,min(directHits_dc)*0.9,max(directHits_dc)*1.1)
+	DirectHits_DC = ROOT.TH1F("DirectHits_DC","",(1+max(directHits_dc)-min(directHits_dc)),min(directHits_dc)-0.5,max(directHits_dc)+0.5)
 	HitsOut_DC = ROOT.TH1F("HitsOut_DC","",1000,min(HitsOut_dc)*0.9,max(HitsOut_dc)*1.1)
 
 	for i in range(0,len(weights_ic)) :
@@ -295,11 +306,14 @@ def OutputRoot(filename) :
 	ImpactAll_dc.Write()
 	Impact_seeMPE_ic.Write()
 	Impact_seeMPE_dc.Write()
+	Impact_vs_Zenith_ic.Write()
+	Impact_vs_Zenith_dc.Write()
+	TotalCharge_vs_Zenith_ic.Write()
+	TotalCharge_vs_Zenith_dc.Write()
 
 	fout.Close()
 
-
-def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_error_dc,y_data_dc,y_error_dc,args) :
+def OutputHDF5(filename,args) :
 
 	global binneddistance_dc
 	global binneddistanceerror_dc
@@ -316,7 +330,7 @@ def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	deapcore = h5file.create_table('/', 'deepcore', DataPoint, "DeepCore Charge vs Distance data")
 	state = h5file.create_table('/','state',State,"Information on the data cuts")
 
-	nelements = len(x_data_ic)
+	nelements = len(binneddistance_ic)
 
 	icrow = icecube.row
 	dcrow = deapcore.row
@@ -354,6 +368,7 @@ def OutputHDF5(filename,x_data_ic,x_error_ic,y_data_ic,y_error_ic,x_data_dc,x_er
 	h5file.close()
 
 
+
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
@@ -366,7 +381,7 @@ if __name__ == '__main__':
 	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
 				default = "data")
 	parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
-				nargs = 2,  default = [-180.0,180.0])
+				nargs = 2,  default = [40.,90.])
 	parser.add_argument('-p', '--energyrange', help='Range of muon Energies', type = float,
 				nargs = 2, default = [0.0, 9999999.00])
 	parser.add_argument('-i','--impactrange',help='Range of DOM impact parameters to include', 
@@ -384,7 +399,7 @@ if __name__ == '__main__':
 	parser.add_argument('-n', '--nhits', help='Min number of direct hit DOMs and Max number of Outside analysis hits', 
 						type = int, nargs = 2, default = [5,20])
 	parser.add_argument('-l', '--likelihood', help='Fit likelyhoods, FiniteReco Likelihood ratio and SplineMPE Rlogl', type = float,
-						nargs = 2, default = [-2.3,10.])
+						nargs = 2, default = [10.,10.])
 
 
 	args = parser.parse_args()
@@ -410,9 +425,11 @@ if __name__ == '__main__':
 	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
 	file_list = []
 	if args.flux == "data" :
-		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 30000000 )]
+		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 50000000 )]
 	else :
 		file_list = [x for x in file_list_h5 if (args.eff in x)]
+
+	nfiles = len(file_list)
 
 	flux = GaisserH4a()
 	if args.flux == "GaisserH3a" : flux = GaisserH3a()
@@ -423,6 +440,11 @@ if __name__ == '__main__':
 	elif args.flux == "Hoerandel_IT" : flux = Hoerandel_IT()
 
 	eventcount = 0
+	max_weight = 0.0
+	totalevent = 0
+	#generator = weighting.from_simprod(21269,False,'vm-simprod2.icecube.wisc.edu')
+	#generator = weighting.icetop_mc_weights(21269,'/home/tmcelroy/icecube/domeff/datasetConfig.json')
+	nfiles = len(file_list)
 	
 	for filename in file_list :
 		h5file = open_file(files_dir+filename, mode="r")
@@ -434,51 +456,51 @@ if __name__ == '__main__':
 
 		for event in eventtable.iterrows() :
 
+			totalevent += 1
 			#Energy Cut
 			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
-				print("Event killed by energy Cut")
-				print(event['reco/energy'])
+				#print("Event killed by energy Cut")
+				#print(event['reco/energy'])
 				continue
 
 			#Zenith Cut
-			if event['reco/dir/zenith'] < args.zenithrange[0]*3.14/180. or event['reco/dir/zenith'] > args.zenithrange[1]*3.14/180. : 
-				print("Event Killed by Zenith Cut")
-				print(event['reco/dir/zenith'])
+			if event['reco/dir/zenith'] < args.zenithrange[0]*ROOT.TMath.Pi()/180. or event['reco/dir/zenith'] > args.zenithrange[1]*ROOT.TMath.Pi()/180. : 
+				#print("Event Killed by Zenith Cut")
+				#print(event['reco/dir/zenith'])
 				continue
 
 			#Stopping Point Cut
-			if event['recoEndpoint/z'] < args.boarder[0] :
-				print("Event killed by Bottom Distance Cut")
-				print(event['recoEndpoint/z'])
+			if event['recoEndPoint/z'] < args.boarder[0] :
+				#print("Event killed by Bottom Distance Cut")
+				#print(event['recoEndPoint/z'])
+				#print("mctruth = %f" %(event['truthEndPoint/z']))
+				#print("event likelihood = %f" % (event['stopLikeRatio']))
 				continue
 
 			if event['borderDistance'] < args.boarder[1] :
-				print("Event killed by Detector Edge Cut")
-				print(event['borderDistance'])
+				#print("Event killed by Detector Edge Cut")
+				#print(event['borderDistance'])
+				#print(event['truthBorderDistance'])
+				#print("event likelihood = %f" % (event['stopLikeRatio']))
 				continue 
 
 			#Likelihood cuts
-			#if event['stopLikeRatio'] > args.likelihood[0] :
+			if event['stopLikeRatio'] < args.likelihood[0] :
 				#print("Event cut by likelihood ratio cut")
-				#print(event['stopLikeRatio'])
+				#print("event likelihood = %f" % (event['stopLikeRatio']))
 				continue
 
 			 #Likelihood cuts
                         if event['recoLogL'] > args.likelihood[1] :
-				print("Event killed by Likelihood check")
-				print(event['recoLogL'])
+				#print("Event killed by Likelihood check")
+				#print(event['recoLogL'])
                                 continue
 
 			#direct hists
 			if event['directHits'] < args.nhits[0]:
-				print("Event killed by N Direct Hists Cut")
-				print(event['directHits'])
+				#print("Event killed by N Direct Hists Cut")
+				#print(event['directHits'])
 				continue
-
-			#if (event['dcHitsOut']+event['icHitsOut'])> args.nhits[1] :
-				#print("Event Killed by N Out Hits Cut")
-				#print((event['dcHitsOut']+event['icHitsOut']))
-			#	continue
 
 			#print("Event Passed")
 			eventcount += 1
@@ -490,7 +512,12 @@ if __name__ == '__main__':
 				energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
 				energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
 				energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
-				weight = energy_weight
+				weight = energy_weight/(event['corsika/nEvents'])
+				if weight > max_weight:
+					max_weight = weight
+				#gen = generator(event['corsika/primaryEnergy'],event['corsika/primaryType'])
+				#weight = pflux/gen
+				#print("weight = %f" % (weight))
 
 			first_ic = True
 			first_dc = True
@@ -521,7 +548,10 @@ if __name__ == '__main__':
 					continue
 				if dom['string'] in DC_Strings :
 					#print("DC DOM Passed")
-					if event['dcHitsOut']> args.nhits[1] :
+					#if event['dcHitsOut']> args.nhits[1] or event['dcHitsOut'] < 1 :
+					#	continue;
+					#I want same overall events used for both.
+					if event['icHitsOut']> args.nhits[1] or event['icHitsOut'] < 1 :
 						continue;
 					#print("DC Distance Charge")
                                         #print(dom['recoDist'])
@@ -529,52 +559,55 @@ if __name__ == '__main__':
 					if first_dc :
 						weights_dc.append(weight)
 						reconstructedE_dc.append(event['reco/energy'])
-						zenith_dc.append(event['reco/dir/zenith'])
+						zenith_dc.append(ROOT.TMath.Cos(event['reco/dir/zenith']))
 						totalcharge_dc.append(event['totalCharge'])
-						recoEndpoint_dc.append(event['recoEndpoint/z'])
+						recoEndpoint_dc.append(event['recoEndPoint/z'])
 						borderDistance_dc.append(event['borderDistance'])
 						stopLikeRatio_dc.append(event['stopLikeRatio'])
 						recoLogL_dc.append(event['recoLogL'])
 						directHits_dc.append(event['directHits'])
 						HitsOut_dc.append(event['dcHitsOut'])
+						TotalCharge_vs_Zenith_dc.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['totalCharge'])
 						first_dc = False
 					bin_DomCharge_dc[i_dist].append(dom['totalCharge'])
-					bin_DomCharge300_dc[i_dist].append(dom['totalCharge300'])
+					bin_DomCharge300_dc[i_dist].append(dom['totalCharge_300ns'])
 					bin_weights_dc[i_dist].append(weight)
 					bin_distance_dc[i_dist].append(dom['recoDist'])
-					ImpactAll_dc.Fill(dom['impactAngle '],weight)
-					if dom['totalCharge'] > 0.0 :
-						Impact_seeMPE_dc.Fill(dom['impactAngle '],weight)
+					ImpactAll_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
+					Impact_vs_Zenith_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
+					Impact_seeMPE_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 				if dom['string'] in IC_Strings :
 					#print("IC DOM Passed")
-					if event['icHitsOut']> args.nhits[1] :
-                                                continue;
+					if event['icHitsOut'] > args.nhits[1] or event['icHitsOut']< 1:
+						continue;
 					#print("IC Distance Charge")
 					#print(dom['recoDist'])
 					#print(dom['totalCharge'])
 					if first_ic :
 						weights_ic.append(weight)
 						reconstructedE_ic.append(event['reco/energy'])
-						zenith_ic.append(event['reco/dir/zenith'])
+						zenith_ic.append(ROOT.TMath.Cos(event['reco/dir/zenith']))
 						totalcharge_ic.append(event['totalCharge'])
-						recoEndpoint_ic.append(event['recoEndpoint/z'])
+						recoEndpoint_ic.append(event['recoEndPoint/z'])
 						borderDistance_ic.append(event['borderDistance'])
 						stopLikeRatio_ic.append(event['stopLikeRatio'])
 						recoLogL_ic.append(event['recoLogL'])
 						directHits_ic.append(event['directHits'])
 						HitsOut_ic.append(event['icHitsOut'])
+						TotalCharge_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['totalCharge'])
 						first_ic = False
 					bin_DomCharge_ic[i_dist].append(dom['totalCharge'])
-					bin_DomCharge300_ic[i_dist].append(dom['totalCharge300'])
+					bin_DomCharge300_ic[i_dist].append(dom['totalCharge_300ns'])
 					bin_weights_ic[i_dist].append(weight)
 					bin_distance_ic[i_dist].append(dom['recoDist'])
-					ImpactAll_ic.Fill(dom['impactAngle '],weight)
+					Impact_vs_Zenith_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
+					ImpactAll_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 					if dom['totalCharge'] > 0.0 :
-						Impact_seeMPE_ic.Fill(dom['impactAngle '],weight)
+						Impact_seeMPE_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 
 		h5file.close()
 	
-	print("Total number of events = %d" % (eventcount))
+	print("Total number of events = %d/%d" % (eventcount,totalevent))
 	
 	binneddistance_dc = np.zeros(nbins,dtype=float)
 	binneddistanceerror_dc = np.zeros(nbins,dtype=float)
@@ -593,7 +626,7 @@ if __name__ == '__main__':
 		if len(bin_weights_dc[i]) > 0 :
 			binneddistance_dc[i] , binneddistanceerror_dc[i] = calc_charge_info(bin_distance_dc[i],bin_weights_dc[i])
 			binnedcharge_dc[i], binnedchargeerror_dc[i] = calc_charge_info(bin_DomCharge_dc[i],bin_weights_dc[i])
-			binnedcharge300_dc[i], binnedchargee300rror_dc[i] = calc_charge_info(bin_DomCharge300_dc[i],bin_weights_dc[i])
+			binnedcharge300_dc[i], binnedcharge300error_dc[i] = calc_charge_info(bin_DomCharge300_dc[i],bin_weights_dc[i])
 		if len(bin_weights_ic[i]) > 0 :
 			binneddistance_ic[i] , binneddistanceerror_ic[i] = calc_charge_info(bin_distance_ic[i],bin_weights_ic[i])
 			binnedcharge_ic[i], binnedchargeerror_ic[i] = calc_charge_info(bin_DomCharge_ic[i],bin_weights_ic[i])

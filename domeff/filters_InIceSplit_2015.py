@@ -68,14 +68,14 @@ def muon_zenith(frame,reco_fit):
     """
     muon = frame[reco_fit]
     angle = math.degrees(muon.dir.zenith)
-    return (muon.fit_status == dataclasses.I3Particle.OK and 40 < angle < 70)
+    #return (muon.fit_status == dataclasses.I3Particle.OK and 40 < angle < 70)
+    return (muon.fit_status == dataclasses.I3Particle.OK)
 
 def FiniteRecoFilter(frame):
     """
     Check that the fit_status of FiniteReco is OK.
     """
-    finiteReco = frame['FiniteRecoFitDOMeff']
-    return (finiteReco.fit_status == dataclasses.I3Particle.OK)
+    return frame['FiniteRecoFitDOMeff'].fit_status == dataclasses.I3Particle.OK
 
 
 def InIceSMTTriggered(frame):
