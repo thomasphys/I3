@@ -21,7 +21,8 @@ def in_ice(frame):
     return event_header.sub_event_stream == 'InIceSplit'
 
 
-def min_bias(frame, reco_fit, options):
+#def min_bias(frame, reco_fit, options):
+def min_bias(frame) :
     """
     Check that condition_passed and prescale_passed for FilterMinBias_11 are
     both True. .. moved it to 'filterMinBias_13
@@ -29,7 +30,7 @@ def min_bias(frame, reco_fit, options):
     if frame.Has('FilterMask_NullSplit0'):
         filter_mask = frame['FilterMask_NullSplit0']
         filter_min_bias = filter_mask['FilterMinBias_13']
-        return filter_min_bias.condition_passed and filter_min_bias.prescale_passed
+        return filter_min_bias.condition_passed #and filter_min_bias.prescale_passed
     else:
         return False
 

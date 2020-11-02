@@ -107,9 +107,6 @@ if not args.sim :
 	# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
 	tray.AddModule(min_bias, 'min_bias')
 
-	# Make sure that the length of SplitInIcePulses is >= 8
-	tray.AddModule(SMT8, 'SMT8')
-
 	# Trigger check
 	# jeb-filter-2012
 	tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',

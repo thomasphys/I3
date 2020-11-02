@@ -9,7 +9,7 @@ parser.add_argument('-o', '--output', help='Output file list.',type=str,default 
 args = parser.parse_args()
 
 #leave out leap years
-monthdays = {31,29,31,30,31,30,31,31,30,31,30,31}
+monthdays = [31,28,31,30,31,30,31,31,30,31,30,31]
 
 def GetDay(date) :
 	datelist = date.split(" ",1)
@@ -72,10 +72,10 @@ for run in data['runs']:
 	month = GetMonth(run['good_tstart'])
 	day = GetDay(run['good_tstart'])
 	if(monthdays[month-1] < day) :
+		runbin.append(-1)
 		continue
 	year = GetYear(run['good_tstart'])
-	bin = sum([monthdays[i] for i in range(month)]) + day-1
-	runbin.append(sum([monthdays[i] for i in range(month)]) + day-1)
+	runbin.append(sum([monthdays[i] for i in range(month-1)]) + day-1)
 
 	#print("data = %d %d %d bin = %d duration = %f"% (year,month,day,runbin[-1],GetDuration(run['good_tstart'],run['good_tstop'])))
 	length[runbin[-1]] += GetDuration(run['good_tstart'],run['good_tstop'])
@@ -89,17 +89,18 @@ file.close()
 file = open(args.output+".txt",'w')
 
 for i in range(len(runnum)) :
+	if runbin[i] < 0 : continue
 	file.write("%d %f\n" % (runnum[i],min_val/length[runbin[i]]))
 
-for i in range(1,13) :
-	for j in range(1,32) :
-		if length[(i-1)*31+(j-1)] == 0.0 :
-			print("%d %d" % (i,j))
+for i in range(len(monthdays)) :
+	for j in range(monthdays[i]) :
+		if length[sum([monthdays[k] for k in range(i)]) + j] == 0.0 :
+			print("%d %d" % (i+1,j+1))
 
 file.close()
 
 fout = ROOT.TFile.Open(args.output+".root","RECREATE")
-DaysExposure = ROOT.TH1F("Exposure","",len(monthdays),0.5,len(monthdays)+0.5)
+DaysExposure = ROOT.TH1F("Exposure","",sum(monthdays),0.5,sum(monthdays)+0.5)
 for i in range(len(length)) :
 	DaysExposure.SetBinContent(i+1,length[i])
 DaysExposure.Write()
