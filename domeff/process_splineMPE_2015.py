@@ -99,14 +99,14 @@ tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
 tray.AddModule(SMT8, 'SMT8')
 tray.AddModule(printtag, 'printtag_SMT8',message = "passed SMT8")
 
+# Make sure that the length of SplitInIcePulses is >= 8
+tray.AddModule(SMT8, 'SMT8')
+
 if not args.sim :
 	tray.AddModule(timestartfilter,'TimeStartFilter')
 	# Filters
 
 	#Thomas - remove minbias for now since only running one run. 
-	# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
-	tray.AddModule(min_bias, 'min_bias')
-
 	# Trigger check
 	# jeb-filter-2012
 	tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
@@ -114,8 +114,8 @@ if not args.sim :
                InIceSMTFlag='InIceSMTTriggered',
                IceTopSMTFlag='IceTopSMTTriggered',
                InIceStringFlag='InIceStringTriggered',
-               PhysMinBiasFlag='PhysMinBiasTriggered',
-               PhysMinBiasConfigID=106,
+               #PhysMinBiasFlag='PhysMinBiasTriggered',
+               #PhysMinBiasConfigID=106,
                DeepCoreSMTFlag='DeepCoreSMTTriggered',
                DeepCoreSMTConfigID=1010)
 
