@@ -100,7 +100,6 @@ tray.AddModule(SMT8, 'SMT8')
 tray.AddModule(printtag, 'printtag_SMT8',message = "passed SMT8")
 
 if not args.sim :
-	tray.AddModule(timestartfilter,'TimeStartFilter')
 	# Filters
 
 	#Thomas - remove minbias for now since only running one run. 

@@ -46,18 +46,29 @@ Impact_vs_Zenith_dc = ROOT.TH2F("Impact_vs_Zenith_DC","",200,-1.0,1.0,200,-1.0,1
 TotalCharge_vs_Zenith_ic = ROOT.TH2F("TotalCharge_vs_Zenith_IC","",200,-1.0,1.0,1000,0.0,3000.0)
 TotalCharge_vs_Zenith_dc = ROOT.TH2F("TotalCharge_vs_Zenith_DC","",200,-1.0,1.0,1000,0.0,3000.0)
 
+TimeResidual_IC = []
+TimeResidual_DC = []
+
 binneddistance_dc = np.zeros(1,dtype=float)
 binneddistanceerror_dc = np.zeros(1,dtype=float)
 binnedcharge_dc = np.zeros(1,dtype=float)
 binnedchargeerror_dc = np.zeros(1,dtype=float)
 binnedcharge300_dc = np.zeros(1,dtype=float)
 binnedcharge300error_dc = np.zeros(1,dtype=float)
+binnedhit_dc = np.zeros(1,dtype=float)
+binnedhiterror_dc = np.zeros(1,dtype=float)
+binnedhit300_dc = np.zeros(1,dtype=float)
+binnedhit300error_dc = np.zeros(1,dtype=float)
 binneddistance_ic = np.zeros(1,dtype=float)
 binneddistanceerror_ic = np.zeros(1,dtype=float)
 binnedcharge_ic = np.zeros(1,dtype=float)
 binnedchargeerror_ic = np.zeros(1,dtype=float)
 binnedcharge300_ic = np.zeros(1,dtype=float)
 binnedcharge300error_ic = np.zeros(1,dtype=float)
+binnedhit_ic = np.zeros(1,dtype=float)
+binnedhiterror_ic = np.zeros(1,dtype=float)
+binnedhit300_ic = np.zeros(1,dtype=float)
+binnedhit300error_ic = np.zeros(1,dtype=float)
 
 def find_error_bootstrap(values,weights):
 # this needs to be eddited, I do not thing this was programmed corerctly.
@@ -206,10 +217,18 @@ def OutputRoot(filename) :
 	global binneddistanceerror_dc
 	global binnedcharge_dc
 	global binnedchargeerror_dc
+	global binnedhit_dc
+	global binnedhiterror_dc
+	global binnedhit300_dc
+	global binnedhit300error_dc
 	global binneddistance_ic
 	global binneddistanceerror_ic
 	global binnedcharge_ic
 	global binnedchargeerror_ic
+	global binnedhit_ic
+	global binnedhiterror_ic
+	global binnedhit300_ic 
+	global binnedhit300error_ic
 	global ImpactAll_ic
 	global ImpactAll_dc
 	global Impact_seeMPE_ic
@@ -218,6 +237,8 @@ def OutputRoot(filename) :
 	global Impact_vs_Zenith_dc
 	global TotalCharge_vs_Zenith_ic
 	global TotalCharge_vs_Zenith_dc
+	global TimeResidual_IC
+	global TimeResidual_DC
 
 	x_data_ic = array('f',binneddistance_ic)
 	x_error_ic = array('f',binneddistanceerror_ic)
@@ -225,12 +246,20 @@ def OutputRoot(filename) :
 	y_error_ic = array('f',binnedchargeerror_ic)
 	y300_data_ic = array('f',binnedcharge300_ic)
 	y300_error_ic = array('f',binnedcharge300error_ic)
+	yhit_data_ic = array('f',binnedhit_ic)
+	yhit_error_ic = array('f',binnedhiterror_ic)
+	yhit300_data_ic = array('f',binnedhit300_ic)
+	yhit300_error_ic = array('f',binnedhit300error_ic)
 	x_data_dc = array('f',binneddistance_dc)
 	x_error_dc = array('f',binneddistanceerror_dc)
 	y_data_dc = array('f',binnedcharge_dc)
 	y_error_dc = array('f',binnedchargeerror_dc)
 	y300_data_dc = array('f',binnedcharge300_dc)
 	y300_error_dc = array('f',binnedcharge300error_dc)
+	yhit_data_dc = array('f',binnedhit_dc)
+	yhit_error_dc = array('f',binnedhiterror_dc)
+	yhit300_data_dc = array('f',binnedhit300_dc)
+	yhit300_error_dc = array('f',binnedhit300error_dc)
 
 	fout = ROOT.TFile.Open(filename+".root","RECREATE")
 
@@ -240,6 +269,10 @@ def OutputRoot(filename) :
 	Charge_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),x_data_dc,y_data_dc,x_error_dc,y_error_dc)
 	Charge300_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),x_data_ic,y300_data_ic,x_error_ic,y300_error_ic)
 	Charge300_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),x_data_dc,y300_data_dc,x_error_dc,y300_error_dc)
+	Hit_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),x_data_ic,yhit_data_ic,x_error_ic,yhit_error_ic)
+	Hit_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),x_data_dc,yhit_data_dc,x_error_dc,yhit_error_dc)
+	Hit300_Distance_IC = ROOT.TGraphErrors(len(x_data_ic),x_data_ic,yhit300_data_ic,x_error_ic,yhit300_error_ic)
+	Hit300_Distance_DC = ROOT.TGraphErrors(len(x_data_dc),x_data_dc,yhit300_data_dc,x_error_dc,yhit300_error_dc)
 	TotalCharge_IC = ROOT.TH1F("TotalCharge_IC","",1000,0,3000)
 	Zenith_IC = ROOT.TH1F("Zenith_IC","",200,-1.0,1.0)
 	RecEnergy_IC = ROOT.TH1F("RecEnergy_IC","",1000,min(reconstructedE_ic)*0.9,max(reconstructedE_ic)*1.1)
@@ -284,6 +317,10 @@ def OutputRoot(filename) :
 	Charge_Distance_DC.Write("Charge_Distance_DC")
 	Charge300_Distance_IC.Write("Charge300_Distance_IC")
 	Charge300_Distance_DC.Write("Charge300_Distance_DC")
+	Hit_Distance_IC.Write("Hit_Distance_IC")
+	Hit_Distance_DC.Write("Hit_Distance_DC")
+	Hit300_Distance_IC.Write("Hit300_Distance_IC")
+	Hit300_Distance_DC.Write("Hit300_Distance_DC")
 	TotalCharge_IC.Write()
 	Zenith_IC.Write()
 	RecEnergy_IC.Write()
@@ -310,6 +347,9 @@ def OutputRoot(filename) :
 	Impact_vs_Zenith_dc.Write()
 	TotalCharge_vs_Zenith_ic.Write()
 	TotalCharge_vs_Zenith_dc.Write()
+	for i in range len(TimeResidual_IC) : TimeResidual_IC[i].Write()
+	for i in range len(TimeResidual_DC) : TimeResidual_DC[i].Write()
+
 
 	fout.Close()
 
@@ -410,12 +450,19 @@ if __name__ == '__main__':
 
 	bin_DomCharge_ic  = [[] for i in range(nbins)]
 	bin_DomCharge300_ic  = [[] for i in range(nbins)]
+	bin_DomHit_ic  = [[] for i in range(nbins)]
+	bin_DomHit300_ic  = [[] for i in range(nbins)]
 	bin_weights_ic = [[] for i in range(nbins)]
 	bin_distance_ic = [[] for i in range(nbins)]
 	bin_DomCharge_dc  = [[] for i in range(nbins)]
 	bin_DomCharge300_dc  = [[] for i in range(nbins)]
+    bin_DomHit_dc  = [[] for i in range(nbins)]
+	bin_DomHit300_dc  = [[] for i in range(nbins)]
 	bin_weights_dc = [[] for i in range(nbins)]
 	bin_distance_dc = [[] for i in range(nbins)]
+
+	TimeResidual_IC = [ROOT.TH1F(str("TimeResidual_IC_%d" % (i)),"",1000,-100.0,900.0) for i in range(nbins)]
+	TimeResidual_DC = [ROOT.TH1F(str("TimeResidual_DC_%d" % (i)),"",1000,-100.0,900.0) for i in range(nbins)]
 
 	DC_Strings = [81,82,83,84,85,86]
 	IC_Strings = [17,18,19,25,26,27,28,34,38,44,47,56,54,55]
@@ -571,11 +618,16 @@ if __name__ == '__main__':
 						first_dc = False
 					bin_DomCharge_dc[i_dist].append(dom['totalCharge'])
 					bin_DomCharge300_dc[i_dist].append(dom['totalCharge_300ns'])
+					if dom['totalCharge'] > 0.5 : bin_DomHit_dc.append(1.0)
+					else bin_DomHit_dc.append(0.0)
+					if dom['totalCharge_300ns'] > 0.5 : bin_DomHit300_dc.append(1.0)
+					else bin_DomHit300_dc.append(0.0)
 					bin_weights_dc[i_dist].append(weight)
 					bin_distance_dc[i_dist].append(dom['recoDist'])
 					ImpactAll_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 					Impact_vs_Zenith_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 					Impact_seeMPE_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
+					TimeResidual_DC[i_dist].Fill(minTimeResidual,weight)
 				if dom['string'] in IC_Strings :
 					#print("IC DOM Passed")
 					if event['icHitsOut'] > args.nhits[1] or event['icHitsOut']< 1:
@@ -598,10 +650,15 @@ if __name__ == '__main__':
 						first_ic = False
 					bin_DomCharge_ic[i_dist].append(dom['totalCharge'])
 					bin_DomCharge300_ic[i_dist].append(dom['totalCharge_300ns'])
+					if dom['totalCharge'] > 0.5 : bin_DomHit_ic.append(1.0)
+					else bin_DomHit_dc.append(0.0)
+					if dom['totalCharge_300ns'] > 0.5 : bin_DomHit300_ic.append(1.0)
+					else bin_DomHit300_dc.append(0.0)
 					bin_weights_ic[i_dist].append(weight)
 					bin_distance_ic[i_dist].append(dom['recoDist'])
 					Impact_vs_Zenith_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 					ImpactAll_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
+					TimeResidual_IC[i_dist].Fill(minTimeResidual,weight)
 					if dom['totalCharge'] > 0.0 :
 						Impact_seeMPE_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 
@@ -615,22 +672,34 @@ if __name__ == '__main__':
 	binnedchargeerror_dc = np.zeros(nbins,dtype=float)
 	binnedcharge300_dc = np.zeros(nbins,dtype=float)
 	binnedcharge300error_dc = np.zeros(nbins,dtype=float)
+	binnedhit_dc = np.zeros(nbins,dtype=float)
+	binnedhiteerror_dc = np.zeros(nbins,dtype=float)
+	binnedhit300_dc = np.zeros(nbins,dtype=float)
+	binnedhit300error_dc = np.zeros(nbins,dtype=float)
 	binneddistance_ic = np.zeros(nbins,dtype=float)
 	binneddistanceerror_ic = np.zeros(nbins,dtype=float)
 	binnedcharge_ic = np.zeros(nbins,dtype=float)
 	binnedchargeerror_ic = np.zeros(nbins,dtype=float)
 	binnedcharge300_ic = np.zeros(nbins,dtype=float)
 	binnedcharge300error_ic = np.zeros(nbins,dtype=float)
+	binnedhit_ic = np.zeros(nbins,dtype=float)
+	binnedhiterror_ic = np.zeros(nbins,dtype=float)
+	binnedhit300_ic = np.zeros(nbins,dtype=float)
+	binnedhit300error_ic = np.zeros(nbins,dtype=float)
 
 	for i in range(0,len(bin_distance_dc)):
 		if len(bin_weights_dc[i]) > 0 :
 			binneddistance_dc[i] , binneddistanceerror_dc[i] = calc_charge_info(bin_distance_dc[i],bin_weights_dc[i])
 			binnedcharge_dc[i], binnedchargeerror_dc[i] = calc_charge_info(bin_DomCharge_dc[i],bin_weights_dc[i])
 			binnedcharge300_dc[i], binnedcharge300error_dc[i] = calc_charge_info(bin_DomCharge300_dc[i],bin_weights_dc[i])
+			binnedhit_dc[i], binnedhiterror_dc[i] = calc_charge_info(bin_DomHit_dc[i],bin_weights_dc[i])
+			binnedhit300_dc[i], binnedhit300error_dc[i] = calc_charge_info(bin_DomHit300_dc[i],bin_weights_dc[i])
 		if len(bin_weights_ic[i]) > 0 :
 			binneddistance_ic[i] , binneddistanceerror_ic[i] = calc_charge_info(bin_distance_ic[i],bin_weights_ic[i])
 			binnedcharge_ic[i], binnedchargeerror_ic[i] = calc_charge_info(bin_DomCharge_ic[i],bin_weights_ic[i])
 			binnedcharge300_ic[i], binnedcharge300error_ic[i] = calc_charge_info(bin_DomCharge300_ic[i],bin_weights_ic[i])
+			binnedhit_ic[i], binnedhiterror_ic[i] = calc_charge_info(bin_DomHit_ic[i],bin_weights_ic[i])
+			binnedhit300_ic[i], binnedhit300error_ic[i] = calc_charge_info(bin_DomHit300_ic[i],bin_weights_ic[i])
 		
 
 	#outfilenamelist = args.output.split(".",1)
