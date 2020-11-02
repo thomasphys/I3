@@ -86,6 +86,9 @@ tray.AddModule('I3Reader', 'I3Reader',
 # Filter the ones with sub_event_stream == InIceSplit
 tray.AddModule(in_ice, 'in_ice')
 
+# Make sure that the length of SplitInIcePulses is >= 8
+tray.AddModule(SMT8, 'SMT8')
+
 if not args.sim :
 	tray.AddModule(timestartfilter,'TimeStartFilter')
 	# Filters
@@ -93,9 +96,6 @@ if not args.sim :
 	#Thomas - remove minbias for now since only running one run. 
 	# Check in FilterMinBias_13 that condition_passed and prescale_passed are both true
 	#tray.AddModule(min_bias, 'min_bias')
-
-	# Make sure that the length of SplitInIcePulses is >= 8
-	tray.AddModule(SMT8, 'SMT8')
 
 	# Check that the fit_status of MPEFit is OK, and that 40 < zenith < 70
 	# tray.AddModule(MPEFit, 'MPEFit')
