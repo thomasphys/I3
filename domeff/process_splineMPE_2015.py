@@ -99,11 +99,7 @@ tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
 tray.AddModule(SMT8, 'SMT8')
 tray.AddModule(printtag, 'printtag_SMT8',message = "passed SMT8")
 
-# Make sure that the length of SplitInIcePulses is >= 8
-tray.AddModule(SMT8, 'SMT8')
-
 if not args.sim :
-	tray.AddModule(timestartfilter,'TimeStartFilter')
 	# Filters
 
 	#Thomas - remove minbias for now since only running one run. 
