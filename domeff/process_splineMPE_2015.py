@@ -44,7 +44,7 @@ load('libstatic-twc')
 load('libfilterscripts')
 
 def printtag(frame,message) :
-#	print(message)
+	print(message)
 	return True
 
 eventcount1 = 0.0
@@ -90,28 +90,34 @@ datafilename = "{0:0{1}d}".format(args.runnum,5)
 tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
 
-tray.AddModule(printtag, 'printtag_newevent',message = "new event")
+#tray.AddModule(printtag, 'printtag_newevent',message = "new event")
 # Filter the ones with sub_event_stream == InIceSplit
 tray.AddModule(in_ice, 'in_ice')
 tray.AddModule(countevents1,"count1")
-tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
+#tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
 # Make sure that the length of SplitInIcePulses is >= 8
 tray.AddModule(SMT8, 'SMT8')
-tray.AddModule(printtag, 'printtag_SMT8',message = "passed SMT8")
+#tray.AddModule(printtag, 'printtag_SMT8',message = "passed SMT8")
 
-if not args.sim :
+tray.AddModule(min_bias, 'min_bias')
+
+#if not args.sim :
+if True :
 	# Filters
 
 	#Thomas - remove minbias for now since only running one run. 
 	# Trigger check
 	# jeb-filter-2012
+
+	#tray.AddModule(printtag, 'isdata',message = "is data")
+
 	tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                I3TriggerHierarchy='I3TriggerHierarchy',
                InIceSMTFlag='InIceSMTTriggered',
                IceTopSMTFlag='IceTopSMTTriggered',
                InIceStringFlag='InIceStringTriggered',
-               #PhysMinBiasFlag='PhysMinBiasTriggered',
-               #PhysMinBiasConfigID=106,
+               PhysMinBiasFlag='PhysMinBiasTriggered',
+               PhysMinBiasConfigID=106,
                DeepCoreSMTFlag='DeepCoreSMTTriggered',
                DeepCoreSMTConfigID=1010)
 
@@ -146,7 +152,7 @@ tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
                If=lambda f: True
                )
 
-tray.AddModule(printtag, 'printtag_I3seed',message = "passed I3SeededRTCleaning")
+#tray.AddModule(printtag, 'printtag_I3seed',message = "passed I3SeededRTCleaning")
 
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 # Despite the unusual name this runs the FiniteReco cleaning on the pulse series.
@@ -157,7 +163,7 @@ tray.AddSegment(WimpHitCleaning, "WIMPstuff",
                     suffix='_WIMP_DOMeff'
     )
 
-tray.AddModule(printtag, 'printtag_WIMPClean',message = "passed WIMP Hit Cleaning")
+#tray.AddModule(printtag, 'printtag_WIMPClean',message = "passed WIMP Hit Cleaning")
 
 # ---- Linefit and SPEfit ---------------------------------------------------
 tray.AddSegment(SPE,'SPE',
@@ -171,7 +177,7 @@ tray.AddSegment(SPE,'SPE',
                 N_iter = 2
                 )
 
-tray.AddModule(printtag, 'printtag_SPE',message = "passed SPE")
+#tray.AddModule(printtag, 'printtag_SPE',message = "passed SPE")
 # ---- MPEFit reconstruction ------------------------------------------------
 tray.AddSegment(MPE, 'MPE',
                 Pulses = args.pulsename,
@@ -183,11 +189,11 @@ tray.AddSegment(MPE, 'MPE',
                 MPEFitCramerRao = 'MPEFitCramerRao'
                 )
 
-tray.AddModule(printtag, 'printtag_MPE',message = "passed MPE")
+#tray.AddModule(printtag, 'printtag_MPE',message = "passed MPE")
 
 tray.AddModule(MPEFit, 'MPEFit')
 
-tray.AddModule(printtag, 'printtag_MPEFit',message = "passed MPEfit")
+#tray.AddModule(printtag, 'printtag_MPEFit',message = "passed MPEfit")
 
 # -----Spline Reco -------------------------------------------------------
 #spline paths Madison
@@ -213,10 +219,10 @@ tray.AddSegment(spline_reco.SplineMPE, "SplineMPE",
                 fitname="SplineMPE",
                 )
 
-tray.AddModule(printtag, 'printtag_splineMPE',message = "passed SplineMPE")
+#tray.AddModule(printtag, 'printtag_splineMPE',message = "passed SplineMPE")
 #Thomas, will apply this later, want to study impact.
-#tray.AddModule(muon_zenith, 'MuonZenithFilter',
-#               reco_fit='SplineMPE')
+tray.AddModule(muon_zenith, 'MuonZenithFilter',
+               reco_fit='SplineMPE')
     
 
 # -----Finite Reco------------------------------------------------------------
@@ -252,14 +258,14 @@ tray.AddModule('I3StartStopPoint', 'GulliverVertexReco',
 		CylinderRadius = 200, # Cylinder radius for the cut calculation,  take care to use Cylinder Radius ==200
 		If = lambda f: True,)
 
-tray.AddModule(printtag, 'printtag_startstoppoint',message = "passed I3StartStopPoint")
+#tray.AddModule(printtag, 'printtag_startstoppoint',message = "passed I3StartStopPoint")
 #starting/stopping probability
 tray.AddModule('I3StartStopLProb', 'GulliverFiniteRecoLlh',
 	Name = 'SplineMPE_Finite', # Name of the input track with _Finite added from I3StartStopPoint
 	ServiceName = 'GulliverPhPnh', # Name of the service is the instance name from I3GulliverFinitePhPnhFactory
 	If = lambda f: True,)
 
-tray.AddModule(printtag, 'printtag_LProb',message = "passed LProb")
+#tray.AddModule(printtag, 'printtag_LProb',message = "passed LProb")
 	
 # rename the finiteReco track
 tray.AddModule('Rename', 'Gulliver_FiniteRecoRename',
@@ -274,13 +280,13 @@ tray.AddModule('Rename', 'Gulliver' + '_FiniteRecoCutsRename' + 'DOMeff',
 		Keys = ['SplineMPE_FiniteCuts', 'FiniteRecoCutsDOMeff'],) # Name of the input track with _FiniteCuts added from I3StartStopPoint
 
 tray.AddModule(FiniteRecoFilter, 'FiniteRecoFilter')
-tray.AddModule(printtag, 'printtag_FiniteRecoFilter',message = "passed FiniteRecoFilter")
+#tray.AddModule(printtag, 'printtag_FiniteRecoFilter',message = "passed FiniteRecoFilter")
 
 tray.AddModule(movellhparams, "MoveLLHParams",
 		llhparams = 'FiniteRecoLlhDOMeff',	      
 )
 
-tray.AddModule(printtag, 'printtag_move',message = "passed MOveLLHParams")
+#tray.AddModule(printtag, 'printtag_move',message = "passed MOveLLHParams")
 
 
 # -----Endpoint---------------------------------------------------------------
@@ -289,14 +295,14 @@ tray.AddModule(reco_endpoint, 'reco_endpoint',
                endpoint_fit='FiniteRecoFitDOMeff'
                )
 
-tray.AddModule(printtag, 'printtag_reco_endpoint',message = "passed reco_endpoint")
+#tray.AddModule(printtag, 'printtag_reco_endpoint',message = "passed reco_endpoint")
 
 tray.AddModule(tot_charge,'tot_charge',
                 reco_fit='SplineMPE',
                 pulses = args.pulsename,
               )
 
-tray.AddModule(printtag, 'printtag_tot_charge',message = "passed tot_charge")
+#tray.AddModule(printtag, 'printtag_tot_charge',message = "passed tot_charge")
 
 # DOManalysis
 # This uses the MPEFit's to calculate TotalCharge, RecoDistance, etc.
@@ -305,7 +311,7 @@ tray.AddModule(dom_data, 'dom_data',
                reco_fit='SplineMPE',
                options=dom_data_options
                )
-tray.AddModule(printtag, 'printtag_dom_data',message = "passed dom_data")
+#tray.AddModule(printtag, 'printtag_dom_data',message = "passed dom_data")
 # General
 
 # Calculate cut variables
@@ -317,20 +323,20 @@ tray.AddSegment(direct_hits.I3DirectHitsCalculatorSegment, 'I3DirectHits',
                 OutputI3DirectHitsValuesBaseName='SplineMPEDirectHits'
                 )
 
-tray.AddModule(printtag, 'printtag_directhits',message = "passed directhits")
+#tray.AddModule(printtag, 'printtag_directhits',message = "passed directhits")
 
 tray.AddSegment(hit_multiplicity.I3HitMultiplicityCalculatorSegment, 'I3HitMultiplicity',
                 PulseSeriesMapName=args.pulsename,
                 OutputI3HitMultiplicityValuesName='HitMultiplicityValues'
                 )
 
-tray.AddModule(printtag, 'printtag_hitmultiplicity',message = "pssed hitmultiplicity")
+#tray.AddModule(printtag, 'printtag_hitmultiplicity',message = "pssed hitmultiplicity")
  
 tray.AddSegment(hit_statistics.I3HitStatisticsCalculatorSegment, 'I3HitStatistics',
                 PulseSeriesMapName=args.pulsename,
                 OutputI3HitStatisticsValuesName='HitStatisticsValues'
                 )
-tray.AddModule(printtag, 'printtag_hitstats',message = "passed hit_stats")
+#tray.AddModule(printtag, 'printtag_hitstats',message = "passed hit_stats")
 # Move the cut variables into the top level of the frame.
 tray.AddModule(move_cut_variables, 'move_cut_variables',
 #               direct_hits_name='MPEFitDOMeffDirectHits',
@@ -338,18 +344,18 @@ tray.AddModule(move_cut_variables, 'move_cut_variables',
                direct_hits_name='SplineMPEDirectHits',
                fit_params_name='SplineMPEFitParams'
                )
-tray.AddModule(printtag, 'printtag_movecuts',message = "passed move_cuts")
+#tray.AddModule(printtag, 'printtag_movecuts',message = "passed move_cuts")
 # Calculate ICAnalysisHits, DCAnalysisHits, ICNHits, and DCNHits
 tray.AddModule(count_hits, 'count_hits',
                pulses_name=args.pulsename)
  
-tray.AddModule(printtag, 'printtag_hitcount',message = "passed hitcount")
+#tray.AddModule(printtag, 'printtag_hitcount',message = "passed hitcount")
 
 # Geoanalysis
 # Calculate the distance of each event to the detector border.
 tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
 
-tray.AddModule(printtag, 'printtag_dist to border',message = "pssed dist_to_border")
+#tray.AddModule(printtag, 'printtag_dist to border',message = "pssed dist_to_border")
 
 #if args.sim :
         # Count the number of in ice muons and get the truth muon
@@ -363,7 +369,7 @@ tray.AddModule(printtag, 'printtag_dist to border',message = "pssed dist_to_bord
 tray.AddModule(EventWriter, 'EventWriter',
                FileName=args.output+datafilename+'.h5')
 tray.AddModule(countevents2,"count2")
-tray.AddModule(printtag, 'printtag_writer',message = "passed writer")
+#tray.AddModule(printtag, 'printtag_writer',message = "passed writer")
 # Write out the data to an I3 file
 #tray.AddModule('I3Writer', 'I3Writer',
 #               FileName=args.output+datafilename+'.i3.gz',
