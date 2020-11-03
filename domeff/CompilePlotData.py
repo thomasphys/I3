@@ -46,6 +46,17 @@ Impact_vs_Zenith_dc = ROOT.TH2F("Impact_vs_Zenith_DC","",200,-1.0,1.0,200,-1.0,1
 TotalCharge_vs_Zenith_ic = ROOT.TH2F("TotalCharge_vs_Zenith_IC","",200,-1.0,1.0,1000,0.0,3000.0)
 TotalCharge_vs_Zenith_dc = ROOT.TH2F("TotalCharge_vs_Zenith_DC","",200,-1.0,1.0,1000,0.0,3000.0)
 
+StoppingZ_vs_Zenith_ic = ROOT.TH2F("StoppingZ_vs_Zenith_ic","",1000,-500.,500.)
+StoppingZ_vs_Zenith_dc = ROOT.TH2F("StoppingZ_vs_Zenith_dc","",1000,-500.,500.)
+BorderDist_vs_Zenith_ic = ROOT.TH2F("BorderDist_vs_Zenith_ic","",1000,-500.,500.)
+BorderDist_vs_Zenith_dc = ROOT.TH2F("BorderDist_vs_Zenith_dc","",1000,-500.,500.)
+NChannel_vs_Zenith_ic = ROOT.TH2F("NChannel_vs_Zenith_ic","",5000,0,5000.)
+NChannel_vs_Zenith_dc = ROOT.TH2F("NChannel_vs_Zenith_dc","",5000,0,5000.)
+StopLike_vs_Zenith_ic = ROOT.TH2F("StopLike_vs_Zenith_ic","",500,0,500.)
+StopLike_vs_Zenith_dc = ROOT.TH2F("StopLike_vs_Zenith_dc","",500,0,500.)
+rLogL_vs_Zenith_ic = ROOT.TH2F("rLogL_vs_Zenith_ic","",500,0,500.)
+rLogL_vs_Zenith_dc = ROOT.TH2F("rLogL_vs_Zenith_dc","",500,0,500.)
+
 TimeResidual_IC = []
 TimeResidual_DC = []
 
@@ -239,6 +250,17 @@ def OutputRoot(filename) :
 	global TotalCharge_vs_Zenith_dc
 	global TimeResidual_IC
 	global TimeResidual_DC
+	global TotalCharge_vs_Zenith_dc
+	global StoppingZ_vs_Zenith_dc
+	global StoppingZ_vs_Zenith_ic
+	global BorderDist_vs_Zenith_dc
+	global BorderDist_vs_Zenith_ic
+	global NChannel_vs_Zenith_dc
+	global NChannel_vs_Zenith_ic
+	global StopLike_vs_Zenith_dc
+	global StopLike_vs_Zenith_ic
+	global rLogL_vs_Zenith_dc
+	global rLogL_vs_Zenith_ic
 
 	x_data_ic = array('f',binneddistance_ic)
 	x_error_ic = array('f',binneddistanceerror_ic)
@@ -347,6 +369,16 @@ def OutputRoot(filename) :
 	Impact_vs_Zenith_dc.Write()
 	TotalCharge_vs_Zenith_ic.Write()
 	TotalCharge_vs_Zenith_dc.Write()
+	StoppingZ_vs_Zenith_dc.Write()
+	StoppingZ_vs_Zenith_ic.Write()
+	BorderDist_vs_Zenith_dc.Write()
+	BorderDist_vs_Zenith_ic.Write()
+	NChannel_vs_Zenith_dc.Write()
+	NChannel_vs_Zenith_ic.Write()
+	StopLike_vs_Zenith_dc.Write()
+	StopLike_vs_Zenith_ic.Write()
+	rLogL_vs_Zenith_dc.Write()
+	rLogL_vs_Zenith_ic.Write()
 	for i in range len(TimeResidual_IC) : TimeResidual_IC[i].Write()
 	for i in range len(TimeResidual_DC) : TimeResidual_DC[i].Write()
 
@@ -615,6 +647,11 @@ if __name__ == '__main__':
 						directHits_dc.append(event['directHits'])
 						HitsOut_dc.append(event['dcHitsOut'])
 						TotalCharge_vs_Zenith_dc.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['totalCharge'])
+						StoppingZ_vs_Zenith_dc.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['recoEndPoint/z'])
+						BorderDist_vs_Zenith_dc.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['borderDistance'])
+						NChannel_vs_Zenith_dc.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['icHitsOut']+event['icHitsIn'])
+						StopLike_vs_Zenith_dc.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['stopLikeRatio'])
+						rLogL_vs_Zenith_dc.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['recoLogL'])
 						first_dc = False
 					bin_DomCharge_dc[i_dist].append(dom['totalCharge'])
 					bin_DomCharge300_dc[i_dist].append(dom['totalCharge_300ns'])
@@ -647,6 +684,12 @@ if __name__ == '__main__':
 						directHits_ic.append(event['directHits'])
 						HitsOut_ic.append(event['icHitsOut'])
 						TotalCharge_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['totalCharge'])
+						TotalCharge_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['totalCharge'])
+						StoppingZ_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['recoEndPoint/z'])
+						BorderDist_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['borderDistance'])
+						NChannel_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['icHitsOut']+event['icHitsIn'])
+						StopLike_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['stopLikeRatio'])
+						rLogL_vs_Zenith_ic.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),event['recoLogL'])
 						first_ic = False
 					bin_DomCharge_ic[i_dist].append(dom['totalCharge'])
 					bin_DomCharge300_ic[i_dist].append(dom['totalCharge_300ns'])
