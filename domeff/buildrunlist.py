@@ -54,6 +54,9 @@ runnum = []
 runbin = []
 length = [ 0.0 for i in range(sum(monthdays))]
 
+runlistyear = 0000
+first = True
+
 for run in data['runs']:
 	if 'short' in run['reason_i3'] :
 		#print(run['reason_i3']) 
@@ -77,6 +80,10 @@ for run in data['runs']:
 	year = GetYear(run['good_tstart'])
 	runbin.append(sum([monthdays[i] for i in range(month-1)]) + day-1)
 
+	if first :
+		runlistyear = year
+		first = False
+
 	#print("data = %d %d %d bin = %d duration = %f"% (year,month,day,runbin[-1],GetDuration(run['good_tstart'],run['good_tstop'])))
 	length[runbin[-1]] += GetDuration(run['good_tstart'],run['good_tstop'])
 
@@ -88,8 +95,14 @@ file.close()
 
 file = open(args.output+".txt",'w')
 
+listOfFiles = list()
+for (dirpath, dirnames, filenames) in os.walk("/data/exp/IceCube/"):
+    listOfFiles += [os.path.join("/data/exp/IceCube/"+dirpath, file) for file in filenames]
+
 for i in range(len(runnum)) :
 	if runbin[i] < 0 : continue
+	runfilelist = [x for x in listOfFiles if (str(runnum[i]) in x and ('.i3.bz2' in x and '_IT' not in x))
+
 	file.write("%d %f\n" % (runnum[i],min_val/length[runbin[i]]))
 
 for i in range(len(monthdays)) :

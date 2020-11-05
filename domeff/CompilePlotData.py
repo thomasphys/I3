@@ -46,16 +46,26 @@ Impact_vs_Zenith_dc = ROOT.TH2F("Impact_vs_Zenith_DC","",200,-1.0,1.0,200,-1.0,1
 TotalCharge_vs_Zenith_ic = ROOT.TH2F("TotalCharge_vs_Zenith_IC","",200,-1.0,1.0,1000,0.0,3000.0)
 TotalCharge_vs_Zenith_dc = ROOT.TH2F("TotalCharge_vs_Zenith_DC","",200,-1.0,1.0,1000,0.0,3000.0)
 
-StoppingZ_vs_Zenith_ic = ROOT.TH2F("StoppingZ_vs_Zenith_ic","",1000,-500.,500.)
-StoppingZ_vs_Zenith_dc = ROOT.TH2F("StoppingZ_vs_Zenith_dc","",1000,-500.,500.)
-BorderDist_vs_Zenith_ic = ROOT.TH2F("BorderDist_vs_Zenith_ic","",1000,-500.,500.)
-BorderDist_vs_Zenith_dc = ROOT.TH2F("BorderDist_vs_Zenith_dc","",1000,-500.,500.)
-NChannel_vs_Zenith_ic = ROOT.TH2F("NChannel_vs_Zenith_ic","",5000,0,5000.)
-NChannel_vs_Zenith_dc = ROOT.TH2F("NChannel_vs_Zenith_dc","",5000,0,5000.)
-StopLike_vs_Zenith_ic = ROOT.TH2F("StopLike_vs_Zenith_ic","",500,0,500.)
-StopLike_vs_Zenith_dc = ROOT.TH2F("StopLike_vs_Zenith_dc","",500,0,500.)
-rLogL_vs_Zenith_ic = ROOT.TH2F("rLogL_vs_Zenith_ic","",500,0,500.)
-rLogL_vs_Zenith_dc = ROOT.TH2F("rLogL_vs_Zenith_dc","",500,0,500.)
+StoppingZ_vs_Zenith_ic = ROOT.TH2F("StoppingZ_vs_Zenith_ic","",200,-1.0,1.0,1000,-500.,500.)
+StoppingZ_vs_Zenith_dc = ROOT.TH2F("StoppingZ_vs_Zenith_dc","",200,-1.0,1.0,1000,-500.,500.)
+BorderDist_vs_Zenith_ic = ROOT.TH2F("BorderDist_vs_Zenith_ic","",200,-1.0,1.0,1000,-500.,500.)
+BorderDist_vs_Zenith_dc = ROOT.TH2F("BorderDist_vs_Zenith_dc","",200,-1.0,1.0,1000,-500.,500.)
+NChannel_vs_Zenith_ic = ROOT.TH2F("NChannel_vs_Zenith_ic","",200,-1.0,1.0,5000,0,5000.)
+NChannel_vs_Zenith_dc = ROOT.TH2F("NChannel_vs_Zenith_dc","",200,-1.0,1.0,5000,0,5000.)
+StopLike_vs_Zenith_ic = ROOT.TH2F("StopLike_vs_Zenith_ic","",200,-1.0,1.0,500,0,500.)
+StopLike_vs_Zenith_dc = ROOT.TH2F("StopLike_vs_Zenith_dc","",200,-1.0,1.0,500,0,500.)
+rLogL_vs_Zenith_ic = ROOT.TH2F("rLogL_vs_Zenith_ic","",200,-1.0,1.0,500,0,500.)
+rLogL_vs_Zenith_dc = ROOT.TH2F("rLogL_vs_Zenith_dc","",200,-1.0,1.0,500,0,500.)
+
+
+zenith_all = ROOT.TH1F("zenith_all","",100,0.0,1.0)
+zenith_zenith = ROOT.TH1F("zenith_zenith","",100,0.0,1.0)
+zenith_endpointz = ROOT.TH1F("zenith_endpointz","",100,0.0,1.0)
+zenith_boarder = ROOT.TH1F("zenith_boarder","",100,0.0,1.0)
+zenith_stopratio = ROOT.TH1F("zenith_stopratio","",100,0.0,1.0)
+zenith_recoLogL = ROOT.TH1F("zenith_recoLogL","",100,0.0,1.0)
+zenith_directHits = ROOT.TH1F("zenith_directHits","",100,0.0,1.0)
+
 
 TimeResidual_IC = []
 TimeResidual_DC = []
@@ -265,6 +275,14 @@ def OutputRoot(filename) :
 	global StopLike_vs_Zenith_ic
 	global rLogL_vs_Zenith_dc
 	global rLogL_vs_Zenith_ic
+	global zenith_all
+	global zenith_zenith
+	global zenith_endpointz
+	global zenith_boarder
+	global zenith_stopratio
+	global zenith_recoLogL
+	global zenith_directHits
+
 
 	x_data_ic = array('f',binneddistance_ic)
 	x_error_ic = array('f',binneddistanceerror_ic)
@@ -383,8 +401,15 @@ def OutputRoot(filename) :
 	StopLike_vs_Zenith_ic.Write()
 	rLogL_vs_Zenith_dc.Write()
 	rLogL_vs_Zenith_ic.Write()
-	for i in range len(TimeResidual_IC) : TimeResidual_IC[i].Write()
-	for i in range len(TimeResidual_DC) : TimeResidual_DC[i].Write()
+	zenith_all.Write()
+	zenith_zenith.Write()
+	zenith_endpointz.Write()
+	zenith_boarder.Write()
+	zenith_stopratio.Write()
+	zenith_recoLogL.Write()
+	zenith_directHits.Write()
+	for i in range(len(TimeResidual_IC)) : TimeResidual_IC[i].Write()
+	for i in range(len(TimeResidual_DC)) : TimeResidual_DC[i].Write()
 
 	fout.Close()
 
@@ -539,6 +564,20 @@ if __name__ == '__main__':
 		for event in eventtable.iterrows() :
 
 			totalevent += 1
+
+			weight = 1.0
+                        if args.flux != "data" :
+                                pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
+                                energy_integral = event['corsika/energyPrimaryMax']**(event['corsika/primarySpectralIndex']+1)
+                                energy_integral = energy_integral - event['corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
+                                energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
+                                energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
+                                energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
+                                weight = energy_weight/(event['corsika/nEvents'])
+                                if weight > max_weight:
+                                        max_weight = weight
+
+			zenith_all.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 			#Energy Cut
 			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
 				#print("Event killed by energy Cut")
@@ -550,7 +589,8 @@ if __name__ == '__main__':
 				#print("Event Killed by Zenith Cut")
 				#print(event['reco/dir/zenith'])
 				continue
-
+			zenith_zenith.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
+		
 			#Stopping Point Cut
 			if event['recoEndPoint/z'] < args.boarder[0] :
 				#print("Event killed by Bottom Distance Cut")
@@ -558,6 +598,7 @@ if __name__ == '__main__':
 				#print("mctruth = %f" %(event['truthEndPoint/z']))
 				#print("event likelihood = %f" % (event['stopLikeRatio']))
 				continue
+			zenith_endpointz.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
 			if event['borderDistance'] < args.boarder[1] :
 				#print("Event killed by Detector Edge Cut")
@@ -565,38 +606,42 @@ if __name__ == '__main__':
 				#print(event['truthBorderDistance'])
 				#print("event likelihood = %f" % (event['stopLikeRatio']))
 				continue 
+			zenith_boarder.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
 			#Likelihood cuts
 			if event['stopLikeRatio'] < args.likelihood[0] :
 				#print("Event cut by likelihood ratio cut")
 				#print("event likelihood = %f" % (event['stopLikeRatio']))
 				continue
+			zenith_stopratio.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
 			 #Likelihood cuts
                         if event['recoLogL'] > args.likelihood[1] :
 				#print("Event killed by Likelihood check")
 				#print(event['recoLogL'])
                                 continue
+			zenith_recoLogL.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
 			#direct hists
 			if event['directHits'] < args.nhits[0]:
 				#print("Event killed by N Direct Hists Cut")
 				#print(event['directHits'])
 				continue
+			zenith_directHits.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
 			#print("Event Passed")
 			eventcount += 1
-			weight = 1.0
-			if args.flux != "data" :
-				pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
-				energy_integral = event['corsika/energyPrimaryMax']**(event['corsika/primarySpectralIndex']+1)
-				energy_integral = energy_integral - event['corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
-				energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
-				energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
-				energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
-				weight = energy_weight/(event['corsika/nEvents'])
-				if weight > max_weight:
-					max_weight = weight
+			#weight = 1.0
+			#if args.flux != "data" :
+			#	pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
+			#	energy_integral = event['corsika/energyPrimaryMax']**(event['corsika/primarySpectralIndex']+1)
+			#	energy_integral = energy_integral - event['corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
+			#	energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
+			#	energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
+			#	energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
+			#	weight = energy_weight/(event['corsika/nEvents'])
+			#	if weight > max_weight:
+			#		max_weight = weight
 				#gen = generator(event['corsika/primaryEnergy'],event['corsika/primaryType'])
 				#weight = pflux/gen
 				#print("weight = %f" % (weight))
