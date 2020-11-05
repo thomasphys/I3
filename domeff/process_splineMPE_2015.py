@@ -371,12 +371,12 @@ tray.AddModule(EventWriter, 'EventWriter',
 tray.AddModule(countevents2,"count2")
 #tray.AddModule(printtag, 'printtag_writer',message = "passed writer")
 # Write out the data to an I3 file
-#tray.AddModule('I3Writer', 'I3Writer',
-#               FileName=args.output+datafilename+'.i3.gz',
-#               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
-#               DropOrphanStreams=[icetray.I3Frame.DAQ],
-#               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
-#               )
+tray.AddModule('I3Writer', 'I3Writer',
+               FileName=args.output+datafilename+'.i3.gz',
+               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
+               DropOrphanStreams=[icetray.I3Frame.DAQ],
+               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
+               )
     
 tray.AddModule('TrashCan', 'yeswecan')
 if args.nevents > 0 :

@@ -79,6 +79,9 @@ class Event(IsDescription):
 	nHits                  = UInt32Col()    # Number of DOM hits in this event
 	primary                = Particle()     # Polyplopia primary particle
 	reco                   = Particle()     # Reconstructed particle track
+	mpe					   = Particle()
+	spe                    = Particle()
+	line				   = Particle()
 	corsika                = Corsika()
 	startTime              = Time()
 	endTime                = Time()

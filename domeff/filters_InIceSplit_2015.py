@@ -54,7 +54,7 @@ def MPEFit(frame):
 #    if hasattr(frame['MPEFit'],azimuth) is True:
     if frame.Has('MPEFitDOMeff'):
         mpe = frame['MPEFitDOMeff']
-#        angle = math.degrees(mpe.dir.zenith)
+#        angle = math.degrees(mpe.dir.zenith) 
         return (mpe.fit_status == dataclasses.I3Particle.OK) #and 40 < angle < 70)
     else: 
         return False
