@@ -82,6 +82,8 @@ class Event(IsDescription):
 	mpe					   = Particle()
 	spe                    = Particle()
 	line				   = Particle()
+	lineorig               = Particle()
+	speorig                = Particle()
 	corsika                = Corsika()
 	startTime              = Time()
 	endTime                = Time()
@@ -90,6 +92,7 @@ class Event(IsDescription):
 	truthBorderDistance    = Float64Col()
 	directHits             = UInt32Col()
 	stopLikeRatio          = Float64Col()
+	passl2cuts             = UInt32Col()
 
 class DOM(IsDescription):
 	eventId           = UInt32Col()   # ID number of the event this DOM belongs to

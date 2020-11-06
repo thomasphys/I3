@@ -72,6 +72,10 @@ class EventWriter(icetray.I3Module):
 		event['spe/dir/azimuth'] = frame['SPEFit2DOMeff'].dir.azimuth
 		event['line/dir/zenith']  = frame['LineFitDOMeff'].dir.zenith
 		event['line/dir/azimuth'] = frame['LineFitDOMeff'].dir.azimuth
+		event['speorig/dir/zenith']  = frame['SPEFit2'].dir.zenith
+		event['speorig/dir/azimuth'] = frame['SPEFit2'].dir.azimuth
+		event['lineorig/dir/zenith']  = frame['LineFit'].dir.zenith
+		event['lineorig/dir/azimuth'] = frame['LineFit'].dir.azimuth
 		event['startTime/tag'] = frame['I3EventHeader'].start_time
 		event['endTime/tag'] = frame['I3EventHeader'].end_time
 		event['dcHitsIn'] = frame['DCAnalysisHits'].value    
@@ -86,6 +90,10 @@ class EventWriter(icetray.I3Module):
 		event['stopLikeRatio'] = frame['FiniteRecoLLHRatio'].value
 
 
+		if frame.Has('SRTInIcePulses') :
+			event['passl2cuts'] = 1
+		else :
+			event['passl2cuts'] = 0
 		
 
 		if frame.Has('CorsikaWeightMap'):

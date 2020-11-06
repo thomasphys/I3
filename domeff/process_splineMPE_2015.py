@@ -78,7 +78,7 @@ parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider
 args = parser.parse_args()
 
 dom_data_options = {}
-#    options['pulses_name'] = 'SplitInIcePulses'
+#    options['pulses_name'] = 'SplitInIcePulses' 
 dom_data_options['pulses_name'] = args.pulsename
 dom_data_options['max_dist'] = args.maxdist
 
@@ -96,22 +96,8 @@ tray.AddModule(in_ice, 'in_ice')
 tray.AddModule(countevents1,"count1")
 #tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
 # Make sure that the length of SplitInIcePulses is >= 8
-tray.AddModule(SMT8, 'SMT8')
-#tray.AddModule(printtag, 'printtag_SMT8',message = "passed SMT8")
 
-tray.AddModule(min_bias, 'min_bias')
-
-#if not args.sim :
-if True :
-	# Filters
-
-	#Thomas - remove minbias for now since only running one run. 
-	# Trigger check
-	# jeb-filter-2012
-
-	#tray.AddModule(printtag, 'isdata',message = "is data")
-
-	tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
+tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                I3TriggerHierarchy='I3TriggerHierarchy',
                InIceSMTFlag='InIceSMTTriggered',
                IceTopSMTFlag='IceTopSMTTriggered',
@@ -122,8 +108,9 @@ if True :
                DeepCoreSMTConfigID=1010)
 
 	# Check that InIceSMTTriggered is true.
-	tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
-
+tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
+tray.AddModule(SMT8, 'SMT8')
+tray.AddModule(min_bias, 'min_bias')
 
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 
@@ -181,7 +168,7 @@ tray.AddSegment(SPE,'SPE',
 # ---- MPEFit reconstruction ------------------------------------------------
 tray.AddSegment(MPE, 'MPE',
                 Pulses = args.pulsename,
-                Seed = 'SPEFit2',
+                Seed = 'SPEFit2DOMeff',
                 #If = which_split(split_name='InIceSplit') & (lambda f:muon_wg(f)),
                 If = lambda f: True,
                 suffix='DOMeff',
