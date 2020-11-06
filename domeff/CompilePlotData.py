@@ -59,6 +59,9 @@ rLogL_vs_Zenith_dc = ROOT.TH2F("rLogL_vs_Zenith_dc","",200,-1.0,1.0,500,0,500.)
 
 
 zenith_all = ROOT.TH1F("zenith_all","",100,0.0,1.0)
+zenith_all_line = ROOT.TH1F("zenith_all_line","",100,0.0,1.0)
+zenith_all_spe = ROOT.TH1F("zenith_all_spe","",100,0.0,1.0)
+zenith_all_mpe = ROOT.TH1F("zenith_all_mpe","",100,0.0,1.0)
 zenith_zenith = ROOT.TH1F("zenith_zenith","",100,0.0,1.0)
 zenith_endpointz = ROOT.TH1F("zenith_endpointz","",100,0.0,1.0)
 zenith_boarder = ROOT.TH1F("zenith_boarder","",100,0.0,1.0)
@@ -282,6 +285,9 @@ def OutputRoot(filename) :
 	global zenith_stopratio
 	global zenith_recoLogL
 	global zenith_directHits
+	global zenith_all_line
+	global zenith_all_spe
+	global zenith_all_mpe
 
 
 	x_data_ic = array('f',binneddistance_ic)
@@ -408,6 +414,9 @@ def OutputRoot(filename) :
 	zenith_stopratio.Write()
 	zenith_recoLogL.Write()
 	zenith_directHits.Write()
+	zenith_all_line.Write()
+	zenith_all_spe.Write()
+	zenith_all_mpe.Write()
 	for i in range(len(TimeResidual_IC)) : TimeResidual_IC[i].Write()
 	for i in range(len(TimeResidual_DC)) : TimeResidual_DC[i].Write()
 
@@ -578,6 +587,9 @@ if __name__ == '__main__':
                                         max_weight = weight
 
 			zenith_all.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
+			zenith_all_line.Fill(ROOT.TMath.Cos(event['line/dir/zenith']),weight)
+			zenith_all_spe.Fill(ROOT.TMath.Cos(event['spe/dir/zenith']),weight)
+			zenith_all_mpe.Fill(ROOT.TMath.Cos(event['mpe/dir/zenith']),weight)
 			#Energy Cut
 			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
 				#print("Event killed by energy Cut")

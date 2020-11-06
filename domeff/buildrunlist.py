@@ -3,6 +3,22 @@ import argparse
 import os, sys
 import ROOT
 
+Datacondition_have = [str(runnumber),'.i3.bz2','Run','Subrun','_1','level2']
+Datacondition_nothave = ['_IT']
+GDCcondition_have = [str(runnumber),'.i3.zst','Run','GCD','level2pass2']
+GDCcondition_nothave = ['_IT']
+
+def checkfilename(filename, runnumber, cond_have, cond_nothave) :
+	if str(runnumber) not in filename :
+		return False
+	for cond in cond_have :
+		if cond not in filename :
+			return False
+	for cond in cond_nothave :
+		if cond in filename :
+			return False
+	return true
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', help='Input good run list.',type=str,default = '')
 parser.add_argument('-o', '--output', help='Output file list.',type=str,default = '')
@@ -101,9 +117,17 @@ for (dirpath, dirnames, filenames) in os.walk("/data/exp/IceCube/"):
 
 for i in range(len(runnum)) :
 	if runbin[i] < 0 : continue
-	runfilelist = [x for x in listOfFiles if (str(runnum[i]) in x and ('.i3.bz2' in x and '_IT' not in x))
+	runfilelist = [x for x in listOfFiles if checkfilename(x,runnum[i],Datacondition_have, Datacondition_nothave)]
+	if len(runfilelist) > 0 :
+		pathsplit = runfilelist[0].split("/",1000)
+		rundirpath = ""
+		for i in rang(len(pathspit)-1):
+			rundirpath += "/"+pathsplit[i]
 
-	file.write("%d %f\n" % (runnum[i],min_val/length[runbin[i]]))
+			outputdir = "/data/user/tmcelroy/submit_domeff_data/"
+		 extra  = "datahd5/"+pathsplit[-6]+"/"+pathsplit[-3]+"/"+pathsplit[-2]+
+		gcdfile = [x for x in listOfFiles if checkfilename(x,runnum[i],GDCcondition_have, GDCcondition_nothave)]
+		file.write(str(len(runfilelist)) + " : python submit_domeff_data.py " + gcdfile + " " + rundirpath + " -1 " + outputdir + " " + extra + " False " + str(min_val/length[runbin[i]]))
 
 for i in range(len(monthdays)) :
 	for j in range(monthdays[i]) :
