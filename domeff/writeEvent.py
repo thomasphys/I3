@@ -12,7 +12,7 @@ class EventWriter(icetray.I3Module):
 		icetray.I3Module.__init__(self, context)
 		self.AddParameter('FileName','Name of the file to write out','out.h5')
 		self.eventId=0
-
+		
 	def Configure(self):
 		self.h5file = open_file(self.GetParameter('FileName'), mode="w", title="DOM Calibration HDF5 File")
 		# Create the table to store all the event objects
