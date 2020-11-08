@@ -34,7 +34,8 @@ from icecube.filterscripts.offlineL2.level2_Reconstruction_WIMP import FiniteRec
 from icecube.filterscripts.offlineL2.level2_Reconstruction_Muon import SPE, MPE
 from icecube.filterscripts.offlineL2.PhotonTables import InstallTables
 from icecube import cramer_rao
-import ROOT
+from tables import *
+from event import *
 
 load('libipdf')
 load('libgulliver')
@@ -80,26 +81,38 @@ args = parser.parse_args()
 
 datafilename = "{0:0{1}d}".format(args.runnum,5)
 
-outputrootfile = ROOT.TFile(args.output+datafilename+".root","RECREATE")
-originalLine = ROOT.TH1F("originalLine","",100,0.0,1.0)
-originalSPE = ROOT.TH1F("originalSPE","",100,0.0,1.0)
-originalLine_all = ROOT.TH1F("originalLine","",100,0.0,1.0)
-originalSPE_all = ROOT.TH1F("originalSPE","",100,0.0,1.0)
+h5file = open_file(args.output+datafilename+"_originalfits.h5", mode="w", title="DOM Calibration HDF5 File")
+	
+line_cut = h5file.create_table('/', 'linecut', data, "IceCube Charge vs Distance data")
+spe_cut = h5file.create_table('/', 'specut',data, "DeepCore Charge vs Distance data")
+line_all = h5file.create_table('/', 'lineall',data, "IceCube Charge vs Distance data")
+spe_all = h5file.create_table('/', 'speall',data, "DeepCore Charge vs Distance data")
+lcrow = line_cut.row
+scrow = spe_cut.row
+larow = line_all.row
+sarow = spe_all.row
+
 
 def FillRootPlots(frame):
-  global originalLine
-  global originalSPE
+  global lcrow
+  global scrow
 
-  originalLine.Fill(ROOT.TMath.Cos(frame['LineFit'].dir.zenith))
-  originalSPE.Fill(ROOT.TMath.Cos(frame['SPEFit2'].dir.zenith))
+  lcrow['value'] = frame['LineFit'].dir.zenith
+  scrow['value'] = frame['SPEFit2'].dir.zenith
+  lcrow.append()
+  scrow.append()
 
 def FillRootPlots_all(frame):
-  global originalLine_all
-  global originalSPE_all
+  global larow
+  global sarow
 
-  originalLine_all.Fill(ROOT.TMath.Cos(frame['LineFit'].dir.zenith))
-  originalSPE_all.Fill(ROOT.TMath.Cos(frame['SPEFit2'].dir.zenith))
-
+  if frame.Has('LineFit') and frame.Has('SPEFit2') :
+  	larow['value'] = frame['LineFit'].dir.zenith
+  	sarow['value'] = frame['SPEFit2'].dir.zenith
+	larow.append()
+	sarow.append()
+  else: 
+	return False
 
 dom_data_options = {}
 #    options['pulses_name'] = 'SplitInIcePulses' 
@@ -116,10 +129,6 @@ tray.AddModule('I3Reader', 'I3Reader',
 # Filter the ones with sub_event_stream == InIceSplit
 tray.AddModule(in_ice, 'in_ice')
 
-tray.AddModule(FillRootPlots_all,'alleventsgraphs')
-#tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
-# Make sure that the length of SplitInIcePulses is >= 8
-
 tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                I3TriggerHierarchy='I3TriggerHierarchy',
                InIceSMTFlag='InIceSMTTriggered',
@@ -131,6 +140,7 @@ tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                DeepCoreSMTConfigID=1010)
 
 	# Check that InIceSMTTriggered is true.
+tray.AddModule(FillRootPlots_all,'alleventsgraphs')
 tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 tray.AddModule(SMT8, 'SMT8')
 tray.AddModule(min_bias, 'min_bias')
@@ -145,8 +155,4 @@ else :
   tray.Execute()
 tray.Finish()
 print("events %f / %f passed" % (eventcount1,eventcount2)) 
-originalLine.Write()
-originalSPE.Write()
-originalLine_all.Write()
-originalSPE_all.Write()
-outputrootfile.Close()
+h5file.close()

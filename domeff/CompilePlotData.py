@@ -541,7 +541,7 @@ if __name__ == '__main__':
 	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
 	file_list = []
 	if args.flux == "data" :
-		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 50000000 )]
+		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 30000000 )]
 	else :
 		file_list = [x for x in file_list_h5 if (args.eff in x)]
 

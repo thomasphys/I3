@@ -3,9 +3,9 @@ import argparse
 import os, sys
 import ROOT
 
-Datacondition_have = [str(runnumber),'.i3.bz2','Run','Subrun','_1','level2']
+Datacondition_have = ['.i3.bz2','Run','Subrun','_1','level2']
 Datacondition_nothave = ['_IT']
-GDCcondition_have = [str(runnumber),'.i3.zst','Run','GCD','level2pass2']
+GDCcondition_have = ['.i3.zst','Run','GCD','level2pass2']
 GDCcondition_nothave = ['_IT']
 
 def checkfilename(filename, runnumber, cond_have, cond_nothave) :
@@ -125,7 +125,7 @@ for i in range(len(runnum)) :
 			rundirpath += "/"+pathsplit[i]
 
 			outputdir = "/data/user/tmcelroy/submit_domeff_data/"
-		 extra  = "datahd5/"+pathsplit[-6]+"/"+pathsplit[-3]+"/"+pathsplit[-2]+
+		extra  = "datahd5/"+pathsplit[-6]+"/"+pathsplit[-3]+"/"+pathsplit[-2]
 		gcdfile = [x for x in listOfFiles if checkfilename(x,runnum[i],GDCcondition_have, GDCcondition_nothave)]
 		file.write(str(len(runfilelist)) + " : python submit_domeff_data.py " + gcdfile + " " + rundirpath + " -1 " + outputdir + " " + extra + " False " + str(min_val/length[runbin[i]]))
 

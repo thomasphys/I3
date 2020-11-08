@@ -3,6 +3,9 @@
 #
 from tables import *
 
+class data(IsDescription):
+	value = Float64Col()
+
 class State(IsDescription):
 	data           = StringCol(500)
 	eff            = StringCol(500)
