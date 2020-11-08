@@ -144,11 +144,11 @@ tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 # Despite the unusual name this runs the FiniteReco cleaning on the pulse series.
 
-tray.AddSegment(WimpHitCleaning, "WIMPstuff",
-                    seededRTConfig = seededRTConfig,
-                    If= lambda f: True,
-                    suffix='_WIMP_DOMeff'
-    )
+#tray.AddSegment(WimpHitCleaning, "WIMPstuff",
+#                    seededRTConfig = seededRTConfig,
+#                    If= lambda f: True,
+#                    suffix='_WIMP_DOMeff'
+#    )
 
 #tray.AddModule(printtag, 'printtag_WIMPClean',message = "passed WIMP Hit Cleaning")
 
