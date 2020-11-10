@@ -7,7 +7,7 @@ from icecube import icetray
 
 from event import *
 
-def filtertriggerresult( Bool state) :
+def filtertriggerresult(state) :
 	if state :
 		return 1
 	else :
@@ -126,14 +126,6 @@ class EventWriter(icetray.I3Module):
 		event['triggerMask/InIceString']                       = filtertriggerresult(frame['InIceStringTriggered'])
 		event['triggerMask/PhysMinBias']                       = filtertriggerresult(frame['PhysMinBiasTriggered'])
 		event['triggerMask/DeepCoreSMT']                       = filtertriggerresult(frame['DeepCoreSMTTriggered'])
-
-		InIceSMTFlag='InIceSMTTriggered',
-               IceTopSMTFlag='IceTopSMTTriggered',
-               InIceStringFlag='InIceStringTriggered',
-               PhysMinBiasFlag='PhysMinBiasTriggered',
-               PhysMinBiasConfigID=106,
-               DeepCoreSMTFlag='DeepCoreSMTTriggered',
-
 
 		#if frame.Has('SRTInIcePulses') :
 	#		event['passl2cuts'] = 1
