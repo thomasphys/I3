@@ -30,7 +30,7 @@ def min_bias(frame) :
     if frame.Has('FilterMask_NullSplit0'):
         filter_mask = frame['FilterMask_NullSplit0']
         filter_min_bias = filter_mask['FilterMinBias_13']
-        return filter_min_bias.condition_passed #and filter_min_bias.prescale_passed
+        return not filter_min_bias.condition_passed #and filter_min_bias.prescale_passed
     else:
         return False
 

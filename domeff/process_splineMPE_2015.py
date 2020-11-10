@@ -168,7 +168,7 @@ tray.AddSegment(SPE,'SPE',
 # ---- MPEFit reconstruction ------------------------------------------------
 tray.AddSegment(MPE, 'MPE',
                 Pulses = args.pulsename,
-                Seed = 'SPEFit2DOMeff',
+                Seed = 'SPEFit2',
                 #If = which_split(split_name='InIceSplit') & (lambda f:muon_wg(f)),
                 If = lambda f: True,
                 suffix='DOMeff',
@@ -361,7 +361,7 @@ tray.AddModule(countevents2,"count2")
 tray.AddModule('I3Writer', 'I3Writer',
                FileName=args.output+datafilename+'.i3.gz',
                SkipKeys=['InIceRecoPulseSeriesPattern.*'],
-               DropOrphanStreams=[icetray.I3Frame.DAQ],
+               DropOrphanStreams=[icetray.I3Frame.DAQ,icetray.I3Frame.Physics],
                Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
                )
     
