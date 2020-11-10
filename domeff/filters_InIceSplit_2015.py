@@ -18,7 +18,7 @@ def in_ice(frame):
     Check that sub_event_stream == 'InIceSplit'.
     """
     event_header = frame['I3EventHeader']
-    return event_header.sub_event_stream == 'InIceSplit' and event_header.sub_event_id == 0
+    return event_header.sub_event_stream == 'InIceSplit'
 
 
 #def min_bias(frame, reco_fit, options):

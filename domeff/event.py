@@ -69,6 +69,42 @@ class Corsika(IsDescription):
 class Time(IsDescription) :
 	tag = StringCol(37)
 
+class FilterMask(IsDescription) :
+	CascadeFilter_13                   = UInt32Col()
+	DeepCoreFilter_13                  = UInt32Col()
+	DeepCoreFilter_TwoLayerExp_13      = UInt32Col()
+	EHEFilter_13                       = UInt32Col()
+	FSSCandidate_13                    = UInt32Col()
+	FSSFilter_13                       = UInt32Col()
+	FilterMinBias_13                   = UInt32Col()
+	FixedRateFilter_13                 = UInt32Col()
+	GCFilter_13                        = UInt32Col()
+	I3DAQDecodeException               = UInt32Col()
+	IceTopSTA3_13                      = UInt32Col()
+	IceTopSTA5_13                      = UInt32Col()
+	IceTop_InFill_STA3_13              = UInt32Col()
+	InIceSMT_IceTopCoincidence_13      = UInt32Col()
+	LID                                = UInt32Col()
+	LowUp_13                           = UInt32Col()
+	MoonFilter_13                      = UInt32Col()
+	MuonFilter_13                      = UInt32Col()
+	OFUFilter_14                       = UInt32Col()
+	OnlineL2Filter_14                  = UInt32Col()
+	SDST_FilterMinBias_13              = UInt32Col()
+	SDST_IceTopSTA3_13                 = UInt32Col()
+	SDST_IceTop_InFill_STA3_13         = UInt32Col()
+	SDST_InIceSMT_IceTopCoincidence_13 = UInt32Col()
+	SlopFilter_13                      = UInt32Col()
+	SunFilter_13                       = UInt32Col()
+	VEF_13                             = UInt32Col()
+
+class TriggerMask(IsDescription) :
+	InIceSMT    = UInt32Col()
+	IceTopSMT   = UInt32Col()
+	InIceString = UInt32Col()
+	PhysMinBias = UInt32Col()
+	DeepCoreSMT = UInt32Col()
+
 class Event(IsDescription):
 	eventId                = UInt32Col()    # ID number of the event
 	dcHitsIn               = Float64Col()    # Number of hits inside the deep core analysis region
@@ -93,6 +129,8 @@ class Event(IsDescription):
 	truthBorderDistance    = Float64Col()
 	directHits             = UInt32Col()
 	stopLikeRatio          = Float64Col()
+	filterMask             = FilterMask()
+	triggerMask            = TriggerMask()
 
 class DOM(IsDescription):
 	eventId           = UInt32Col()   # ID number of the event this DOM belongs to
