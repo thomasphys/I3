@@ -69,6 +69,39 @@ zenith_stopratio = ROOT.TH1F("zenith_stopratio","",100,0.0,1.0)
 zenith_recoLogL = ROOT.TH1F("zenith_recoLogL","",100,0.0,1.0)
 zenith_directHits = ROOT.TH1F("zenith_directHits","",100,0.0,1.0)
 
+CascadeFilter_13 = ROOT.TH1F("CascadeFilter_13","",100,0.0,1.0)
+DeepCoreFilter_13 = ROOT.TH1F("DeepCoreFilter_13","",100,0.0,1.0)                  
+DeepCoreFilter_TwoLayerExp_13 = ROOT.TH1F("DeepCoreFilter_TwoLayerExp_13","",100,0.0,1.0)      
+EHEFilter_13 = ROOT.TH1F("EHEFilter_13","",100,0.0,1.0)                       
+FSSCandidate_13 = ROOT.TH1F("FSSCandidate_13","",100,0.0,1.0)                    
+FSSFilter_13 = ROOT.TH1F("FSSFilter_13","",100,0.0,1.0)                       
+FilterMinBias_13 = ROOT.TH1F("FilterMinBias_13","",100,0.0,1.0)                   
+FixedRateFilter_13 = ROOT.TH1F("FixedRateFilter_13","",100,0.0,1.0)                 
+GCFilter_13 = ROOT.TH1F("GCFilter_13","",100,0.0,1.0)                        
+I3DAQDecodeException = ROOT.TH1F("I3DAQDecodeException","",100,0.0,1.0)               
+IceTopSTA3_13 = ROOT.TH1F("IceTopSTA3_13","",100,0.0,1.0)                      
+IceTopSTA5_13 = ROOT.TH1F("IceTopSTA5_13","",100,0.0,1.0)                      
+IceTop_InFill_STA3_13 = ROOT.TH1F("IceTop_InFill_STA3_13","",100,0.0,1.0)              
+InIceSMT_IceTopCoincidence_13 = ROOT.TH1F("InIceSMT_IceTopCoincidence_13","",100,0.0,1.0)      
+LID = ROOT.TH1F("LID","",100,0.0,1.0)                                
+LowUp_13 = ROOT.TH1F("LowUp_13","",100,0.0,1.0)                           
+MoonFilter_13 = ROOT.TH1F("MoonFilter_13","",100,0.0,1.0)                      
+MuonFilter_13 = ROOT.TH1F("MuonFilter_13","",100,0.0,1.0)                      
+OFUFilter_14 = ROOT.TH1F("OFUFilter_14","",100,0.0,1.0)                       
+OnlineL2Filter_14 = ROOT.TH1F("OnlineL2Filter_14","",100,0.0,1.0)                  
+SDST_FilterMinBias_13 = ROOT.TH1F("SDST_FilterMinBias_13","",100,0.0,1.0)              
+SDST_IceTopSTA3_13 = ROOT.TH1F("SDST_IceTopSTA3_13","",100,0.0,1.0)                 
+SDST_IceTop_InFill_STA3_13 = ROOT.TH1F("SDST_IceTop_InFill_STA3_13","",100,0.0,1.0)         
+SDST_InIceSMT_IceTopCoincidence_13 = ROOT.TH1F("SDST_InIceSMT_IceTopCoincidence_13","",100,0.0,1.0) 
+SlopFilter_13 = ROOT.TH1F("SlopFilter_13","",100,0.0,1.0)                      
+SunFilter_13 = ROOT.TH1F("SunFilter_13","",100,0.0,1.0)                       
+VEF_13 = ROOT.TH1F("VEF_13","",100,0.0,1.0)                             
+InIceSMT = ROOT.TH1F("InIceSMT","",100,0.0,1.0)    
+IceTopSMT = ROOT.TH1F("IceTopSMT","",100,0.0,1.0)   
+InIceString = ROOT.TH1F("InIceString","",100,0.0,1.0) 
+PhysMinBias = ROOT.TH1F("PhysMinBias","",100,0.0,1.0) 
+DeepCoreSMT = ROOT.TH1F("DeepCoreSMT","",100,0.0,1.0) 
+
 
 TimeResidual_IC = []
 TimeResidual_DC = []
@@ -288,6 +321,38 @@ def OutputRoot(filename) :
 	global zenith_all_line
 	global zenith_all_spe
 	global zenith_all_mpe
+	global CascadeFilter_13
+	global DeepCoreFilter_13                
+	global DeepCoreFilter_TwoLayerExp_13   
+	global EHEFilter_13                     
+	global FSSCandidate_13                   
+	global FSSFilter_13                      
+	global FilterMinBias_13                  
+	global FixedRateFilter_13                
+	global GCFilter_13             
+	global I3DAQDecodeException        
+	global IceTopSTA3_13                  
+	global IceTopSTA5_13                    
+	global IceTop_InFill_STA3_13            
+	global InIceSMT_IceTopCoincidence_13     
+	global LID                              
+	global LowUp_13                         
+	global MoonFilter_13                   
+	global MuonFilter_13                     
+	global OFUFilter_14                      
+	global OnlineL2Filter_14                
+	global SDST_FilterMinBias_13          
+	global SDST_IceTopSTA3_13          
+	global SDST_IceTop_InFill_STA3_13       
+	global SDST_InIceSMT_IceTopCoincidence_13 
+	global SlopFilter_13                     
+	global SunFilter_13                      
+	global VEF_13                           
+	global InIceSMT    
+	global IceTopSMT   
+	global InIceString
+	global PhysMinBias
+	global DeepCoreSMT
 
 
 	x_data_ic = array('f',binneddistance_ic)
@@ -419,6 +484,38 @@ def OutputRoot(filename) :
 	zenith_all_mpe.Write()
 	for i in range(len(TimeResidual_IC)) : TimeResidual_IC[i].Write()
 	for i in range(len(TimeResidual_DC)) : TimeResidual_DC[i].Write()
+	CascadeFilter_13.Write()
+	DeepCoreFilter_13.Write()             
+	DeepCoreFilter_TwoLayerExp_13.Write()   
+	EHEFilter_13.Write()                     
+	FSSCandidate_13.Write()                   
+	FSSFilter_13.Write()                      
+	FilterMinBias_13.Write()                  
+	FixedRateFilter_13.Write()                
+	GCFilter_13.Write()             
+	I3DAQDecodeException.Write()        
+	IceTopSTA3_13.Write()                  
+	IceTopSTA5_13.Write()                    
+	IceTop_InFill_STA3_13.Write()            
+	InIceSMT_IceTopCoincidence_13.Write()     
+	LID.Write()                              
+	LowUp_13.Write()                         
+	MoonFilter_13.Write()                   
+	MuonFilter_13.Write()                     
+	OFUFilter_14.Write()                      
+	OnlineL2Filter_14.Write()                
+	SDST_FilterMinBias_13.Write()          
+	SDST_IceTopSTA3_13.Write()          
+	SDST_IceTop_InFill_STA3_13.Write()       
+	SDST_InIceSMT_IceTopCoincidence_13.Write() 
+	SlopFilter_13.Write()                     
+	SunFilter_13.Write()                      
+	VEF_13.Write()                           
+	InIceSMT.Write()    
+	IceTopSMT.Write()   
+	InIceString.Write()
+	PhysMinBias.Write()
+	DeepCoreSMT.Write()
 
 	fout.Close()
 
@@ -585,6 +682,39 @@ if __name__ == '__main__':
                                 weight = energy_weight/(event['corsika/nEvents'])
                                 if weight > max_weight:
                                         max_weight = weight
+
+            if event['filterMask/CascadeFilter_13'] : CascadeFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
+			if event['filterMask/DeepCoreFilter_13'] : DeepCoreFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                  
+			if event['filterMask/DeepCoreFilter_TwoLayerExp_13'] : DeepCoreFilter_TwoLayerExp_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)    
+			if event['filterMask/EHEFilter_13'] : EHEFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                      
+			if event['filterMask/FSSCandidate_13'] : FSSCandidate_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                   
+			if event['filterMask/FSSFilter_13'] : FSSFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                       
+			if event['filterMask/FilterMinBias_13'] : FilterMinBias_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                   
+			if event['filterMask/FixedRateFilter_13'] : FixedRateFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                
+			if event['filterMask/GCFilter_13'] : GCFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                        
+			if event['filterMask/I3DAQDecodeException'] : I3DAQDecodeException.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)              
+			if event['filterMask/IceTopSTA3_13'] : IceTopSTA3_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                   
+			if event['filterMask/IceTopSTA5_13'] : IceTopSTA5_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                     
+			if event['filterMask/IceTop_InFill_STA3_13'] : IceTop_InFill_STA3_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)              
+			if event['filterMask/InIceSMT_IceTopCoincidence_13'] : InIceSMT_IceTopCoincidence_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)     
+			if event['filterMask/LID'] : LID.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                               
+			if event['filterMask/LowUp_13'] : LowUp_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                           
+			if event['filterMask/MoonFilter_13'] : MoonFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                      
+			if event['filterMask/MuonFilter_13'] : MuonFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                      
+			if event['filterMask/OFUFilter_14'] : OFUFilter_14.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                      
+			if event['filterMask/OnlineL2Filter_14'] : OnlineL2Filter_14.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                 
+			if event['filterMask/SDST_FilterMinBias_13'] : SDST_FilterMinBias_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)              
+			if event['filterMask/SDST_IceTopSTA3_13'] : SDST_IceTopSTA3_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                 
+			if event['filterMask/SDST_IceTop_InFill_STA3_13'] : SDST_IceTop_InFill_STA3_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)         
+			if event['filterMask/SDST_InIceSMT_IceTopCoincidence_13'] : SDST_InIceSMT_IceTopCoincidence_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight) 
+			if event['filterMask/SlopFilter_13'] : SlopFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                      
+			if event['filterMask/SunFilter_13'] : SunFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                       
+			if event['filterMask/VEF_13'] : VEF_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                             
+			if event['triggerMask/InIceSMT'] : InIceSMT.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)    
+			if event['triggerMask/IceTopSMT'] : IceTopSMT.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)   
+			if event['triggerMask/InIceString'] : InIceString.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight) 
+			if event['triggerMask/PhysMinBias'] : PhysMinBias.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight) 
+			if event['triggerMask/DeepCoreSMT'] : DeepCoreSMT.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
 			zenith_all.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 			#zenith_all_line.Fill(ROOT.TMath.Cos(event['line/dir/zenith']),weight)

@@ -15,6 +15,12 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
+from icecube.filterscripts.offlineL2 import Globals
+from icecube.filterscripts.offlineL2.Rehydration import Rehydration, Dehydration
+from icecube.filterscripts.offlineL2.PhotonTables import InstallTables
+from icecube.filterscripts.offlineL2.ClipStartStop import ClipStartStop
+from icecube.phys_services.which_split import which_split
+
 # Setup logging
 from icecube.icetray.i3logging import *
 from icecube import dataio, icetray, finiteReco, gulliver, simclasses, dataclasses, photonics_service, phys_services, spline_reco #, MuonGun
@@ -90,6 +96,16 @@ datafilename = "{0:0{1}d}".format(args.runnum,5)
 tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
 
+if "PFFilt" in datafilename :
+  tray.AddModule(ClipStartStop, 'clipstartstop')
+
+  tray.AddSegment(Rehydration, 'rehydrator',
+                dstfile=dstfile,
+                mc=False,
+                doNotQify=doNotQify,
+                pass2=pass2,
+                )
+
 #tray.AddModule(printtag, 'printtag_newevent',message = "new event")
 # Filter the ones with sub_event_stream == InIceSplit
 tray.AddModule(in_ice, 'in_ice')
@@ -142,19 +158,6 @@ tray.AddModule('I3SeededRTCleaning_RecoPulseMask_Module', 'North_seededrt',
                Streams=[icetray.I3Frame.Physics],
                If=lambda f: True
                )
-
-#tray.AddModule(printtag, 'printtag_I3seed',message = "passed I3SeededRTCleaning")
-
-# Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
-# Despite the unusual name this runs the FiniteReco cleaning on the pulse series.
-
-#tray.AddSegment(WimpHitCleaning, "WIMPstuff",
-#                    seededRTConfig = seededRTConfig,
-#                    If= lambda f: True,
-#                    suffix='_WIMP_DOMeff'
-#    )
-
-#tray.AddModule(printtag, 'printtag_WIMPClean',message = "passed WIMP Hit Cleaning")
 
 # ---- Linefit and SPEfit ---------------------------------------------------
 tray.AddSegment(SPE,'SPE',
