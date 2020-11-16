@@ -587,9 +587,9 @@ if __name__ == '__main__':
                                         max_weight = weight
 
 			zenith_all.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
-			zenith_all_line.Fill(ROOT.TMath.Cos(event['line/dir/zenith']),weight)
-			zenith_all_spe.Fill(ROOT.TMath.Cos(event['spe/dir/zenith']),weight)
-			zenith_all_mpe.Fill(ROOT.TMath.Cos(event['mpe/dir/zenith']),weight)
+			#zenith_all_line.Fill(ROOT.TMath.Cos(event['line/dir/zenith']),weight)
+			#zenith_all_spe.Fill(ROOT.TMath.Cos(event['spe/dir/zenith']),weight)
+			#zenith_all_mpe.Fill(ROOT.TMath.Cos(event['mpe/dir/zenith']),weight)
 			#Energy Cut
 			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
 				#print("Event killed by energy Cut")

@@ -108,9 +108,13 @@ tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                DeepCoreSMTConfigID=1010)
 
 	# Check that InIceSMTTriggered is true.
+#tray.AddModule(printtag, 'printtag_trigcheck',message = "passed trigcheck")
 tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
+#tray.AddModule(printtag, 'printtag_smttrig',message = "passed smttrig")
 tray.AddModule(SMT8, 'SMT8')
-tray.AddModule(min_bias, 'min_bias')
+#tray.AddModule(printtag, 'printtag_smt8',message = "passed smt8")
+#tray.AddModule(min_bias, 'min_bias')
+#tray.AddModule(printtag, 'printtag_minbias',message = "passed minbias")
 
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
 
