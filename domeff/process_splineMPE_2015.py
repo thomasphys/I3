@@ -80,6 +80,7 @@ parser.add_argument('-t', '--datafiletype', help='Suffix of Datafiles', type = s
 parser.add_argument('-r', '--runnum', help='number to identify target file', type = int, default = 0)
 parser.add_argument('-p', '--pulsename', help='Name of new pulse list', type = str, default = 'SRTInIcePulsesDOMEff')
 parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 200.0)
+parser.add_argument('-x', '--dstfile', help='dts file, should be .root',type=str,default = "")
 
 args = parser.parse_args()
 
@@ -96,20 +97,26 @@ datafilename = "{0:0{1}d}".format(args.runnum,5)
 tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
 
-if "PFFilt" in datafilename :
+tray.AddModule(countevents1,"count1")
+
+if "PFFilt" in args.datadir :
+  #tray.AddModule(printtag, 'printtag_pff',message = "pff data")
+
   tray.AddModule(ClipStartStop, 'clipstartstop')
 
+  #tray.AddModule(printtag, 'printtag_clip',message = "pass clipstartstop")
+
   tray.AddSegment(Rehydration, 'rehydrator',
-                dstfile=dstfile,
+                #dstfile=args.dstfile,
                 mc=False,
-                doNotQify=doNotQify,
-                pass2=pass2,
+                doNotQify=False,
+                pass2=True,
                 )
+  #tray.AddModule(printtag, 'printtag_rehydrate',message = "pass rehydrate")
 
 #tray.AddModule(printtag, 'printtag_newevent',message = "new event")
 # Filter the ones with sub_event_stream == InIceSplit
 tray.AddModule(in_ice, 'in_ice')
-tray.AddModule(countevents1,"count1")
 #tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
 # Make sure that the length of SplitInIcePulses is >= 8
 
@@ -129,7 +136,7 @@ tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 #tray.AddModule(printtag, 'printtag_smttrig',message = "passed smttrig")
 tray.AddModule(SMT8, 'SMT8')
 #tray.AddModule(printtag, 'printtag_smt8',message = "passed smt8")
-#tray.AddModule(min_bias, 'min_bias')
+tray.AddModule(min_bias, 'min_bias')
 #tray.AddModule(printtag, 'printtag_minbias',message = "passed minbias")
 
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data
@@ -195,7 +202,7 @@ timingSplinePath = '/cvmfs/icecube.opensciencegrid.org/data/photon-tables/spline
 amplitudeSplinePath = '/cvmfs/icecube.opensciencegrid.org/data/photon-tables/splines/InfBareMu_mie_abs_z20a10_V2.fits'
 stochTimingSplinePath = '/cvmfs/icecube.opensciencegrid.org/data/photon-tables/splines/InfHighEStoch_mie_prob_z20a10.fits'
 stochAmplitudeSplinePath = '/cvmfs/icecube.opensciencegrid.org/data/photon-tables/splines/InfHighEStoch_mie_abs_z20a10.fits'
-#pulses = "SRTOfflinePulses"
+pulses = "SRTOfflinePulses"
 EnEstis = ["SplineMPETruncatedEnergy_SPICEMie_AllDOMS_Muon",
            "SplineMPETruncatedEnergy_SPICEMie_DOMS_Muon",
            "SplineMPETruncatedEnergy_SPICEMie_AllBINS_Muon",
@@ -223,10 +230,10 @@ tray.AddModule(muon_zenith, 'MuonZenithFilter',
 tray.AddSegment(InstallTables, 'InstallPhotonTables')
 #tray.AddSegment(FiniteReco,'FiniteReco',
 #                suffix = 'DOMeff',
-#                #InputTrackName = 'SplineMPE',
+#                InputTrackName = 'SplineMPE',
 #		Pulses = args.pulsename,
                 #Pulses = 'RTTWOfflinePulses_FR_WIMP_DOMeff',
-##                Pulses = 'SRTInIcePulses'
+#                Pulses = 'SRTInIcePulses'
 #		)
 
 
@@ -236,7 +243,7 @@ ic86 = [ 21, 29, 39, 38, 30, 40, 50, 59, 49, 58, 67, 66, 74, 73, 65, 72, 78, 48,
 	25, 85, 84, 82, 81, 86, 35, 34, 24, 15, 23, 33, 43, 32, 42, 41, 51,
 	31, 22, 14, 7, 1, 79, 80] # Taken from http://wiki.icecube.wisc.edu/index.php/Deployment_order
 
-#icetray.load('finiteReco', False)
+icetray.load('finiteReco', False)
 tray.AddService('I3GulliverFinitePhPnhFactory', 'GulliverPhPnh',
 		InputReadout = args.pulsename,
 		PhotorecName = Globals.PhotonicsServiceFiniteReco,
@@ -301,7 +308,7 @@ tray.AddModule(tot_charge,'tot_charge',
 # DOManalysis
 # This uses the MPEFit's to calculate TotalCharge, RecoDistance, etc.
 tray.AddModule(dom_data, 'dom_data',
-#               reco_fit='MPEFitDOMeff',
+               #reco_fit='MPEFitDOMeff',
                reco_fit='SplineMPE',
                options=dom_data_options
                )
@@ -333,8 +340,8 @@ tray.AddSegment(hit_statistics.I3HitStatisticsCalculatorSegment, 'I3HitStatistic
 #tray.AddModule(printtag, 'printtag_hitstats',message = "passed hit_stats")
 # Move the cut variables into the top level of the frame.
 tray.AddModule(move_cut_variables, 'move_cut_variables',
-#               direct_hits_name='MPEFitDOMeffDirectHits',
-#               fit_params_name='MPEFitDOMeffFitParams')
+              # direct_hits_name='MPEFitDOMeffDirectHits',
+              # fit_params_name='MPEFitDOMeffFitParams')
                direct_hits_name='SplineMPEDirectHits',
                fit_params_name='SplineMPEFitParams'
                )
@@ -367,9 +374,9 @@ tray.AddModule(countevents2,"count2")
 # Write out the data to an I3 file
 tray.AddModule('I3Writer', 'I3Writer',
                FileName=args.output+datafilename+'.i3.gz',
-               SkipKeys=['InIceRecoPulseSeriesPattern.*'],
-               DropOrphanStreams=[icetray.I3Frame.DAQ,icetray.I3Frame.Physics],
-               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics]
+               #SkipKeys=['InIceRecoPulseSeriesPattern.*'],
+               DropOrphanStreams=[icetray.I3Frame.DAQ],
+               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics,icetray.I3Frame.Simulation]
                )
     
 tray.AddModule('TrashCan', 'yeswecan')

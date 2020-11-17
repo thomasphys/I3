@@ -3,21 +3,26 @@ import argparse
 import os, sys
 import ROOT
 
-Datacondition_have = ['.i3.bz2','Run','Subrun','_1','level2']
+Datacondition_have = ['.tar.bz2','Run','Subrun','PFFilt']
 Datacondition_nothave = ['_IT']
-GDCcondition_have = ['.i3.zst','Run','GCD','level2pass2']
+GDCcondition_have = ['.i3.','Run','GCD','Level2pass2']
 GDCcondition_nothave = ['_IT']
 
-def checkfilename(filename, runnumber, cond_have, cond_nothave) :
+def checkfilename(filename, cond_have, cond_nothave) :
+
+	print(filename)
+        for cond in cond_have :
+                if cond not in filename :
+                        return False
+        for cond in cond_nothave :
+                if cond in filename :
+                        return False
+        return True
+
+def checkrunnum(filename, runnumber) :
 	if str(runnumber) not in filename :
 		return False
-	for cond in cond_have :
-		if cond not in filename :
-			return False
-	for cond in cond_nothave :
-		if cond in filename :
-			return False
-	return true
+	return True
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', help='Input good run list.',type=str,default = '')
@@ -112,22 +117,35 @@ file.close()
 file = open(args.output+".txt",'w')
 
 listOfFiles = list()
-for (dirpath, dirnames, filenames) in os.walk("/data/exp/IceCube/"):
-    listOfFiles += [os.path.join("/data/exp/IceCube/"+dirpath, file) for file in filenames]
+gcdfilelist = list()
+basedir = "/data/exp/IceCube/"+str(runlistyear)+"/filtered/PFFilt"
+print(basedir)
+for (dirpath, dirnames, filenames) in os.walk(basedir):
+    listOfFiles += [os.path.join(dirpath,x) for x in filenames if checkfilename(x,Datacondition_have, Datacondition_nothave)]
+basedir = "/data/exp/IceCube/"+str(runlistyear)+"/filtered/level2pass2/AllGCD"
+print(basedir)
+for (dirpath, dirnames, filenames) in os.walk(basedir):
+    gcdfilelist += [os.path.join(dirpath,x) for x in filenames if checkfilename(x,GDCcondition_have, GDCcondition_nothave)]
 
 for i in range(len(runnum)) :
+	print(str(i)+"/"+str(len(runnum)))
 	if runbin[i] < 0 : continue
-	runfilelist = [x for x in listOfFiles if checkfilename(x,runnum[i],Datacondition_have, Datacondition_nothave)]
+	runfilelist = [x for x in listOfFiles if checkrunnum(x,runnum[i])]
+	print(len(runfilelist))
 	if len(runfilelist) > 0 :
 		pathsplit = runfilelist[0].split("/",1000)
-		rundirpath = ""
-		for i in rang(len(pathspit)-1):
-			rundirpath += "/"+pathsplit[i]
-
-			outputdir = "/data/user/tmcelroy/submit_domeff_data/"
+		rundirpath = pathsplit[0]
+		for j in range(1,len(pathsplit)-1):
+			rundirpath += "/"+pathsplit[j]
+		rundirpath += "/"
+		outputdir = "/data/user/tmcelroy/submit_domeff_data/"
 		extra  = "datahd5/"+pathsplit[-6]+"/"+pathsplit[-3]+"/"+pathsplit[-2]
-		gcdfile = [x for x in listOfFiles if checkfilename(x,runnum[i],GDCcondition_have, GDCcondition_nothave)]
-		file.write(str(len(runfilelist)) + " : python submit_domeff_data.py " + gcdfile + " " + rundirpath + " -1 " + outputdir + " " + extra + " False " + str(min_val/length[runbin[i]]))
+		gcdfile = [x for x in gcdfilelist if checkrunnum(x,runnum[i])]
+		print(gcdfile)
+		if len(gcdfile)<1 : 
+			continue
+		nsubruns = len(runfilelist)
+		file.write(str(nsubruns) + " : python submit_domeff_data.py " + gcdfile[0] + " " + rundirpath + " Run" "{0:0{1}d}".format(runnum[i],8) + " -1 " + outputdir + " " + extra + " False " + str(min_val/length[runbin[i]]) + "\n")
 
 for i in range(len(monthdays)) :
 	for j in range(monthdays[i]) :

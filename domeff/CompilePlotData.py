@@ -683,7 +683,7 @@ if __name__ == '__main__':
                                 if weight > max_weight:
                                         max_weight = weight
 
-            if event['filterMask/CascadeFilter_13'] : CascadeFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
+            		if event['filterMask/CascadeFilter_13'] : CascadeFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 			if event['filterMask/DeepCoreFilter_13'] : DeepCoreFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                  
 			if event['filterMask/DeepCoreFilter_TwoLayerExp_13'] : DeepCoreFilter_TwoLayerExp_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)    
 			if event['filterMask/EHEFilter_13'] : EHEFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)                      
