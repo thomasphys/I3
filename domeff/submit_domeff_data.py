@@ -17,18 +17,34 @@ files_dir = opts["data"]
 folderlist = files_dir.split("/",1000)
 folder = folderlist[len(folderlist)-2] + '_' + folderlist[len(folderlist)-1]
 file_list_aux = os.listdir(files_dir)
-file_list = [x for x in file_list_aux if ( '.i3.zst' in x and '_IT' not in x)]
+file_list_bz2 = [x for x in file_list_aux if ( '.i3.bz2' in x and '_IT' not in x)]
+file_list_gz = [x for x in file_list_aux if ( '.i3.gz' in x and '_IT' not in x)]
+file_list_zst = [x for x in file_list_aux if ( '.i3.zst' in x and '_IT' not in x)]
+
+file_list = file_list_zst
+ext = '.i3.zst'
+if len(file_list_bz2) > len(file_list_gz) and len(file_list_bz2) > len(file_list_zst) :
+	file_list = file_list_bz2
+	ext = '.i3.bz2'
+elif len(file_list_gz) > len(file_list_zst) :
+	file_list = file_list_gz
+	ext = '.i3.gz'
 
 totaljobs = len(file_list)
 filecutsuff = file_list[0].replace('.i3.zst', '')
 filenamelist = filecutsuff.split("_",20)
 filenameprefix = filenamelist[0]
+processfilename = filenamelist[0]
 for i in range(1,len(filenamelist)) :
 	if "Subrun" in filenamelist[i] :
-		filenameprefix = filenameprefix + "_" + filenamelist[i]
-		break
+		if 'Level2pass2' in filecutsuff:
+			filenameprefix = filenameprefix + "_" + filenamelist[i]+"_000"
+			break
+		else :
+			filenameprefix = filenameprefix + "_" + "Subrun000"
+			break
 	filenameprefix = filenameprefix + "_" + filenamelist[i]
-filenameprefix = filenameprefix + "_000"
+	processfilename = processfilename + "_" + filenamelist[i]
 
 startnumber = 9999999999
 
@@ -37,13 +53,13 @@ job_string = '''#!/bin/bash
 eval `/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/setup.sh`
 #RUNNUM=$( printf '%05d' $1 )
 #tar -xvjf {}$RUNNUM.tar.bz2 -C /data/user/tmcelroy/domeff/datatemp
-/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t .i3.zst -o {}
+/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t {} -o {}
 
-'''.format(files_dir+"/"+filenameprefix,opts["gcd"],files_dir+filenameprefix,opts["out"]+"datahd5/"+filenameprefix,filenameprefix,filenameprefix)
-procesfilename = 'domeff_process_' + opts["run"] + '.sh'
-with open(opts["out"] + '/jobscripts/' + procesfilename, 'w') as ofile:
+'''.format(files_dir+"/"+filenameprefix,opts["gcd"],files_dir+filenameprefix,ext,opts["out"]+"datahd5/"+filenameprefix)
+processfilename = processfilename + '.sh'
+with open(opts["out"] + '/jobscripts/' + processfilename + '.sh', 'w') as ofile:
 	ofile.write(job_string)
-	subprocess.Popen(['chmod','777',opts["out"] + '/jobscripts/' + procesfilename])
+	subprocess.Popen(['chmod','777',opts["out"] + '/jobscripts/' + processfilename + '.sh'])
 
 submit_string = '''
 executable = {}/jobscripts/{}
@@ -51,9 +67,9 @@ executable = {}/jobscripts/{}
 transfer_input_files = domanalysis.py,event.py,general.py,geometry.py,process_splineMPE_2015.py,writeEvent.py
 
 Arguments = $(Process)
-output = /home/tmcelroy/icecube/domeff/out/DOMeff_processdata_$(Process).out
-error = /home/tmcelroy/icecube/domeff/error/DOMeff_processdata_$(Process).err
-log = /scratch/tmcelroy/domeff/log/DOMeff_processdata_$(Process).log
+output = /home/tmcelroy/icecube/domeff/out/{}_$(Process).out
+error = /home/tmcelroy/icecube/domeff/error/{}_$(Process).err
+log = /scratch/tmcelroy/domeff/log/{}_$(Process).log
 
 Universe = vanilla
 request_memory = 4GB
@@ -64,7 +80,7 @@ notification = never
 +TransferOutput=""
 
 queue {}
-'''.format(opts["out"],procesfilename,str(totaljobs))
+'''.format(opts["out"],processfilename + '.sh',processfilename,processfilename,processfilename,str(totaljobs))
 
 submissionfilename = 'domeff_process_' + folder + '.submit'
 

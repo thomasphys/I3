@@ -99,12 +99,12 @@ tray.AddModule('I3Reader', 'I3Reader',
 
 tray.AddModule(countevents1,"count1")
 
-if "PFFilt" in args.datadir :
-  #tray.AddModule(printtag, 'printtag_pff',message = "pff data")
+if "PFDSTnoSPE" in args.datadir :
+#  tray.AddModule(printtag, 'printtag_pff',message = "pff data")
 
   tray.AddModule(ClipStartStop, 'clipstartstop')
 
-  #tray.AddModule(printtag, 'printtag_clip',message = "pass clipstartstop")
+#  tray.AddModule(printtag, 'printtag_clip',message = "pass clipstartstop")
 
   tray.AddSegment(Rehydration, 'rehydrator',
                 #dstfile=args.dstfile,
@@ -112,7 +112,7 @@ if "PFFilt" in args.datadir :
                 doNotQify=False,
                 pass2=True,
                 )
-  #tray.AddModule(printtag, 'printtag_rehydrate',message = "pass rehydrate")
+#  tray.AddModule(printtag, 'printtag_rehydrate',message = "pass rehydrate")
 
 #tray.AddModule(printtag, 'printtag_newevent',message = "new event")
 # Filter the ones with sub_event_stream == InIceSplit
@@ -136,7 +136,7 @@ tray.AddModule(InIceSMTTriggered, 'InIceSMTTriggered')
 #tray.AddModule(printtag, 'printtag_smttrig',message = "passed smttrig")
 tray.AddModule(SMT8, 'SMT8')
 #tray.AddModule(printtag, 'printtag_smt8',message = "passed smt8")
-tray.AddModule(min_bias, 'min_bias')
+#tray.AddModule(min_bias, 'min_bias')
 #tray.AddModule(printtag, 'printtag_minbias',message = "passed minbias")
 
 # Generate RTTWOfflinePulses_FR_WIMP, used to generate the finite reco reconstruction in data

@@ -27,12 +27,14 @@ def min_bias(frame) :
     Check that condition_passed and prescale_passed for FilterMinBias_11 are
     both True. .. moved it to 'filterMinBias_13
     """
-    #if frame.Has('FilterMask_NullSplit0'):
+    #if frame.Has('QFilterMask'):
     if frame.Has('FilterMask'):
-        #filter_mask = frame['FilterMask_NullSplit0']
+        #filter_mask = frame['QFilterMask_NullSplit0']
         filter_mask = frame['FilterMask']
         filter_min_bias = filter_mask['FilterMinBias_13']
         return filter_min_bias.condition_passed #and filter_min_bias.prescale_passed
+#    if frame.Has('PhysMinBiasTriggered') :
+#	return frame['PhysMinBiasTriggered'].value
     else:
         return False
 

@@ -4,18 +4,16 @@ import subprocess
 
 opts = {}
 
-opts["gcd"] = sys.argv[1]
-opts["data"] = sys.argv[2]
-opts["nevents"] = sys.argv[3]
-opts["out"] = sys.argv[4]
-opts["sim"] = sys.argv[6]
-opts["subdir"] = sys.argv[5]
+opts["gcd"] = sys.argv[1].replace("\n","")
+opts["data"] = sys.argv[2].replace("\n","")
+opts["out"] = sys.argv[3].replace("\n","")
+opts["subdir"] = sys.argv[4].replace("\n","")
 
 scratch = '/scratch/tmcelroy/domeff'
 
 files_dir = opts["data"]
 folderlist = files_dir.split("/",1000)
-folder = folderlist[len(folderlist)-2] + '_' + folderlist[len(folderlist)-1]
+folder = folderlist[-3] + '_' + folderlist[-2]
 file_list_aux = os.listdir(files_dir)
 file_list = [x for x in file_list_aux if '.i3.zst' in x]
 
@@ -39,13 +37,13 @@ job_string = '''#!/bin/bash
 
 eval `/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/setup.sh`
 
-/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t .i3.zst -o {} -s {}
+/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t .i3.zst -o {} -s True
 
-'''.format(opts["gcd"],files_dir+"/"+filenameprefix,opts["out"]+"/hd5/"+opts["subdir"]+filenameprefix,opts["sim"])
+'''.format(opts["gcd"],files_dir+filenameprefix,opts["out"]+"hd5/"+opts["subdir"]+filenameprefix)
 procesfilename = 'domeff_process_' + folder + '.sh'
 with open(opts["out"] + '/jobscripts/' + procesfilename, 'w') as ofile:
 	ofile.write(job_string)
-	subprocess.Popen(['chmod','777',opts["out"] + '/jobscripts/' + procesfilename])
+	subprocess.Popen(['chmod','777',opts["out"] + 'jobscripts/' + procesfilename])
 
 submit_string = '''
 executable = {}/jobscripts/{}

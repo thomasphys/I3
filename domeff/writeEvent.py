@@ -91,35 +91,41 @@ class EventWriter(icetray.I3Module):
 		event['totalCharge'] = frame['EventCharge'].value
 		event['stopLikeRatio'] = frame['FiniteRecoLLHRatio'].value
 
-		#filter_mask = frame['FilterMask']
+		filter_mask = []
+		if frame.Has('FilterMask') :
+			filter_mask = frame['FilterMask']
+		elif frame.Has('QFilterMask') :
+			filter_mask = frame['QFilterMask']
+		elif frame.Has('QFilterMask_NullSplit0') :
+			filter_mask = frame['QFilterMask_NullSplit0']
 
-		#event['filterMask/CascadeFilter_13']                   = filtertriggerresult(filter_mask['CascadeFilter_13'].condition_passed)
-		#event['filterMask/DeepCoreFilter_13']                  = filtertriggerresult(filter_mask['DeepCoreFilter_13'].condition_passed)
-	#	event['filterMask/DeepCoreFilter_TwoLayerExp_13']      = filtertriggerresult(filter_mask['DeepCoreFilter_TwoLayerExp_13'].condition_passed)
+		event['filterMask/CascadeFilter_13']                   = filtertriggerresult(filter_mask['CascadeFilter_13'].condition_passed)
+		event['filterMask/DeepCoreFilter_13']                  = filtertriggerresult(filter_mask['DeepCoreFilter_13'].condition_passed)
+	#	vent['filterMask/DeepCoreFilter_TwoLayerExp_13']      = filtertriggerresult(filter_mask['DeepCoreFilter_TwoLayerExp_13'].condition_passed)
 		#event['filterMask/EHEFilter_13']                       = filtertriggerresult(filter_mask['EHEFilter_13'].condition_passed)
-		#event['filterMask/FSSCandidate_13']                    = filtertriggerresult(filter_mask['FSSCandidate_13'].condition_passed)
-		#event['filterMask/FSSFilter_13']                       = filtertriggerresult(filter_mask['FSSFilter_13'].condition_passed)
-		#event['filterMask/FilterMinBias_13']                   = filtertriggerresult(filter_mask['FilterMinBias_13'].condition_passed)
-		#event['filterMask/FixedRateFilter_13']                 = filtertriggerresult(filter_mask['FixedRateFilter_13'].condition_passed)
+		event['filterMask/FSSCandidate_13']                    = filtertriggerresult(filter_mask['FSSCandidate_13'].condition_passed)
+		event['filterMask/FSSFilter_13']                       = filtertriggerresult(filter_mask['FSSFilter_13'].condition_passed)
+		event['filterMask/FilterMinBias_13']                   = filtertriggerresult(filter_mask['FilterMinBias_13'].condition_passed)
+		event['filterMask/FixedRateFilter_13']                 = filtertriggerresult(filter_mask['FixedRateFilter_13'].condition_passed)
 		#event['filterMask/GCFilter_13']                        = filtertriggerresult(filter_mask['GCFilter_13'].condition_passed)
-		#event['filterMask/I3DAQDecodeException']               = filtertriggerresult(filter_mask['I3DAQDecodeException'].condition_passed)
-		#event['filterMask/IceTopSTA3_13']                      = filtertriggerresult(filter_mask['IceTopSTA3_13'].condition_passed)
-		#event['filterMask/IceTopSTA5_13']                      = filtertriggerresult(filter_mask['IceTopSTA5_13'].condition_passed)
-		#event['filterMask/IceTop_InFill_STA3_13']              = filtertriggerresult(filter_mask['IceTop_InFill_STA3_13'].condition_passed)
-		#event['filterMask/InIceSMT_IceTopCoincidence_13']      = filtertriggerresult(filter_mask['InIceSMT_IceTopCoincidence_13'].condition_passed)
+		event['filterMask/I3DAQDecodeException']               = filtertriggerresult(filter_mask['I3DAQDecodeException'].condition_passed)
+		event['filterMask/IceTopSTA3_13']                      = filtertriggerresult(filter_mask['IceTopSTA3_13'].condition_passed)
+		event['filterMask/IceTopSTA5_13']                      = filtertriggerresult(filter_mask['IceTopSTA5_13'].condition_passed)
+		event['filterMask/IceTop_InFill_STA3_13']              = filtertriggerresult(filter_mask['IceTop_InFill_STA3_13'].condition_passed)
+		event['filterMask/InIceSMT_IceTopCoincidence_13']      = filtertriggerresult(filter_mask['InIceSMT_IceTopCoincidence_13'].condition_passed)
 		#event['filterMask/LID']                                = filtertriggerresult(filter_mask['LID'].condition_passed)
-		#event['filterMask/LowUp_13']                           = filtertriggerresult(filter_mask['LowUp_13'].condition_passed)
-		#event['filterMask/MoonFilter_13']                      = filtertriggerresult(filter_mask['MoonFilter_13'].condition_passed)
-		#event['filterMask/MuonFilter_13']                      = filtertriggerresult(filter_mask['MuonFilter_13'].condition_passed)
+		event['filterMask/LowUp_13']                           = filtertriggerresult(filter_mask['LowUp_13'].condition_passed)
+		event['filterMask/MoonFilter_13']                      = filtertriggerresult(filter_mask['MoonFilter_13'].condition_passed)
+		event['filterMask/MuonFilter_13']                      = filtertriggerresult(filter_mask['MuonFilter_13'].condition_passed)
 		#event['filterMask/OFUFilter_14']                       = filtertriggerresult(filter_mask['OFUFilter_14'].condition_passed)
 		#event['filterMask/OnlineL2Filter_14']                  = filtertriggerresult(filter_mask['OnlineL2Filter_14'].condition_passed)
 		#event['filterMask/SDST_FilterMinBias_13']              = filtertriggerresult(filter_mask['SDST_FilterMinBias_13'].condition_passed)
-		#event['filterMask/SDST_IceTopSTA3_13']                 = filtertriggerresult(filter_mask['SDST_IceTopSTA3_13'].condition_passed)
-		#event['filterMask/SDST_IceTop_InFill_STA3_13']         = filtertriggerresult(filter_mask['SDST_IceTop_InFill_STA3_13'].condition_passed)
-		#event['filterMask/SDST_InIceSMT_IceTopCoincidence_13'] = filtertriggerresult(filter_mask['SDST_InIceSMT_IceTopCoincidence_13'].condition_passed)
-		#event['filterMask/SlopFilter_13']                      = filtertriggerresult(filter_mask['SlopFilter_13'].condition_passed)
-		#event['filterMask/SunFilter_13']                       = filtertriggerresult(filter_mask['SunFilter_13'].condition_passed)
-		#event['filterMask/VEF_13']                             = filtertriggerresult(filter_mask['VEF_13'].condition_passed)
+		event['filterMask/SDST_IceTopSTA3_13']                 = filtertriggerresult(filter_mask['SDST_IceTopSTA3_13'].condition_passed)
+		event['filterMask/SDST_IceTop_InFill_STA3_13']         = filtertriggerresult(filter_mask['SDST_IceTop_InFill_STA3_13'].condition_passed)
+		event['filterMask/SDST_InIceSMT_IceTopCoincidence_13'] = filtertriggerresult(filter_mask['SDST_InIceSMT_IceTopCoincidence_13'].condition_passed)
+		event['filterMask/SlopFilter_13']                      = filtertriggerresult(filter_mask['SlopFilter_13'].condition_passed)
+		event['filterMask/SunFilter_13']                       = filtertriggerresult(filter_mask['SunFilter_13'].condition_passed)
+		event['filterMask/VEF_13']                             = filtertriggerresult(filter_mask['VEF_13'].condition_passed)
 
 		event['triggerMask/InIceSMT']                          = filtertriggerresult(frame['InIceSMTTriggered'])
 		event['triggerMask/IceTopSMT']                         = filtertriggerresult(frame['IceTopSMTTriggered'])
