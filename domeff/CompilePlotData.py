@@ -612,6 +612,7 @@ if __name__ == '__main__':
 						nargs = 2, default = [10.,10.])
 
 
+
 	args = parser.parse_args()
 	weightname = 'weight_'+args.flux
 
@@ -626,7 +627,7 @@ if __name__ == '__main__':
 	bin_distance_ic = [[] for i in range(nbins)]
 	bin_DomCharge_dc  = [[] for i in range(nbins)]
 	bin_DomCharge300_dc  = [[] for i in range(nbins)]
-    	bin_DomHit_dc  = [[] for i in range(nbins)]
+    bin_DomHit_dc  = [[] for i in range(nbins)]
 	bin_DomHit300_dc  = [[] for i in range(nbins)]
 	bin_weights_dc = [[] for i in range(nbins)]
 	bin_distance_dc = [[] for i in range(nbins)]
@@ -639,14 +640,14 @@ if __name__ == '__main__':
 
 	files_dir = args.data
 	file_list_aux = os.listdir(files_dir)
-	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
-	file_list = []
+	file_list = list()
+	for (dirpath, dirnames, filenames) in os.walk(basedir):
+    file_list += [os.path.join(dirpath,x) for x in filenames if '.h5' in x and args.eff in x]
+
 #	if args.flux == "data" :
 #		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 12000000 )]
 #	else :
 #		file_list = [x for x in file_list_h5 if (args.eff in x)]
-
-	file_list = [x for x in file_list_h5 if (args.eff in x)]
 
 	nfiles = len(file_list)
 
@@ -668,7 +669,11 @@ if __name__ == '__main__':
 	nfiles = len(file_list)
 	
 	for filename in file_list :
-		h5file = open_file(files_dir+filename, mode="r")
+		h5file = 0
+		try :
+			h5file = open_file(files_dir+filename, mode="r")
+		except : continue
+		
 		domtable = h5file.root.doms
 		eventtable = h5file.root.events
 		runtable = h5file.root.runinfo

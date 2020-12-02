@@ -8,6 +8,8 @@ Datacondition_nothave = ['_IT']
 GDCcondition_have = ['.i3.','Run','GCD','Level2pass2']
 GDCcondition_nothave = ['_IT']
 
+prescale = 1.0
+
 def checkfilename(filename, cond_have, cond_nothave) :
 
 	print(filename)
@@ -139,13 +141,13 @@ for i in range(len(runnum)) :
 			rundirpath += "/"+pathsplit[j]
 		rundirpath += "/"
 		outputdir = "/data/user/tmcelroy/submit_domeff_data/"
-		extra  = "datahd5/"+pathsplit[-6]+"/"+pathsplit[-3]+"/"+pathsplit[-2]
+		extra  = pathsplit[-5]+"/"+pathsplit[-2]
 		gcdfile = [x for x in gcdfilelist if checkrunnum(x,runnum[i])]
 		print(gcdfile)
 		if len(gcdfile)<1 : 
 			continue
 		nsubruns = len(runfilelist)
-		file.write(str(nsubruns) + " : python submit_domeff_data.py " + gcdfile[0] + " " + rundirpath + " Run" "{0:0{1}d}".format(runnum[i],8) + " -1 " + outputdir + " " + extra + " False " + str(min_val/length[runbin[i]]) + "\n")
+		file.write(str(nsubruns) + " :python submit_domeff_data.py " + gcdfile[0] + " " + rundirpath + " Run" "{0:0{1}d}".format(runnum[i],8) + " -1 " + outputdir + " " + extra + " False " + str(prescale*float(min_val/length[runbin[i]])) + "\n")
 
 for i in range(len(monthdays)) :
 	for j in range(monthdays[i]) :

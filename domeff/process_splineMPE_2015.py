@@ -40,6 +40,7 @@ from icecube.filterscripts.offlineL2.level2_Reconstruction_WIMP import FiniteRec
 from icecube.filterscripts.offlineL2.level2_Reconstruction_Muon import SPE, MPE
 from icecube.filterscripts.offlineL2.PhotonTables import InstallTables
 from icecube import cramer_rao
+import ROOT
 
 load('libipdf')
 load('libgulliver')
@@ -63,6 +64,25 @@ def countevents2(frame) :
 	global eventcount2
         eventcount2 += 1.0
 
+rand = ROOT.TRandom3(0)
+def prescalemodule(frame,prescalefrac) :
+  global rand
+  if rand.Uniform() < prescalefrac :
+    return True
+  return False
+
+def standardcuts(frame) :
+    
+  if frame['SplineMPE'].pos.z < -450.0 : return False
+
+  if frame['DistToBorder'].value < 50. : return False
+  
+  if frame['FiniteRecoLLHRatio'].value < 5.0 : return False
+
+  if frame['rlogl'].value < 5 : return False
+
+  if frame['ICNHits'].value  > 30 : return False
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--datadir', help='Directory of data files.',type=str,
         default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_')
@@ -81,6 +101,7 @@ parser.add_argument('-r', '--runnum', help='number to identify target file', typ
 parser.add_argument('-p', '--pulsename', help='Name of new pulse list', type = str, default = 'SRTInIcePulsesDOMEff')
 parser.add_argument('-m', '--maxdist', help='maximum distance to DOM to consider', type = float, default = 200.0)
 parser.add_argument('-x', '--dstfile', help='dts file, should be .root',type=str,default = "")
+parser.add_argument('-y','--prescale',help='prescale fraction',type=float,default = 1.0)
 
 args = parser.parse_args()
 
@@ -96,6 +117,9 @@ datafilename = "{0:0{1}d}".format(args.runnum,5)
 # Read the files.
 tray.AddModule('I3Reader', 'I3Reader',
                Filenamelist=[args.gcd, args.datadir+datafilename+args.datafiletype])
+
+if args.prescale < 1.0 :
+  tray.AddModule(prescalemodule,'prescale',prescalefrac=args.prescale)
 
 tray.AddModule(countevents1,"count1")
 
@@ -355,6 +379,8 @@ tray.AddModule(count_hits, 'count_hits',
 # Geoanalysis
 # Calculate the distance of each event to the detector border.
 tray.AddModule(calc_dist_to_border, 'calc_dist_to_border')
+
+tray.AddModule(standardcuts,'standardcutsmodule')
 
 #tray.AddModule(printtag, 'printtag_dist to border',message = "pssed dist_to_border")
 

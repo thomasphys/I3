@@ -9,6 +9,14 @@ opts["data"] = sys.argv[2].replace("\n","")
 opts["out"] = sys.argv[3].replace("\n","")
 opts["subdir"] = sys.argv[4].replace("\n","")
 
+subdirectorysplit = opts["subdir"].split("/",100)
+pathtosub = opts["out"]+"hd5/"
+for subdir in subdirectorysplit :
+	if subdir == "" or subdir == " " : continue
+	if not os.path.exists(pathtosub+subdir) :
+		os.mkdir(pathtosub+subdir)
+	pathtosub = pathtosub+subdir+"/"
+
 scratch = '/scratch/tmcelroy/domeff'
 
 files_dir = opts["data"]
@@ -39,7 +47,7 @@ eval `/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/setup.sh`
 
 /cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t .i3.zst -o {} -s True
 
-'''.format(opts["gcd"],files_dir+filenameprefix,opts["out"]+"hd5/"+opts["subdir"]+filenameprefix)
+'''.format(opts["gcd"],files_dir+filenameprefix,pathtosub+filenameprefix)
 procesfilename = 'domeff_process_' + folder + '.sh'
 with open(opts["out"] + '/jobscripts/' + procesfilename, 'w') as ofile:
 	ofile.write(job_string)
