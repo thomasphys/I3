@@ -12,7 +12,6 @@ import argparse
 from icecube import dataio, icetray, gulliver, simclasses, dataclasses, photonics_service, phys_services
 from icecube.common_variables import direct_hits, hit_multiplicity, hit_statistics
 from I3Tray import I3Tray, I3Units, load
-
 from filters_InIceSplit_2015 import in_ice, min_bias, SMT8, MPEFit, InIceSMTTriggered,SplineMPE
 from general import get_truth_muon, get_truth_endpoint, count_hits, reco_endpoint, move_cut_variables,totaltimefilter,timestartfilter
 from geoanalysis import calc_dist_to_border

@@ -40,6 +40,7 @@ from icecube.filterscripts.offlineL2.level2_Reconstruction_WIMP import FiniteRec
 from icecube.filterscripts.offlineL2.level2_Reconstruction_Muon import SPE, MPE
 from icecube.filterscripts.offlineL2.PhotonTables import InstallTables
 from icecube import cramer_rao
+from icecube.filterscripts.shadowfilter import ShadowFilter
 
 load('libipdf')
 load('libgulliver')
@@ -119,6 +120,11 @@ if "PFDSTnoSPE" in args.datadir :
 tray.AddModule(in_ice, 'in_ice')
 #tray.AddModule(printtag, 'printtag_in_ice',message = "passed in_ice")
 # Make sure that the length of SplitInIcePulses is >= 8
+
+if args.sim :
+
+	tray.AddSegment(ShadowFilter, "MoonAndSun",
+			mcseed=args.runnum)
 
 tray.AddModule('TriggerCheck_13', 'TriggerCheck_13',
                I3TriggerHierarchy='I3TriggerHierarchy',

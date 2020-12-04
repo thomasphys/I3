@@ -591,7 +591,7 @@ if __name__ == '__main__':
 	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
 				default = "data")
 	parser.add_argument('-z', '--zenithrange', help='Range of muon Zeniths', type = float,
-				nargs = 2,  default = [40.,90.])
+				nargs = 2,  default = [40.,70.])
 	parser.add_argument('-p', '--energyrange', help='Range of muon Energies', type = float,
 				nargs = 2, default = [0.0, 9999999.00])
 	parser.add_argument('-i','--impactrange',help='Range of DOM impact parameters to include', 
@@ -610,7 +610,7 @@ if __name__ == '__main__':
 						type = int, nargs = 2, default = [5,20])
 	parser.add_argument('-l', '--likelihood', help='Fit likelyhoods, FiniteReco Likelihood ratio and SplineMPE Rlogl', type = float,
 						nargs = 2, default = [10.,10.])
-
+	parser.add_argument('-y', '--skim',help="skim fraction",type = float, default = 1.0)
 
 	args = parser.parse_args()
 	weightname = 'weight_'+args.flux
@@ -641,12 +641,12 @@ if __name__ == '__main__':
 	file_list_aux = os.listdir(files_dir)
 	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
 	file_list = []
-#	if args.flux == "data" :
-#		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 12000000 )]
-#	else :
-#		file_list = [x for x in file_list_h5 if (args.eff in x)]
+	if args.flux == "data" :
+		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 30000000 )]
+	else :
+		file_list = [x for x in file_list_h5 if (args.eff in x)]
 
-	file_list = [x for x in file_list_h5 if (args.eff in x)]
+#	file_list = [x for x in file_list_h5 if (args.eff in x)]
 
 	nfiles = len(file_list)
 
@@ -666,9 +666,15 @@ if __name__ == '__main__':
 	#generator = weighting.from_simprod(21269,False,'vm-simprod2.icecube.wisc.edu')
 	#generator = weighting.icetop_mc_weights(21269,'/home/tmcelroy/icecube/domeff/datasetConfig.json')
 	nfiles = len(file_list)
+
+	rand = ROOT.TRandom3()
 	
 	for filename in file_list :
+		#if args.flux == "data" :
+		#	if rand.Uniform() > args.skim : continue
 		h5file = open_file(files_dir+filename, mode="r")
+		if not h5file : continue
+		if not h5file.isopen :  continue
 		domtable = h5file.root.doms
 		eventtable = h5file.root.events
 		runtable = h5file.root.runinfo
@@ -676,6 +682,9 @@ if __name__ == '__main__':
 		domindex = 0
 
 		for event in eventtable.iterrows() :
+
+			if args.flux == "data" :
+				if rand.Uniform()>args.skim : continue
 
 			totalevent += 1
 
@@ -787,14 +796,15 @@ if __name__ == '__main__':
 				flagcount += 1
 				DeepCoreSMT.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
-			if (not event['filterMask/SunFilter_13']) or (flagcount>0 and event['filterMask/SunFilter_13']):
+			if not (event['filterMask/SunFilter_13'] or event['filterMask/MoonFilter_13']):
 				NotOnlySun.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 			
 			if not event['filterMask/CascadeFilter_13'] :
 				NoCascade_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 
-		#	if event['filterMask/SunFilter_13'] : continue
-		#	if event['filterMask/MoonFilter_13'] : continue 
+			if args.flux == "data" :			
+				if event['filterMask/SunFilter_13'] : continue
+				if event['filterMask/MoonFilter_13'] : continue 
 
 			#if not event['filterMask/FSSFilter_13'] : continue
 
