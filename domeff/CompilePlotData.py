@@ -584,8 +584,8 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
 				default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
-	parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str,
-				default = "eff100")
+	parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str, nargs = '+',
+				default = ["eff100"])
 	parser.add_argument('-o', '--output', help='Name of output file.', type=str,
 				default = "out.root")
 	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
@@ -642,8 +642,10 @@ if __name__ == '__main__':
 	file_list_aux = os.listdir(files_dir)
 	file_list = list()
 	for (dirpath, dirnames, filenames) in os.walk(basedir):
-    file_list += [os.path.join(dirpath,x) for x in filenames if '.h5' in x and args.eff in x]
-
+		for eff in args.eff :
+    		file_list += [os.path.join(dirpath,x) for x in filenames if '.h5' in x and eff in x]
+    #remove duclicates
+    file_list = list(set(file_list))
 #	if args.flux == "data" :
 #		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 12000000 )]
 #	else :
