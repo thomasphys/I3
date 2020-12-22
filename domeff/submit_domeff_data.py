@@ -9,9 +9,24 @@ opts["data"] = sys.argv[2]
 opts["run"] = sys.argv[3]
 opts["nevents"] = sys.argv[4]
 opts["out"] = sys.argv[5]
-opts["sim"] = sys.argv[6]
+opts["sim"] = sys.argv[7]
+opts["subdir"] = sys.argv[6]
+
+if len(sys.argv) > 8 :
+	opts["pre"] = sys.argv[8]
+else : 
+	opts["pre"] = 1.0
 
 scratch = '/scratch/tmcelroy/domeff'
+
+# check that directorys exist for output
+subdirectorysplit = opts["subdir"].split("/",100)
+pathtosub = opts["out"]+"datahd5/"
+for subdir in subdirectorysplit :
+	if subdir == "" or subdir == " " : continue
+	if not os.path.exists(pathtosub+subdir) :
+		os.mkdir(pathtosub+subdir)
+	pathtosub = pathtosub+subdir+"/"
 
 files_dir = opts["data"]
 folderlist = files_dir.split("/",1000)
@@ -53,9 +68,9 @@ job_string = '''#!/bin/bash
 eval `/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/setup.sh`
 #RUNNUM=$( printf '%05d' $1 )
 #tar -xvjf {}$RUNNUM.tar.bz2 -C /data/user/tmcelroy/domeff/datatemp
-/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t {} -o {}
+/cvmfs/icecube.opensciencegrid.org/py2-v3.1.1/RHEL_7_x86_64/metaprojects/combo/V00-00-04/env-shell.sh /home/tmcelroy/icecube/domeff/process_splineMPE_2015.py -g {} -d {} -r $1 -t {} -o {} -y {}
 
-'''.format(files_dir+"/"+filenameprefix,opts["gcd"],files_dir+filenameprefix,ext,opts["out"]+"datahd5/"+filenameprefix)
+'''.format(files_dir+"/"+filenameprefix,opts["gcd"],files_dir+filenameprefix,ext,pathtosub+filenameprefix,opts["pre"])
 processfilename = processfilename + '.sh'
 with open(opts["out"] + '/jobscripts/' + processfilename + '.sh', 'w') as ofile:
 	ofile.write(job_string)

@@ -550,7 +550,10 @@ def OutputHDF5(filename,args) :
     #h5file.root._v_attrs.dom_cuts = dom_cuts
 
 	staterow['data'] = args.data
-	staterow['eff'] = args.eff
+	eff = ""
+	for arg in args.eff :
+		eff = eff+","+arg
+	staterow['eff'] = eff
 	staterow['flux'] = args.flux
 	staterow['zenithmin'] = args.zenithrange[0]
 	staterow['zenithmax'] = args.zenithrange[1]
@@ -584,8 +587,8 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
 				default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
-	parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str,
-				default = "eff100")
+	parser.add_argument('-e', '--eff', help='efficiency to be used or data for data.', type = str, nargs = '+',
+				default = ["eff100"])
 	parser.add_argument('-o', '--output', help='Name of output file.', type=str,
 				default = "out.root")
 	parser.add_argument('-f', '--flux', help='Name of flux model.', type=str,
@@ -611,6 +614,7 @@ if __name__ == '__main__':
 	parser.add_argument('-l', '--likelihood', help='Fit likelyhoods, FiniteReco Likelihood ratio and SplineMPE Rlogl', type = float,
 						nargs = 2, default = [10.,10.])
 	parser.add_argument('-y', '--skim',help="skim fraction",type = float, default = 1.0)
+
 
 	args = parser.parse_args()
 	weightname = 'weight_'+args.flux
@@ -639,14 +643,16 @@ if __name__ == '__main__':
 
 	files_dir = args.data
 	file_list_aux = os.listdir(files_dir)
-	file_list_h5 = [x for x in file_list_aux if '.h5' in x]
-	file_list = []
-	if args.flux == "data" :
-		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 30000000 )]
-	else :
-		file_list = [x for x in file_list_h5 if (args.eff in x)]
-
-#	file_list = [x for x in file_list_h5 if (args.eff in x)]
+	file_list = list()
+	for (dirpath, dirnames, filenames) in os.walk(files_dir):
+		for eff in args.eff :
+			file_list += [os.path.join(dirpath,x) for x in filenames if '.h5' in x and eff in x]
+    #remove duclicates
+	file_list = list(set(file_list))
+#	if args.flux == "data" :
+#		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 12000000 )]
+#	else :
+#		file_list = [x for x in file_list_h5 if (args.eff in x)]
 
 	nfiles = len(file_list)
 
@@ -670,11 +676,11 @@ if __name__ == '__main__':
 	rand = ROOT.TRandom3()
 	
 	for filename in file_list :
-		#if args.flux == "data" :
-		#	if rand.Uniform() > args.skim : continue
-		h5file = open_file(files_dir+filename, mode="r")
-		if not h5file : continue
-		if not h5file.isopen :  continue
+		h5file = 0
+		try :
+			h5file = open_file(filename, mode="r")
+		except : continue
+		
 		domtable = h5file.root.doms
 		eventtable = h5file.root.events
 		runtable = h5file.root.runinfo
@@ -813,7 +819,7 @@ if __name__ == '__main__':
 			#zenith_all_spe.Fill(ROOT.TMath.Cos(event['spe/dir/zenith']),weight)
 			#zenith_all_mpe.Fill(ROOT.TMath.Cos(event['mpe/dir/zenith']),weight)
 			#Energy Cut
-			if event['reco/energy'] < args.energyrange[0] or event['reco/energy'] > args.energyrange[1] : 
+			if event['totalCharge'] < args.energyrange[0] or event['totalCharge'] > args.energyrange[1] : 
 				#print("Event killed by energy Cut")
 				#print(event['reco/energy'])
 				continue
@@ -836,6 +842,7 @@ if __name__ == '__main__':
 
 			if event['borderDistance'] < args.boarder[1] :
 				#print("Event killed by Detector Edge Cut")
+
 				#print(event['borderDistance'])
 				#print(event['truthBorderDistance'])
 				#print("event likelihood = %f" % (event['stopLikeRatio']))
