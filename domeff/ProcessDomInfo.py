@@ -165,7 +165,7 @@ if __name__ == '__main__':
 				elif dom['eventId'] == event['eventId'] :
 					domindex += 1
 				else :
-					break
+					continue
 				if dom['impactAngle'] < args.impactrange[0]*3.14/180. or  dom['impactAngle'] > args.impactrange[1]*3.14/180.:
 					continue
 				if dom['distAboveEndpoint'] < args.trackendpoint :
