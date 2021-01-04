@@ -30,7 +30,7 @@ completejobs  = open("submittedjobs.txt", "a")
 completejobs_read  = open("submittedjobs.txt", "r")
 cj = completejobs_read.readlines()
 
-jobfilelist = ["testjobs.txt",]
+jobfilelist = ["testjobs.txt","datarunlist/2015/runlist.txt"]
 #			   "",
 #			   ""] 
 

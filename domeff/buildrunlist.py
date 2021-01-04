@@ -3,7 +3,7 @@ import argparse
 import os, sys
 import ROOT
 
-Datacondition_have = ['.tar.bz2','Run','Subrun','PFFilt']
+Datacondition_have = ['.i3.zst','Run','Subrun','Level2pass2']
 Datacondition_nothave = ['_IT']
 GDCcondition_have = ['.i3.','Run','GCD','Level2pass2']
 GDCcondition_nothave = ['_IT']
@@ -12,7 +12,7 @@ prescale = 1.0
 
 def checkfilename(filename, cond_have, cond_nothave) :
 
-	print(filename)
+	#print(filename)
         for cond in cond_have :
                 if cond not in filename :
                         return False
@@ -120,12 +120,12 @@ file = open(args.output+".txt",'w')
 
 listOfFiles = list()
 gcdfilelist = list()
-basedir = "/data/exp/IceCube/"+str(runlistyear)+"/filtered/PFFilt"
-print(basedir)
+basedir = "/data/exp/IceCube/"+str(runlistyear)+"/filtered/level2pass2a"
+#print(basedir)
 for (dirpath, dirnames, filenames) in os.walk(basedir):
     listOfFiles += [os.path.join(dirpath,x) for x in filenames if checkfilename(x,Datacondition_have, Datacondition_nothave)]
 basedir = "/data/exp/IceCube/"+str(runlistyear)+"/filtered/level2pass2/AllGCD"
-print(basedir)
+#print(basedir)
 for (dirpath, dirnames, filenames) in os.walk(basedir):
     gcdfilelist += [os.path.join(dirpath,x) for x in filenames if checkfilename(x,GDCcondition_have, GDCcondition_nothave)]
 
@@ -140,8 +140,8 @@ for i in range(len(runnum)) :
 		for j in range(1,len(pathsplit)-1):
 			rundirpath += "/"+pathsplit[j]
 		rundirpath += "/"
-		outputdir = "/data/user/tmcelroy/submit_domeff_data/"
-		extra  = pathsplit[-5]+"/"+pathsplit[-2]
+		outputdir = "/data/user/tmcelroy/domeff/"
+		extra  = pathsplit[-2]
 		gcdfile = [x for x in gcdfilelist if checkrunnum(x,runnum[i])]
 		print(gcdfile)
 		if len(gcdfile)<1 : 

@@ -36,6 +36,7 @@ class EventWriter(icetray.I3Module):
 		event=self.events.row
 		# Get the current event ID number
 		event['eventId']=self.eventId
+		event['eventId'] = frame['I3EventHeader'].event_id
 		event['reco/time']   = frame['SplineMPE'].time
 		event['reco/energy'] = frame['SplineMPE'].energy
 		event['reco/speed']  = frame['SplineMPE'].speed

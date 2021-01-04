@@ -16,10 +16,10 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
 from icecube.filterscripts.offlineL2 import Globals
-from icecube.filterscripts.offlineL2.Rehydration import Rehydration, Dehydration
+#from icecube.filterscripts.offlineL2.Rehydration import Rehydration, Dehydration
 from icecube.filterscripts.offlineL2.PhotonTables import InstallTables
 from icecube.filterscripts.offlineL2.ClipStartStop import ClipStartStop
-from icecube.phys_services.which_split import which_split
+#from icecube.phys_services.which_split import which_split
 
 # Setup logging
 from icecube.icetray.i3logging import *
@@ -124,19 +124,19 @@ if args.prescale < 1.0 :
 
 tray.AddModule(countevents1,"count1")
 
-if "PFDSTnoSPE" in args.datadir :
+#if "PFDSTnoSPE" in args.datadir :
 #  tray.AddModule(printtag, 'printtag_pff',message = "pff data")
 
-  tray.AddModule(ClipStartStop, 'clipstartstop')
+#  tray.AddModule(ClipStartStop, 'clipstartstop')
 
 #  tray.AddModule(printtag, 'printtag_clip',message = "pass clipstartstop")
 
-  tray.AddSegment(Rehydration, 'rehydrator',
-                #dstfile=args.dstfile,
-                mc=False,
-                doNotQify=False,
-                pass2=True,
-                )
+#  tray.AddSegment(Rehydration, 'rehydrator',
+#                #dstfile=args.dstfile,
+#                mc=False,
+#                doNotQify=False,
+#                pass2=True,
+#                )
 #  tray.AddModule(printtag, 'printtag_rehydrate',message = "pass rehydrate")
 
 #tray.AddModule(printtag, 'printtag_newevent',message = "new event")
@@ -404,12 +404,12 @@ tray.AddModule(EventWriter, 'EventWriter',
 tray.AddModule(countevents2,"count2")
 #tray.AddModule(printtag, 'printtag_writer',message = "passed writer")
 # Write out the data to an I3 file
-tray.AddModule('I3Writer', 'I3Writer',
-               FileName=args.output+datafilename+'.i3.gz',
+#tray.AddModule('I3Writer', 'I3Writer',
+#               FileName=args.output+datafilename+'.i3.gz',
                #SkipKeys=['InIceRecoPulseSeriesPattern.*'],
-               DropOrphanStreams=[icetray.I3Frame.DAQ],
-               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics,icetray.I3Frame.Simulation]
-               )
+#               DropOrphanStreams=[icetray.I3Frame.DAQ],
+#               Streams=[icetray.I3Frame.TrayInfo,icetray.I3Frame.DAQ,icetray.I3Frame.Physics,icetray.I3Frame.Simulation]
+#               )
     
 tray.AddModule('TrashCan', 'yeswecan')
 if args.nevents > 0 :
