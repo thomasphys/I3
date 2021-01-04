@@ -2,13 +2,132 @@
 
 void makeplots() { 
 
-TFile* datafile_root = new TFile("Level2pass2a_Fullyear_cutanalysis_40_70.root","READ");
+TFile* datafile_root = new TFile("Level2pass2a_FullYear_cutanalysis_lowe.root","READ");
 TFile* eff090_root = new TFile("MC090_cutanalysis_40_70.root","READ");
-TFile* eff100_root = new TFile("MC100_cutanalysis_40_70.root","READ");
+TFile* eff100_root = new TFile("MC100_cutanalysis_lowe.root","READ");
 TFile* eff110_root = new TFile("MC110_cutanalysis_40_70.root","READ");
 TFile* eff120_root = new TFile("MC120_cutanalysis_40_70.root","READ");
 
+TGraphErrors* data_chargedist_IC = (TGraphErrors*) datafile_root->Get("Charge_Distance_IC");
+double* data_chargedist_IC_Xvalue = data_chargedist_IC->GetX();
+double* data_chargedist_IC_Yvalue = data_chargedist_IC->GetY();
+double* data_chargedist_IC_Yerror = data_chargedist_IC->GetEY();
+TGraphErrors* eff090_chargedist_IC = (TGraphErrors*) eff090_root->Get("Charge_Distance_IC");
+double* eff090_chargedist_IC_Xvalue = eff090_chargedist_IC->GetX();
+double* eff090_chargedist_IC_Yvalue = eff090_chargedist_IC->GetY();
+double* eff090_chargedist_IC_Yerror = eff090_chargedist_IC->GetEY();
+TGraphErrors* eff100_chargedist_IC = (TGraphErrors*) eff100_root->Get("Charge_Distance_IC");
+double* eff100_chargedist_IC_Xvalue = eff100_chargedist_IC->GetX();
+double* eff100_chargedist_IC_Yvalue = eff100_chargedist_IC->GetY();
+double* eff100_chargedist_IC_Yerror = eff100_chargedist_IC->GetEY();
+TGraphErrors* eff110_chargedist_IC = (TGraphErrors*) eff110_root->Get("Charge_Distance_IC");
+double* eff110_chargedist_IC_Xvalue = eff110_chargedist_IC->GetX();
+double* eff110_chargedist_IC_Yvalue = eff110_chargedist_IC->GetY();
+double* eff110_chargedist_IC_Yerror = eff110_chargedist_IC->GetEY();
+TGraphErrors* eff120_chargedist_IC = (TGraphErrors*) eff120_root->Get("Charge_Distance_IC");
+double* eff120_chargedist_IC_Xvalue = eff120_chargedist_IC->GetX();
+double* eff120_chargedist_IC_Yvalue = eff120_chargedist_IC->GetY();
+double* eff120_chargedist_IC_Yerror = eff120_chargedist_IC->GetEY();
+
+int n = data_chargedist_IC->GetN();
+
+for(int i=0; i<n; ++i){
+	eff090_chargedist_IC_Yvalue[i] /= data_chargedist_IC_Yvalue[i];
+	double error_data = data_chargedist_IC_Yerror[i]/data_chargedist_IC_Yvalue[i];
+	double error_eff090 = eff090_chargedist_IC_Yerror[i]/eff090_chargedist_IC_Yvalue[i];
+	eff090_chargedist_IC_Yerror[i] = eff090_chargedist_IC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff090*error_eff090);
+	eff090_chargedist_IC_Xvalue[i] = 0.5*(eff090_chargedist_IC_Xvalue[i]+data_chargedist_IC_Xvalue[i]);
+}
+TGraphErrors* eff090_ratio_IC = new TGraphErrors(data_chargedist_IC->GetN(),eff090_chargedist_IC_Xvalue,eff090_chargedist_IC_Yvalue,0,eff090_chargedist_IC_Yerror);
+
+for(int i=0; i<n; ++i){
+	eff100_chargedist_IC_Yvalue[i] /= data_chargedist_IC_Yvalue[i];
+	double error_data = data_chargedist_IC_Yerror[i]/data_chargedist_IC_Yvalue[i];
+	double error_eff100 = eff100_chargedist_IC_Yerror[i]/eff100_chargedist_IC_Yvalue[i];
+	eff100_chargedist_IC_Yerror[i] = eff100_chargedist_IC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff100*error_eff100);
+	eff100_chargedist_IC_Xvalue[i] = 0.5*(eff100_chargedist_IC_Xvalue[i]+data_chargedist_IC_Xvalue[i]);
+}
+TGraphErrors* eff100_ratio_IC = new TGraphErrors(data_chargedist_IC->GetN(),eff100_chargedist_IC_Xvalue,eff100_chargedist_IC_Yvalue,0,eff100_chargedist_IC_Yerror);
+
+for(int i=0; i<n; ++i){
+	eff110_chargedist_IC_Yvalue[i] /= data_chargedist_IC_Yvalue[i];
+	double error_data = data_chargedist_IC_Yerror[i]/data_chargedist_IC_Yvalue[i];
+	double error_eff110 = eff110_chargedist_IC_Yerror[i]/eff110_chargedist_IC_Yvalue[i];
+	eff110_chargedist_IC_Yerror[i] = eff110_chargedist_IC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff110*error_eff110);
+	eff110_chargedist_IC_Xvalue[i] = 0.5*(eff110_chargedist_IC_Xvalue[i]+data_chargedist_IC_Xvalue[i]);
+}
+TGraphErrors* eff110_ratio_IC = new TGraphErrors(data_chargedist_IC->GetN(),eff110_chargedist_IC_Xvalue,eff110_chargedist_IC_Yvalue,0,eff110_chargedist_IC_Yerror);
+
+for(int i=0; i<n; ++i){
+	eff120_chargedist_IC_Yvalue[i] /= data_chargedist_IC_Yvalue[i];
+	double error_data = data_chargedist_IC_Yerror[i]/data_chargedist_IC_Yvalue[i];
+	double error_eff120 = eff120_chargedist_IC_Yerror[i]/eff120_chargedist_IC_Yvalue[i];
+	eff120_chargedist_IC_Yerror[i] = eff120_chargedist_IC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff120*error_eff120);
+	eff120_chargedist_IC_Xvalue[i] = 0.5*(eff120_chargedist_IC_Xvalue[i]+data_chargedist_IC_Xvalue[i]);
+}
+TGraphErrors* eff120_ratio_IC = new TGraphErrors(data_chargedist_IC->GetN(),eff120_chargedist_IC_Xvalue,eff120_chargedist_IC_Yvalue,0,eff120_chargedist_IC_Yerror);
+
+
+TGraphErrors* data_chargedist_DC = (TGraphErrors*) datafile_root->Get("Charge_Distance_DC");
+double* data_chargedist_DC_Xvalue = data_chargedist_DC->GetX();
+double* data_chargedist_DC_Yvalue = data_chargedist_DC->GetY();
+double* data_chargedist_DC_Yerror = data_chargedist_DC->GetEY();
+TGraphErrors* eff090_chargedist_DC = (TGraphErrors*) eff090_root->Get("Charge_Distance_DC");
+double* eff090_chargedist_DC_Xvalue = eff090_chargedist_DC->GetX();
+double* eff090_chargedist_DC_Yvalue = eff090_chargedist_DC->GetY();
+double* eff090_chargedist_DC_Yerror = eff090_chargedist_DC->GetEY();
+TGraphErrors* eff100_chargedist_DC = (TGraphErrors*) eff100_root->Get("Charge_Distance_DC");
+double* eff100_chargedist_DC_Xvalue = eff100_chargedist_DC->GetX();
+double* eff100_chargedist_DC_Yvalue = eff100_chargedist_DC->GetY();
+double* eff100_chargedist_DC_Yerror = eff100_chargedist_DC->GetEY();
+TGraphErrors* eff110_chargedist_DC = (TGraphErrors*) eff110_root->Get("Charge_Distance_DC");
+double* eff110_chargedist_DC_Xvalue = eff110_chargedist_DC->GetX();
+double* eff110_chargedist_DC_Yvalue = eff110_chargedist_DC->GetY();
+double* eff110_chargedist_DC_Yerror = eff110_chargedist_DC->GetEY();
+TGraphErrors* eff120_chargedist_DC = (TGraphErrors*) eff120_root->Get("Charge_Distance_DC");
+double* eff120_chargedist_DC_Xvalue = eff120_chargedist_DC->GetX();
+double* eff120_chargedist_DC_Yvalue = eff120_chargedist_DC->GetY();
+double* eff120_chargedist_DC_Yerror = eff120_chargedist_DC->GetEY();
+
+for(int i=0; i<n; ++i){
+	eff090_chargedist_DC_Yvalue[i] /= data_chargedist_DC_Yvalue[i];
+	double error_data = data_chargedist_DC_Yerror[i]/data_chargedist_DC_Yvalue[i];
+	double error_eff090 = eff090_chargedist_DC_Yerror[i]/eff090_chargedist_DC_Yvalue[i];
+	eff090_chargedist_DC_Yerror[i] = eff090_chargedist_DC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff090*error_eff090);
+	eff090_chargedist_DC_Xvalue[i] = 0.5*(eff090_chargedist_DC_Xvalue[i]+data_chargedist_DC_Xvalue[i]);
+}
+TGraphErrors* eff090_ratio_DC = new TGraphErrors(data_chargedist_DC->GetN(),eff090_chargedist_DC_Xvalue,eff090_chargedist_DC_Yvalue,0,eff090_chargedist_DC_Yerror);
+
+for(int i=0; i<n; ++i){
+	eff100_chargedist_DC_Yvalue[i] /= data_chargedist_DC_Yvalue[i];
+	double error_data = data_chargedist_DC_Yerror[i]/data_chargedist_DC_Yvalue[i];
+	double error_eff100 = eff100_chargedist_DC_Yerror[i]/eff100_chargedist_DC_Yvalue[i];
+	eff100_chargedist_DC_Yerror[i] = eff100_chargedist_DC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff100*error_eff100);
+	eff100_chargedist_DC_Xvalue[i] = 0.5*(eff100_chargedist_DC_Xvalue[i]+data_chargedist_DC_Xvalue[i]);
+}
+TGraphErrors* eff100_ratio_DC = new TGraphErrors(data_chargedist_DC->GetN(),eff100_chargedist_DC_Xvalue,eff100_chargedist_DC_Yvalue,0,eff100_chargedist_DC_Yerror);
+
+for(int i=0; i<n; ++i){
+	eff110_chargedist_DC_Yvalue[i] /= data_chargedist_DC_Yvalue[i];
+	double error_data = data_chargedist_DC_Yerror[i]/data_chargedist_DC_Yvalue[i];
+	double error_eff110 = eff110_chargedist_DC_Yerror[i]/eff110_chargedist_DC_Yvalue[i];
+	eff110_chargedist_DC_Yerror[i] = eff110_chargedist_DC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff110*error_eff110);
+	eff110_chargedist_DC_Xvalue[i] = 0.5*(eff110_chargedist_DC_Xvalue[i]+data_chargedist_DC_Xvalue[i]);
+}
+TGraphErrors* eff110_ratio_DC = new TGraphErrors(data_chargedist_DC->GetN(),eff110_chargedist_IC_Xvalue,eff110_chargedist_IC_Yvalue,0,eff110_chargedist_IC_Yerror);
+
+for(int i=0; i<n; ++i){
+	eff120_chargedist_DC_Yvalue[i] /= data_chargedist_DC_Yvalue[i];
+	double error_data = data_chargedist_DC_Yerror[i]/data_chargedist_DC_Yvalue[i];
+	double error_eff120 = eff120_chargedist_DC_Yerror[i]/eff120_chargedist_DC_Yvalue[i];
+	eff120_chargedist_DC_Yerror[i] = eff120_chargedist_DC_Yvalue[i]*TMath::Sqrt(error_data*error_data + error_eff120*error_eff120);
+	eff120_chargedist_DC_Xvalue[i] = 0.5*(eff120_chargedist_DC_Xvalue[i]+data_chargedist_DC_Xvalue[i]);
+}
+TGraphErrors* eff120_ratio_DC = new TGraphErrors(data_chargedist_DC->GetN(),eff120_chargedist_DC_Xvalue,eff120_chargedist_DC_Yvalue,0,eff120_chargedist_DC_Yerror);
+
+
 TH1F* data_allzenith = (TH1F*) datafile_root->Get("NotOnlySun");
+//TH1F* data_allzenith = (TH1F*) datafile_root->Get("zenith_all");
 data_allzenith->Scale(1.0/data_allzenith->GetBinContent(70));
 data_allzenith->SetStats(0);
 data_allzenith->SetLineColor(kBlack);
@@ -154,7 +273,17 @@ eff120_boarderdist->SetStats(0);
 TH1F* ratio_eff120_boarderdist = (TH1F*) data_boarderdist->Clone();
 ratio_eff120_boarderdist->Divide(eff120_endpointx) ;
 
-TFile* fout = new TFile("RatioPlots.root","RECREATE");
+TFile* fout = new TFile("RatioPlots_lowe.root","RECREATE");
+
+eff090_ratio_IC->Write("eff090_ratio_IC");
+eff100_ratio_IC->Write("eff100_ratio_IC");
+eff110_ratio_IC->Write("eff110_ratio_IC");
+eff120_ratio_IC->Write("eff120_ratio_IC");
+
+eff090_ratio_DC->Write("eff090_ratio_DC");
+eff100_ratio_DC->Write("eff100_ratio_DC");
+eff110_ratio_DC->Write("eff110_ratio_DC");
+eff120_ratio_DC->Write("eff120_ratio_DC");
 
 data_allzenith->Write("data_allzenith");
 eff090_allzenith->Write("eff090_allzenith"); 

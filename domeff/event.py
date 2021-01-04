@@ -26,6 +26,15 @@ class DataPoint(IsDescription):
 	meandistance  = Float64Col()
 	sigmadistance = Float64Col()
 
+class Data(IsDescription) :
+	charge = Float64Col()
+	dist = Float64Col()
+
+class MC(IsDescription) :
+	charge = Float64Col()
+	dist = Float64Col()
+	weight = Float64Col()
+
 class Flux(IsDescription):
 	totalcharge = Float64Col()
 	energy      = Float64Col()
