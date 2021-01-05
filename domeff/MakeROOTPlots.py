@@ -10,31 +10,6 @@ from event import *
 from I3Tray import OMKey
 from array import array
 
-weights_ic = []
-weights_dc = []
-reconstructedE_ic = []
-reconstructedE_dc = []
-zenith_ic = []
-zenith_dc = []
-EnergyTruth_ic = []
-EnergyTruth_dc = []
-ZenithTruth_ic = []
-ZenithTruth_dc = []
-totalcharge_ic = []
-totalcharge_dc = []
-recoEndpoint_ic = []
-recoEndpoint_dc = []
-borderDistance_ic = []
-borderDistance_dc = []
-stopLikeRatio_ic = []
-stopLikeRatio_dc = []
-recoLogL_ic = []
-recoLogL_dc = []
-directHits_ic = []
-directHits_dc = []
-HitsOut_ic = []
-HitsOut_dc = [] 
-
 TotalCharge_IC = ROOT.TH1F("TotalCharge_IC","",1000,0,3000)
 Zenith_IC = ROOT.TH1F("Zenith_IC","",200,-1.0,1.0)
 RecEnergy_IC = ROOT.TH1F("RecEnergy_IC","",1000,min(reconstructedE_ic)*0.9,max(reconstructedE_ic)*1.1)
@@ -126,366 +101,6 @@ NotOnlySun = ROOT.TH1F("NotOnlySun","",100,0.0,1.0)
 TimeResidual_IC = []
 TimeResidual_DC = []
 
-binneddistance_dc = np.zeros(1,dtype=float)
-binneddistanceerror_dc = np.zeros(1,dtype=float)
-binnedcharge_dc = np.zeros(1,dtype=float)
-binnedchargeerror_dc = np.zeros(1,dtype=float)
-binnedcharge300_dc = np.zeros(1,dtype=float)
-binnedcharge300error_dc = np.zeros(1,dtype=float)
-binnedhit_dc = np.zeros(1,dtype=float)
-binnedhiterror_dc = np.zeros(1,dtype=float)
-binnedhit300_dc = np.zeros(1,dtype=float)
-binnedhit300error_dc = np.zeros(1,dtype=float)
-binneddistance_ic = np.zeros(1,dtype=float)
-binneddistanceerror_ic = np.zeros(1,dtype=float)
-binnedcharge_ic = np.zeros(1,dtype=float)
-binnedchargeerror_ic = np.zeros(1,dtype=float)
-binnedcharge300_ic = np.zeros(1,dtype=float)
-binnedcharge300error_ic = np.zeros(1,dtype=float)
-binnedhit_ic = np.zeros(1,dtype=float)
-binnedhiterror_ic = np.zeros(1,dtype=float)
-binnedhit300_ic = np.zeros(1,dtype=float)
-binnedhit300error_ic = np.zeros(1,dtype=float)
-
-def find_error_bootstrap(values,weights):
-# this needs to be eddited, I do not thing this was programmed corerctly.
-
-	total = len(values)
-	sum_weights = sum([weights[i] for i in range(0,len(weights))])
-	mu = sum([vales[i]*weights[i] for i in range(0,len(weights))])
-	mu = mu/sum_weights
-	std_mu = []
-	for j in range(0,11) :
-		means = []
-		size = 0.1 + (0.065)*j
-		sum_weights = 0.0
-		for i in range(0,100):
-			resampled = np.random.randint(low=0.0, high=total, size=size)
-			sum_weights = sum([weights[i] for i in resampled])
-			mu = sum([charge_list[i]*weights[i] for i in resampled])
-			mu = mu/sum_weights
-			means.append(mu)
-			std_mu.append(np.std(means,ddof=1))
-
-	return std_mu_limit
-
-def calc_charge_info(values,weights):
-
-    
-	"""
-	Calculate the mean distance of the bin, (average) charge, and error in average charge
-
-	Parameters
-	----------
-	total_charge_dict: dict
-	Contains the total_charge_dict data.
-
-	Returns
-	-------
-	charge_info: dict
-	Contains the mean distance, charge, and error of each thing.
-	"""
-		
-	# We use the standard IC procedure to calculate the statistical error for the
-	# weighted average
-	# There are three main terms
-	# 1) The  weighted sum of charges, and its variance
-	if len(values) == 0 :
-		return 0.0, 1.0
-	wsc = sum([ weights[i]*values[i] for i in range(0,len(values))])
-	sw = sum(weights)
-	if sw == 0.0 or wsc == 0.0 :
-		return 0.0, 1.0 
-	# Defining the weighted average
-	mu = wsc/sw
-	var_wsc = sum([(weights[i]*values[i])**2 for i in range(0,len(values))]) 
-	# 2) The sum of weights and its variance 
-	var_sw = sum([weights[i]**2 for i in range(0,len(values))])
-	# 3) The covariance associated to both sums of weights 
-	cov = sum([values[i]*(weights[i]**2) for i in range(0,len(values))])
-	# The error in the weighted average of charges is given by the variance of the quantity 
-	# wsc/sw; a division of two sums of weights (for two sets of weights that are correlated). \
-	std_mu = var_wsc/(wsc)**2
-	std_mu += var_sw/(sw)**2
-	std_mu -= 2.*cov/(sw*wsc)
-	std_mu = std_mu**0.5
-	std_mu *= mu
-
-	return mu , std_mu
-
-def ComputeMeanandError(value,weight) :
-
-	nelements = len(value)
-	for i in range(0,nelements) :
-		mean += value[i]/nelements
-
-	for i in range(0,nelements) :
-		sigma += ((value[i]-mean)**2.0)/nelements
-
-	return mean, sigma**0.5
-
-
-def ComputeWeightedMeanandError(value,weight):
-
-	'''
-	This function computes the standard error of the mean for a weighted set following the bootstrap validated formulation here:
-	https://en.wikipedia.org/wiki/Weighted_arithmetic_mean#:~:text=Statistical%20properties,-The%20weighted%20sample&text=can%20be%20called%20the%20standard,weights%20except%20one%20are%20zero.
-
-	'''
-
-	nelements = len(value)
-	if len(weight) != nelements :
-		print("error lists are not of equal length")
-		return 0.0,0.0
-
-	mean = 0.0
-	sumweights = 0.0
-	sumweights_sqr = 0.0
-	n_nonzero = 0.0
-	sigma = 0.
-
-	for i in range(0,nelements) :
-		sumweights = sumweights+weight[i]
-		sumweights_sqr = sumweights_sqr+(weight[i]/sumweights)**2.0
-		if weight[i] > 0.0 : n_nonzero += 1.0
-
-	#Compute mean
-	mean2 = 0.0
-	for i in range(0,nelements) :
-		mean += weight[i]*value[i]/sumweights
-		mean2 += value[i]/nelements
-
-	if n_nonzero == 0.0 : 
-		print("Sum of weights is zero")
-		return 0.0,0.0	
-
-	for i in range(0,nelements) :
-		sigma += (weight[i]*(value[i]-mean)/sumweights)**2.0
-
-	#Compute standard error squared
-	sigma /= (n_nonzero-1.0)/n_nonzero
-
-	return mean, sigma**0.5
-
-
-def OutputRoot(filename) :
-
-	global weights_ic
-	global weights_dc
-	global reconstructedE_ic
-	global reconstructedE_dc
-	global zenith_ic
-	global zenith_dc
-	global EnergyTruth_ic
-	global EnergyTruth_dc
-	global ZenithTruth_ic
-	global ZenithTruth_dc
-	global totalcharge_ic
-	global totalcharge_dc
-	global recoEndpoint_ic
-	global recoEndpoint_dc
-	global borderDistance_ic
-	global borderDistance_dc
-	global stopLikeRatio_ic
-	global stopLikeRatio_dc
-	global recoLogL_ic
-	global recoLogL_dc
-	global directHits_ic
-	global directHits_dc
-	global HitsOut_ic
-	global HitsOut_dc
-	global binneddistance_dc
-	global binneddistanceerror_dc
-	global binnedcharge_dc
-	global binnedchargeerror_dc
-	global binnedhit_dc
-	global binnedhiterror_dc
-	global binnedhit300_dc
-	global binnedhit300error_dc
-	global binneddistance_ic
-	global binneddistanceerror_ic
-	global binnedcharge_ic
-	global binnedchargeerror_ic
-	global binnedhit_ic
-	global binnedhiterror_ic
-	global binnedhit300_ic 
-	global binnedhit300error_ic
-	global ImpactAll_ic
-	global ImpactAll_dc
-	global Impact_seeMPE_ic
-	global Impact_seeMPE_dc
-	global Impact_vs_Zenith_ic
-	global Impact_vs_Zenith_dc
-	global TotalCharge_vs_Zenith_ic
-	global TotalCharge_vs_Zenith_dc
-	global TimeResidual_IC
-	global TimeResidual_DC
-	global TotalCharge_vs_Zenith_dc
-	global StoppingZ_vs_Zenith_dc
-	global StoppingZ_vs_Zenith_ic
-	global BorderDist_vs_Zenith_dc
-	global BorderDist_vs_Zenith_ic
-	global NChannel_vs_Zenith_dc
-	global NChannel_vs_Zenith_ic
-	global StopLike_vs_Zenith_dc
-	global StopLike_vs_Zenith_ic
-	global rLogL_vs_Zenith_dc
-	global rLogL_vs_Zenith_ic
-	global zenith_all
-	global zenith_zenith
-	global zenith_endpointz
-	global zenith_boarder
-	global zenith_stopratio
-	global zenith_recoLogL
-	global zenith_directHits
-	global zenith_all_line
-	global zenith_all_spe
-	global zenith_all_mpe
-	global CascadeFilter_13
-	global DeepCoreFilter_13                
-	global DeepCoreFilter_TwoLayerExp_13   
-	global EHEFilter_13                     
-	global FSSCandidate_13                   
-	global FSSFilter_13                      
-	global FilterMinBias_13                  
-	global FixedRateFilter_13                
-	global GCFilter_13             
-	global I3DAQDecodeException        
-	global IceTopSTA3_13                  
-	global IceTopSTA5_13                    
-	global IceTop_InFill_STA3_13            
-	global InIceSMT_IceTopCoincidence_13     
-	global LID                              
-	global LowUp_13                         
-	global MoonFilter_13                   
-	global MuonFilter_13                     
-	global OFUFilter_14                      
-	global OnlineL2Filter_14                
-	global SDST_FilterMinBias_13          
-	global SDST_IceTopSTA3_13          
-	global SDST_IceTop_InFill_STA3_13       
-	global SDST_InIceSMT_IceTopCoincidence_13 
-	global SlopFilter_13                     
-	global SunFilter_13                      
-	global VEF_13                           
-	global InIceSMT    
-	global IceTopSMT   
-	global InIceString
-	global PhysMinBias
-	global DeepCoreSMT
-	global NotOnlySun
-	global NoCascade_13
-
-	x_data_ic = array('f',binneddistance_ic)
-	x_error_ic = array('f',binneddistanceerror_ic)
-	y_data_ic = array('f',binnedcharge_ic)
-	y_error_ic = array('f',binnedchargeerror_ic)
-	y300_data_ic = array('f',binnedcharge300_ic)
-	y300_error_ic = array('f',binnedcharge300error_ic)
-	#yhit_data_ic = array('f',binnedhit_ic)
-	#yhit_error_ic = array('f',binnedhiterror_ic)
-	#yhit300_data_ic = array('f',binnedhit300_ic)
-	#yhit300_error_ic = array('f',binnedhit300error_ic)
-	x_data_dc = array('f',binneddistance_dc)
-	x_error_dc = array('f',binneddistanceerror_dc)
-	y_data_dc = array('f',binnedcharge_dc)
-	y_error_dc = array('f',binnedchargeerror_dc)
-	y300_data_dc = array('f',binnedcharge300_dc)
-	y300_error_dc = array('f',binnedcharge300error_dc)
-	#yhit_data_dc = array('f',binnedhit_dc)
-	#yhit_error_dc = array('f',binnedhiterror_dc)
-	#yhit300_data_dc = array('f',binnedhit300_dc)
-	#yhit300_error_dc = array('f',binnedhit300error_dc)
-
-	fout = ROOT.TFile.Open(filename+".root","RECREATE")
-
-	fout.cd()
-
-	TotalCharge_IC.Write()
-	Zenith_IC.Write()
-	RecEnergy_IC.Write()
-	EndPointZ_IC.Write()
-	BoarderDist_IC.Write()
-	StopLikeRatio_IC.Write()
-	RecoLogL_IC.Write()
-	DirectHits_IC.Write()
-	HitsOut_IC.Write()
-	TotalCharge_DC.Write()
-	Zenith_DC.Write()
-	RecEnergy_DC.Write()
-	EndPointZ_DC.Write()
-	BoarderDist_DC.Write()
-	StopLikeRatio_DC.Write()
-	RecoLogL_DC.Write()
-	DirectHits_DC.Write()
-	HitsOut_DC.Write()
-	ImpactAll_ic.Write()
-	ImpactAll_dc.Write()
-	Impact_seeMPE_ic.Write()
-	Impact_seeMPE_dc.Write()
-	Impact_vs_Zenith_ic.Write()
-	Impact_vs_Zenith_dc.Write()
-	TotalCharge_vs_Zenith_ic.Write()
-	TotalCharge_vs_Zenith_dc.Write()
-	StoppingZ_vs_Zenith_dc.Write()
-	StoppingZ_vs_Zenith_ic.Write()
-	BorderDist_vs_Zenith_dc.Write()
-	BorderDist_vs_Zenith_ic.Write()
-	NChannel_vs_Zenith_dc.Write()
-	NChannel_vs_Zenith_ic.Write()
-	StopLike_vs_Zenith_dc.Write()
-	StopLike_vs_Zenith_ic.Write()
-	rLogL_vs_Zenith_dc.Write()
-	rLogL_vs_Zenith_ic.Write()
-	zenith_all.Write()
-	zenith_zenith.Write()
-	zenith_endpointz.Write()
-	zenith_boarder.Write()
-	zenith_stopratio.Write()
-	zenith_recoLogL.Write()
-	zenith_directHits.Write()
-	zenith_all_line.Write()
-	zenith_all_spe.Write()
-	zenith_all_mpe.Write()
-	for i in range(len(TimeResidual_IC)) : TimeResidual_IC[i].Write()
-	for i in range(len(TimeResidual_DC)) : TimeResidual_DC[i].Write()
-	CascadeFilter_13.Write()
-	DeepCoreFilter_13.Write()             
-	DeepCoreFilter_TwoLayerExp_13.Write()   
-	EHEFilter_13.Write()                     
-	FSSCandidate_13.Write()                   
-	FSSFilter_13.Write()                      
-	FilterMinBias_13.Write()                  
-	FixedRateFilter_13.Write()                
-	GCFilter_13.Write()             
-	I3DAQDecodeException.Write()        
-	IceTopSTA3_13.Write()                  
-	IceTopSTA5_13.Write()                    
-	IceTop_InFill_STA3_13.Write()            
-	InIceSMT_IceTopCoincidence_13.Write()     
-	LID.Write()                              
-	LowUp_13.Write()                         
-	MoonFilter_13.Write()                   
-	MuonFilter_13.Write()                     
-	OFUFilter_14.Write()                      
-	OnlineL2Filter_14.Write()                
-	SDST_FilterMinBias_13.Write()          
-	SDST_IceTopSTA3_13.Write()          
-	SDST_IceTop_InFill_STA3_13.Write()       
-	SDST_InIceSMT_IceTopCoincidence_13.Write() 
-	SlopFilter_13.Write()                     
-	SunFilter_13.Write()                      
-	VEF_13.Write()                           
-	InIceSMT.Write()    
-	IceTopSMT.Write()   
-	InIceString.Write()
-	PhysMinBias.Write()
-	DeepCoreSMT.Write()
-	NotOnlySun.Write()
-	NoCascade_13.Write()
-
-	fout.Close()
-
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser()
@@ -549,6 +164,10 @@ if __name__ == '__main__':
 
 	print(nfiles)
 
+	fout = ROOT.TFile.Open(args.output+".root","RECREATE")
+
+	fout.cd()
+
 	flux = GaisserH4a()
 	if args.flux == "GaisserH3a" : flux = GaisserH3a()
 	elif args.flux == "GaisserH4a_IT" : flux = GaisserH4a_IT()
@@ -576,6 +195,7 @@ if __name__ == '__main__':
 		runtable = h5file.root.runinfo
 
 		domindex = 0
+		eventindex = -1
 
 		for event in eventtable.iterrows() :
 
@@ -595,7 +215,7 @@ if __name__ == '__main__':
             	weight = energy_weight/(event['corsika/nEvents'])
                                
 			flagcount = 0
-            		if event['filterMask/CascadeFilter_13'] :
+            if event['filterMask/CascadeFilter_13'] :
 				flagcount += 1 
 				CascadeFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 			if event['filterMask/DeepCoreFilter_13'] : 
@@ -763,13 +383,12 @@ if __name__ == '__main__':
 			first_ic = True
 			first_dc = True
 			for dom in domtable.iterrows(domindex) :
-				if dom['eventId'] < event['eventId'] :
+				if dom['eventId'] < int(eventindex) : #event['eventId'] :
 					domindex += 1
 					continue
-				elif dom['eventId'] == event['eventId'] :
+				elif dom['eventId'] == int(eventindex) : #event['eventId'] :
 					domindex += 1
 				else :
-					#print("new event")
 					break
 				if dom['impactAngle'] < args.impactrange[0]*3.14/180. or  dom['impactAngle'] > args.impactrange[1]*3.14/180.:
 					#print("DOM killed by Impact Angle Cut")
@@ -852,6 +471,92 @@ if __name__ == '__main__':
 		h5file.close()
 	
 	print("Total number of events = %d/%d" % (eventcount,totalevent))
-	OutputRoot(args.output)
+	
+	fout.cd()
+
+	TotalCharge_IC.Write()
+	Zenith_IC.Write()
+	RecEnergy_IC.Write()
+	EndPointZ_IC.Write()
+	BoarderDist_IC.Write()
+	StopLikeRatio_IC.Write()
+	RecoLogL_IC.Write()
+	DirectHits_IC.Write()
+	HitsOut_IC.Write()
+	TotalCharge_DC.Write()
+	Zenith_DC.Write()
+	RecEnergy_DC.Write()
+	EndPointZ_DC.Write()
+	BoarderDist_DC.Write()
+	StopLikeRatio_DC.Write()
+	RecoLogL_DC.Write()
+	DirectHits_DC.Write()
+	HitsOut_DC.Write()
+	ImpactAll_ic.Write()
+	ImpactAll_dc.Write()
+	Impact_seeMPE_ic.Write()
+	Impact_seeMPE_dc.Write()
+	Impact_vs_Zenith_ic.Write()
+	Impact_vs_Zenith_dc.Write()
+	TotalCharge_vs_Zenith_ic.Write()
+	TotalCharge_vs_Zenith_dc.Write()
+	StoppingZ_vs_Zenith_dc.Write()
+	StoppingZ_vs_Zenith_ic.Write()
+	BorderDist_vs_Zenith_dc.Write()
+	BorderDist_vs_Zenith_ic.Write()
+	NChannel_vs_Zenith_dc.Write()
+	NChannel_vs_Zenith_ic.Write()
+	StopLike_vs_Zenith_dc.Write()
+	StopLike_vs_Zenith_ic.Write()
+	rLogL_vs_Zenith_dc.Write()
+	rLogL_vs_Zenith_ic.Write()
+	zenith_all.Write()
+	zenith_zenith.Write()
+	zenith_endpointz.Write()
+	zenith_boarder.Write()
+	zenith_stopratio.Write()
+	zenith_recoLogL.Write()
+	zenith_directHits.Write()
+	zenith_all_line.Write()
+	zenith_all_spe.Write()
+	zenith_all_mpe.Write()
+	for i in range(len(TimeResidual_IC)) : TimeResidual_IC[i].Write()
+	for i in range(len(TimeResidual_DC)) : TimeResidual_DC[i].Write()
+	CascadeFilter_13.Write()
+	DeepCoreFilter_13.Write()             
+	DeepCoreFilter_TwoLayerExp_13.Write()   
+	EHEFilter_13.Write()                     
+	FSSCandidate_13.Write()                   
+	FSSFilter_13.Write()                      
+	FilterMinBias_13.Write()                  
+	FixedRateFilter_13.Write()                
+	GCFilter_13.Write()             
+	I3DAQDecodeException.Write()        
+	IceTopSTA3_13.Write()                  
+	IceTopSTA5_13.Write()                    
+	IceTop_InFill_STA3_13.Write()            
+	InIceSMT_IceTopCoincidence_13.Write()     
+	LID.Write()                              
+	LowUp_13.Write()                         
+	MoonFilter_13.Write()                   
+	MuonFilter_13.Write()                     
+	OFUFilter_14.Write()                      
+	OnlineL2Filter_14.Write()                
+	SDST_FilterMinBias_13.Write()          
+	SDST_IceTopSTA3_13.Write()          
+	SDST_IceTop_InFill_STA3_13.Write()       
+	SDST_InIceSMT_IceTopCoincidence_13.Write() 
+	SlopFilter_13.Write()                     
+	SunFilter_13.Write()                      
+	VEF_13.Write()                           
+	InIceSMT.Write()    
+	IceTopSMT.Write()   
+	InIceString.Write()
+	PhysMinBias.Write()
+	DeepCoreSMT.Write()
+	NotOnlySun.Write()
+	NoCascade_13.Write()
+
+	fout.Close()
 
 
