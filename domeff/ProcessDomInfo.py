@@ -93,8 +93,8 @@ if __name__ == '__main__':
 	#generator = weighting.icetop_mc_weights(21269,'/home/tmcelroy/icecube/domeff/datasetConfig.json')
 	nfiles = len(file_list)
 
-	rand = ROOT.TRandom3()
-	
+	rand = ROOT.TRandom3()	
+
 	for filename in file_list :
 		h5file = 0
 		try :
@@ -106,9 +106,11 @@ if __name__ == '__main__':
 		runtable = h5file.root.runinfo
 
 		domindex = 0
+		eventindex = -1
 
 		for event in eventtable.iterrows() :
 
+			eventindex += 1
 			if args.flux == "data" :
 				if rand.Uniform()>args.skim : continue
 
@@ -138,13 +140,15 @@ if __name__ == '__main__':
 				continue
 
 			 #Likelihood cuts
-            if event['recoLogL'] > args.likelihood[1] :
-                continue
+            		if event['recoLogL'] > args.likelihood[1] :
+                		continue
 
 			#direct hists
 			if event['directHits'] < args.nhits[0]:
 				continue
 
+			if event['icHitsOut']> args.nhits[1] or event['icHitsOut'] < 1 :
+                                        continue;
 	
 			eventcount += 1
 			weight = 1.0
@@ -159,13 +163,17 @@ if __name__ == '__main__':
 				weight = weight/nfiles
 
 			for dom in domtable.iterrows(domindex) :
-				if dom['eventId'] < event['eventId'] :
+				#print("in dom loop")
+				#print(dom['eventId'])
+				#print(int(eventindex))
+				if dom['eventId'] < int(eventindex) : #event['eventId'] :
 					domindex += 1
 					continue
-				elif dom['eventId'] == event['eventId'] :
+				elif dom['eventId'] == int(eventindex) : #event['eventId'] :
 					domindex += 1
 				else :
-					continue
+					break
+				#print("in dom loop 2")
 				if dom['impactAngle'] < args.impactrange[0]*3.14/180. or  dom['impactAngle'] > args.impactrange[1]*3.14/180.:
 					continue
 				if dom['distAboveEndpoint'] < args.trackendpoint :
@@ -174,19 +182,21 @@ if __name__ == '__main__':
 					continue
 				if event['icHitsOut']> args.nhits[1] or event['icHitsOut'] < 1 :
 					continue; 
-			
+				#print("in dom loop 3")
 				if dom['string'] in DC_Strings :
 					dcrow['charge'] = dom['totalCharge']
 					dcrow['dist'] = dom['recoDist']
 					if args.flux != "data" :
 						dcrow['weight'] = weight
 					dcrow.append()
+					#print("append DC")
 				if dom['string'] in IC_Strings :
 					icrow['charge'] = dom['totalCharge']
 					icrow['dist'] = dom['recoDist']
 					if args.flux != "data" :
 						icrow['weight'] = weight
 					icrow.append()
+					#print("append IC")
 					
 		h5file.close()
 
