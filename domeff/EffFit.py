@@ -55,62 +55,6 @@ def SimCharge(eff,dist,sim):
 
 	return charge, chargesig
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
-			default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
-parser.add_argument('-e', '--eff', help='Ordered list of efficiency simulations to use, 0.9,1.0,1.1,1.2', type = str,
-			nargs = '+', default =["","","",""])
-args = parser.parse_args()
-
-datafile = open_file(args.data, mode="r")
-eff_file = [open_file(args.eff[0], mode="r"),open_file(args.eff[1], mode="r"),open_file(args.eff[2], mode="r"),open_file(args.eff[3], mode="r")]
-data_ic = []
-data_dc = []
-for x in datafile.root.icecube.iterrows() :
-	template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
-	template['meandistance']=x['meandistance']
-	template['sigmadistance']=x['sigmadistance']
-	data_ic.append(template)
-for x in datafile.root.deapcore.iterrows() :
-	template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
-	template['meandistance']=x['meandistance']
-	template['sigmadistance']=x['sigmadistance']
-	template['meancharge']=x['meancharge']
-	data_dc.append(template)
-eff_ic = []
-eff_ic_norm = []
-eff_dc = []
-eff_dc_norm = []
-
-
-for file in eff_file :
-	eff_ic.append([])
-	eff_dc.append([])
-	eff_ic_norm.append([])
-	eff_dc_norm.append([])
-	for x in file.root.icecube.iterrows():
-		template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
-		template['meandistance']=x['meandistance']
-		template['sigmadistance']=x['sigmadistance']
-		template['meancharge']=x['meancharge']
-		template['sigmacharge']=x['sigmacharge']
-		eff_ic[-1].append(template)
-		charge, error = XinterpolationsandYequivError(x['meandistance'],data_ic)
-		template['meancharge']=x['meancharge']/charge
-		template['sigmacharge']=(x['meancharge']/charge)*((x['sigmacharge']/x['meancharge'])**2.0+(error/charge)**2.0)**0.5
-		eff_ic_norm[-1].append(template)
-	for x in file.root.deapcore.iterrows():
-		template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
-		template['meandistance']=x['meandistance']
-		template['sigmadistance']=x['sigmadistance']
-		template['meancharge']=x['meancharge']
-		template['sigmacharge']=x['sigmacharge']
-		eff_dc[-1].append(template)
-		charge, error = XinterpolationsandYequivError(x['meandistance'],data_dc)
-		template['meancharge']=x['meancharge']/charge
-		template['sigmacharge']=(x['meancharge']/charge)*((x['sigmacharge']/x['meancharge'])**2.0+(error/charge)**2.0)**0.5
-		eff_dc_norm[-1].append(template)
-
 def chargedist(dist,amp,base,tau) :
 	return base + amp*exp(-dist/tau)
 
@@ -148,90 +92,75 @@ def linearChi2(slope, intercept):
 		chisq += ((MCDataRatio[i]['scaledcharge']-linear(slope, intercept, MCDataRatio[i]['eff']))**2.0)/(MCDataRatio[i]['error']**2.0)
 	return chisq
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', '--data', help='Directory of data files.',type=str,
+			default = '/data/user/sanchezh/IC86_2015/Final_Level2_IC86_MPEFit_*.h5')
+parser.add_argument('-e', '--eff', help='Ordered list of efficiency simulations to use, 0.9,1.0,1.1,1.2', type = str,
+			nargs = '+', default =["","","",""])
+args = parser.parse_args()
+
+datafile = open_file(args.data, mode="r")
+eff_file = [open_file(args.eff[0], mode="r"),open_file(args.eff[1], mode="r"),open_file(args.eff[2], mode="r"),open_file(args.eff[3], mode="r")]
+data_ic = []
+data_dc = []
+for x in datafile.root.icecube.iterrows() :
+	template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
+	template['meandistance']=x['meandistance']
+	template['sigmadistance']=x['sigmadistance']
+	data_ic.append(template)
+for x in datafile.root.deapcore.iterrows() :
+	template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
+	template['meandistance']=x['meandistance']
+	template['sigmadistance']=x['sigmadistance']
+	template['meancharge']=x['meancharge']
+	data_dc.append(template)
+eff_ic = []
+eff_ic_norm = []
+eff_dc = []
+eff_dc_norm = []
+
+for file in eff_file :
+	eff_ic.append([])
+	eff_dc.append([])
+	eff_ic_norm.append([])
+	eff_dc_norm.append([])
+	for x in file.root.icecube.iterrows():
+		template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
+		template['meandistance']=x['meandistance']
+		template['sigmadistance']=x['sigmadistance']
+		template['meancharge']=x['meancharge']
+		template['sigmacharge']=x['sigmacharge']
+		eff_ic[-1].append(template)
+		charge, error = XinterpolationsandYequivError(x['meandistance'],data_ic)
+		template['meancharge']=x['meancharge']/charge
+		template['sigmacharge']=(x['meancharge']/charge)*((x['sigmacharge']/x['meancharge'])**2.0+(error/charge)**2.0)**0.5
+		eff_ic_norm[-1].append(template)
+	for x in file.root.deapcore.iterrows():
+		template = {'meandistance':0.0,'sigmadistance':0.0,'meancharge': 0.0,'sigmacharge':0.0}
+		template['meandistance']=x['meandistance']
+		template['sigmadistance']=x['sigmadistance']
+		template['meancharge']=x['meancharge']
+		template['sigmacharge']=x['sigmacharge']
+		eff_dc[-1].append(template)
+		charge, error = XinterpolationsandYequivError(x['meandistance'],data_dc)
+		template['meancharge']=x['meancharge']/charge
+		template['sigmacharge']=(x['meancharge']/charge)*((x['sigmacharge']/x['meancharge'])**2.0+(error/charge)**2.0)**0.5
+		eff_dc_norm[-1].append(template)
+
 currenteff = eff_ic
 currentdata = data_ic
-
-#compute noise baseline
-
-currentdata = data_ic
-kwargs = dict(amp=currentdata[0].get['meancharge'], error_amp= currentdata[0].get['meancharge']*2.0, 
-	          base = currentdata[-1].get['meancharge'], error_base = currentdata[-1].get['meancharge'], 
-	          tau=50.0, error_tau = 20.0)
-m = Minuit(chargedistChi2,**kwargs)
-m.migrad()
-m.hesse()
-base_ic = m.values[0]
-baseerror_ic = m.errors[0]
-
-currentdata = data_dc
-kwargs = dict(amp=currentdata[0].get['meancharge'], error_amp= currentdata[0].get['meancharge']*2.0, 
-	          base = currentdata[-1].get['meancharge'], error_base = currentdata[-1].get['meancharge'], 
-	          tau=50.0, error_tau = 20.0)
-m = Minuit(chargedistChi2,**kwargs)
-m.migrad()
-m.hesse()
-base_dc = m.values[0]
-baseerror_dc = m.errors[0]
-
-base_mc_ic = []
-baseerror_mc_ic = []
-for i in range(len(eff_ic))
-	currentdata = eff_ic[i]
-	kwargs = dict(amp=currentdata[0].get['meancharge'], error_amp= currentdata[0].get['meancharge']*2.0, 
-	          base = currentdata[-1].get['meancharge'], error_base = currentdata[-1].get['meancharge'], 
-	          tau=50.0, error_tau = 20.0)
-	m = Minuit(chargedistChi2,**kwargs)
-	m.migrad()
-	m.hesse()
-	base_mc_ic.append(m.values[0])
-	baseerror_mc_ic.append(m.errors[0])
-
-base_mc_dc = []
-baseerror_mc_dc = []
-for i in range(len(eff_dc))
-	currentdata = eff_dc[i]
-	kwargs = dict(amp=currentdata[0].get['meancharge'], error_amp= currentdata[0].get['meancharge']*2.0, 
-	          base = currentdata[-1].get['meancharge'], error_base = currentdata[-1].get['meancharge'], 
-	          tau=50.0, error_tau = 20.0)
-	m = Minuit(chargedistChi2,**kwargs)
-	m.migrad()
-	m.hesse()
-	base_mc_dc.append(m.values[0])
-	baseerror_mc_dc.append(m.errors[0])
-
-currenteff = eff_ic
-currentdata = data_ic
-
-# Compute the DOM efficency for IceCube straight from Charge vs Distance.
-kwargs = dict(eff=1.1, error_eff=0.1,limit_eff=(0.91,1.19))
-m = Minuit(calcChi2,**kwargs)
-print("Fit IceCube DOM Efficiency")
-m.migrad()
-print("DOM efficiency: %f" % (m.values.get("eff")))
-m.hesse()
-print("DOM Efficiency Error: %f" % (m.errors.get("eff")))
-
-currenteff = eff_dc
-currentdata = data_dc
-
-# Compute the DOM efficency for DeepCore straight from Charge vs Distance.
-m = Minuit(calcChi2, **kwargs)
-print("Fit DeepCore DOM Efficiency")
-m.migrad()
-print("DOM efficiency: %f" % (m.values.get("eff")))
-m.hesse()
-print("DOM Efficiency Error: %f" % (m.errors.get("eff")))
 
 #compute the DOM efficency for IceCube by fitting the average scaled charge and then fitting line and taking intercept.
 eff_value = 0.9
-nominal_eff = 0.99
+nominal_eff = 0.94
 for eff in eff_ic_norm :
 	currentratio = eff
 	kwargs = dict(ratio=0.8, error_ratio=0.4,limit_ratio=(0.1,1.9))
 	m = Minuit(constChi2,**kwargs)
 	m.migrad()
 	m.hesse()
-	MCDataRatio.append(dict('eff' = eff_value*nominal_eff,'scaledcharge' = mvalues[0],'error' = m.errors[0]))
+	MCDataRatio.append(dict('eff' = eff_value*nominal_eff,'scaledcharge' = m.values[0],'error' = m.errors[0]))
 	eff_value += 0.1
 
 kwargs = dict(slope=1.0, error_slope=0.1, inter=0.0, error_inter=0.1)
@@ -246,10 +175,9 @@ e_slope = m.errors.get("slope")
 e_inter = m.errors.get("inter")
 print("DOM Efficiency Error: %f" % (((1.0-inter)/slope)*((e_slope/slope)**2.0+(e_inter/(1.0-inter))**2.0)**0.5))
 
-MCDataRatio = []
-#compute the DOM efficency for DeepCore by fitting the average scaled charge and then fitting line and taking intercept.
+#compute the DOM efficency for IceCube by fitting the average scaled charge and then fitting line and taking intercept.
 eff_value = 0.9
-nominal_eff = 0.99
+nominal_eff = 0.94
 for eff in eff_dc_norm :
 	currentratio = eff
 	kwargs = dict(ratio=0.8, error_ratio=0.4,limit_ratio=(0.1,1.9))
@@ -270,99 +198,6 @@ m.hesse()
 e_slope = m.errors.get("slope")
 e_inter = m.errors.get("inter")
 print("DOM Efficiency Error: %f" % (((1.0-inter)/slope)*((e_slope/slope)**2.0+(e_inter/(1.0-inter))**2.0)**0.5))
-
-#Now do the whole thing over again but subtracting the base noise.
-
-#subtract base noise.
-for data in data_ic :
-	data.get['meancharge'] -= base_ic
-	data.get['sigmacharge'] = (baseerror_ic**2.0 + data.get['sigmacharge']**2.0)**0.5
-for data in data_dc :
-	data.get['meancharge'] -= base_dc
-	data.get['sigmacharge'] = (baseerror_dc**2.0 + data.get['sigmacharge']**2.0)**0.5
-
-for i in range(len(eff_dc)) :
-	for data in eff_dc[i] :
-		data.get['meancharge'] -= base_mc_dc[i]
-		data.get['sigmacharge'] = (baseerror_mc_dc[i]**2.0 + data.get['sigmacharge']**2.0)**0.5
-for i in range(len(eff_ic)) :
-	for data in eff_ic[i] :
-		data.get['meancharge'] -= base_mc_ic[i]
-		data.get['sigmacharge'] = (baseerror_mc_ic[i]**2.0 + data.get['sigmacharge']**2.0)**0.5
-
-currenteff = eff_ic
-currentdata = data_ic
-
-# Compute the DOM efficency for IceCube straight from Charge vs Distance.
-kwargs = dict(eff=1.1, error_eff=0.1,limit_eff=(0.91,1.19))
-m = Minuit(calcChi2,**kwargs)
-print("Fit IceCube DOM Efficiency post base noise subtraction")
-m.migrad()
-print("DOM efficiency: %f" % (m.values.get("eff")))
-m.hesse()
-print("DOM Efficiency Error: %f" % (m.errors.get("eff")))
-
-currenteff = eff_dc
-currentdata = data_dc
-
-# Compute the DOM efficency for DeepCore straight from Charge vs Distance.
-m = Minuit(calcChi2, **kwargs)
-print("Fit DeepCore DOM Efficiency post base noise subtraction")
-m.migrad()
-print("DOM efficiency: %f" % (m.values.get("eff")))
-m.hesse()
-print("DOM Efficiency Error: %f" % (m.errors.get("eff")))
-
-#compute the DOM efficency for IceCube by fitting the average scaled charge and then fitting line and taking intercept.
-eff_value = 0.9
-nominal_eff = 0.99
-for eff in eff_ic_norm :
-	currentratio = eff
-	kwargs = dict(ratio=0.8, error_ratio=0.4,limit_ratio=(0.1,1.9))
-	m = Minuit(constChi2,**kwargs)
-	m.migrad()
-	m.hesse()
-	MCDataRatio.append(dict('eff' = eff_value*nominal_eff,'scaledcharge' = mvalues[0],'error' = m.errors[0]))
-	eff_value += 0.1
-
-kwargs = dict(slope=1.0, error_slope=0.1, inter=0.0, error_inter=0.1)
-m = Minuit(linearChi2,**kwargs)
-print("Fit IceCube DOM Efficiency from scaled charge post base noise subtraction")
-m.migrad()
-slope = m.values.get("slope")
-inter = m.values.get("inter")
-print("DOM efficiency: %f" % ((1.0-inter)/slope))
-m.hesse()
-e_slope = m.errors.get("slope")
-e_inter = m.errors.get("inter")
-print("DOM Efficiency Error: %f" % (((1.0-inter)/slope)*((e_slope/slope)**2.0+(e_inter/(1.0-inter))**2.0)**0.5))
-
-MCDataRatio = []
-#compute the DOM efficency for DeepCore by fitting the average scaled charge and then fitting line and taking intercept.
-eff_value = 0.9
-nominal_eff = 0.99
-for eff in eff_dc_norm :
-	currentratio = eff
-	kwargs = dict(ratio=0.8, error_ratio=0.4,limit_ratio=(0.1,1.9))
-	m = Minuit(constChi2,**kwargs)
-	m.migrad()
-	m.hesse()
-	MCDataRatio.append(dict('eff' = eff_value*nominal_eff,'scaledcharge' = mvalues[0],'error' = m.errors[0]))
-	eff_value += 0.1
-
-kwargs = dict(slope=1.0, error_slope=0.1, inter=0.0, error_inter=0.1)
-m = Minuit(linearChi2,**kwargs)
-print("Fit DeepCore DOM Efficiency from scaled charge post base noise subtraction")
-m.migrad()
-slope = m.values.get("slope")
-inter = m.values.get("inter")
-print("DOM efficiency: %f" % ((1.0-inter)/slope))
-m.hesse()
-e_slope = m.errors.get("slope")
-e_inter = m.errors.get("inter")
-print("DOM Efficiency Error: %f" % (((1.0-inter)/slope)*((e_slope/slope)**2.0+(e_inter/(1.0-inter))**2.0)**0.5))
-
-
 
 datafile.close()
 for file in eff_file :
