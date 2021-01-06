@@ -23,6 +23,7 @@ folderlist = ['Run00125791','Run00125827','Run00125872','Run00125915','Run001259
 				'Run00125800','Run00125859','Run00125898','Run00125914','Run00125938','Run00125962','Run00125981','Run00126000','Run00126032','Run00126384']
 
 for folder in folderlist :
-	if os.path.isfile('/data/user/tmcelroy/domeff/datahd5/'+folder+".hd5") :
+	if os.path.isfile('/data/user/tmcelroy/domeff/datahd5/'+folder+".h5") :
 		continue
 	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', 'Level2pass2',  '-d', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-o', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-f','data'])
+	submit.wait()
