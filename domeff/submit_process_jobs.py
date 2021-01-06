@@ -25,7 +25,7 @@ folderlist = ['Run00125791','Run00125827','Run00125872','Run00125915','Run001259
 for folder in folderlist :
 	if os.path.isfile('/data/user/tmcelroy/domeff/datahd5/'+folder+"lowE.h5") :
 		continue
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', 'Level2pass2',  '-d', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-o', '/data/user/tmcelroy/domeff/datahd5/'+folder+"lowE", '-f','data','-q','0.0','30.0'])
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', 'Level2pass2',  '-d', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-o', '/data/user/tmcelroy/domeff/datahd5/'+folder+"lowE", '-f','data','-p','0.0','30.0'])
 	submit.wait()
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', 'Level2pass2',  '-d', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-o', '/data/user/tmcelroy/domeff/datahd5/'+folder+"highE", '-f','data','-q','30.0','1000.0'])
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', 'Level2pass2',  '-d', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-o', '/data/user/tmcelroy/domeff/datahd5/'+folder+"highE", '-f','data','-p','30.0','1000.0'])
 	submit.wait()

@@ -12,22 +12,23 @@ from array import array
 
 TotalCharge_IC = ROOT.TH1F("TotalCharge_IC","",1000,0,3000)
 Zenith_IC = ROOT.TH1F("Zenith_IC","",200,-1.0,1.0)
-RecEnergy_IC = ROOT.TH1F("RecEnergy_IC","",1000,min(reconstructedE_ic)*0.9,max(reconstructedE_ic)*1.1)
-EndPointZ_IC = ROOT.TH1F("EndPointX_IC","",1000,min(recoEndpoint_ic)*0.9,max(recoEndpoint_ic)*1.1)
-BoarderDist_IC = ROOT.TH1F("BoarderDist_IC","",1000,min(borderDistance_ic)*0.9,max(borderDistance_ic)*1.1)
-StopLikeRatio_IC = ROOT.TH1F("StopLikeRatio_IC","",1000,min(stopLikeRatio_ic )*0.9,max(stopLikeRatio_ic)*1.1)
-RecoLogL_IC = ROOT.TH1F("RecoLogL_IC","",1000,min(recoLogL_ic)*0.9,max(recoLogL_ic)*1.1)
+RecEnergy_IC = ROOT.TH1F("RecEnergy_IC","",1000,0.*0.9,1000000*1.1)
+EndPointZ_IC = ROOT.TH1F("EndPointX_IC","",1000,-500.*1.1,500.*1.1)
+BoarderDist_IC = ROOT.TH1F("BoarderDist_IC","",1000,0.0,500.*1.1)
+StopLikeRatio_IC = ROOT.TH1F("StopLikeRatio_IC","",1000,-100.,100)
+RecoLogL_IC = ROOT.TH1F("RecoLogL_IC","",1000,-100.,100.)
 DirectHits_IC = ROOT.TH1F("DirectHits_IC","",71,-0.5,70.5)
-HitsOut_IC = ROOT.TH1F("HitsOut_IC","",1000,0,max(HitsOut_ic)*1.1)
+HitsOut_IC = ROOT.TH1F("HitsOut_IC","",1000,0,100*1.1)
+
 TotalCharge_DC = ROOT.TH1F("TotalCharge_DC","",1000,0,3000)
 Zenith_DC = ROOT.TH1F("Zenith_DC","",200,-1.0,1.0)
-RecEnergy_DC = ROOT.TH1F("RecEnergy_DC","",1000,min(reconstructedE_dc)*0.9,max(reconstructedE_dc)*1.1)
-EndPointZ_DC = ROOT.TH1F("EndPointX_DC","",1000,min(recoEndpoint_dc)*0.9,max(recoEndpoint_dc)*1.1)
-BoarderDist_DC = ROOT.TH1F("BoarderDist_DC","",1000,min(borderDistance_dc)*0.9,max(borderDistance_dc)*1.1)
-StopLikeRatio_DC = ROOT.TH1F("StopLikeRatio_DC","",1000,min(stopLikeRatio_dc)*0.9,max(stopLikeRatio_dc)*1.1)
-RecoLogL_DC = ROOT.TH1F("RecoLogL_DC","",1000,min(recoLogL_dc)*0.9,max(recoLogL_dc)*1.1)
-DirectHits_DC = ROOT.TH1F("DirectHits_DC","",(1+max(directHits_dc)-min(directHits_dc)),min(directHits_dc)-0.5,max(directHits_dc)+0.5)
-HitsOut_DC = ROOT.TH1F("HitsOut_DC","",1000,min(HitsOut_dc)*0.9,max(HitsOut_dc)*1.1)
+RecEnergy_DC = ROOT.TH1F("RecEnergy_DC","",1000,0.*0.9,1000000*1.1)
+EndPointZ_DC = ROOT.TH1F("EndPointX_DC","",1000,-500.*1.1,500.*1.1)
+BoarderDist_DC = ROOT.TH1F("BoarderDist_DC","",1000,0.0,500.*1.1)
+StopLikeRatio_DC = ROOT.TH1F("StopLikeRatio_DC","",1000,-100.,100)
+RecoLogL_DC = ROOT.TH1F("RecoLogL_DC","",1000,-100.,100.)
+DirectHits_DC = ROOT.TH1F("DirectHits_DC","",71,-0.5,70.5)
+HitsOut_DC = ROOT.TH1F("HitsOut_DC","",1000,0,100*1.1)
 
 ImpactAll_ic = ROOT.TH1F("ImpactAll_IC","",1000,-1.0,1.0)
 ImpactAll_dc = ROOT.TH1F("ImpactAll_DC","",1000,-1.0,1.0)
@@ -177,7 +178,6 @@ if __name__ == '__main__':
 	elif args.flux == "Hoerandel_IT" : flux = Hoerandel_IT()
 
 	eventcount = 0
-	totalevent = 0
 	#generator = weighting.from_simprod(21269,False,'vm-simprod2.icecube.wisc.edu')
 	#generator = weighting.icetop_mc_weights(21269,'/home/tmcelroy/icecube/domeff/datasetConfig.json')
 	nfiles = len(file_list)
@@ -201,21 +201,18 @@ if __name__ == '__main__':
 
 			if args.flux == "data" :
 				if rand.Uniform()>args.skim : continue
-
-			totalevent += 1
-
 			weight = 1.0
-            if args.flux != "data" :
-            	pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
-            	energy_integral = event['corsika/energyPrimaryMax']**(event['corsika/primarySpectralIndex']+1)
-            	energy_integral = energy_integral - event['corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
-            	energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
-            	energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
-            	energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
-            	weight = energy_weight/(event['corsika/nEvents'])
+            		if args.flux != "data" :
+            			pflux = flux(event['corsika/primaryEnergy'],event['corsika/primaryType'])
+            			energy_integral = event['corsika/energyPrimaryMax']**(event['corsika/primarySpectralIndex']+1)
+            			energy_integral = energy_integral - event['corsika/energyPrimaryMin']**(event['corsika/primarySpectralIndex']+1)
+            			energy_integral = energy_integral / (event['corsika/primarySpectralIndex']+1)
+            			energy_weight = event['corsika/primaryEnergy']**event['corsika/primarySpectralIndex']
+            			energy_weight = pflux*energy_integral/energy_weight*event['corsika/areaSum']
+            			weight = energy_weight/(event['corsika/nEvents'])
                                
 			flagcount = 0
-            if event['filterMask/CascadeFilter_13'] :
+            		if event['filterMask/CascadeFilter_13'] :
 				flagcount += 1 
 				CascadeFilter_13.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 			if event['filterMask/DeepCoreFilter_13'] : 
@@ -402,22 +399,15 @@ if __name__ == '__main__':
 					#print("DOM killed by Distance from Track Cut")
 					#print(dom['recoDist']) 
 					continue 
+				if event['icHitsOut']> args.nhits[1] or event['icHitsOut'] < 1 :
+                                	continue;
 				i_dist = (int)(dom['recoDist']/args.binwidth)
 				if i_dist < 0 or i_dist > nbins-1 :
 					#print("DOM out of bin range")
 					continue
 				if dom['string'] in DC_Strings :
-					#print("DC DOM Passed")
-					#if event['dcHitsOut']> args.nhits[1] or event['dcHitsOut'] < 1 :
-					#	continue;
-					#I want same overall events used for both.
-					if event['icHitsOut']> args.nhits[1] or event['icHitsOut'] < 1 :
-						continue;
-					#print("DC Distance Charge")
-                                        #print(dom['recoDist'])
-					#print(dom['totalCharge'])
 					if first_dc :
-						TotalCharge_DC.Fill(totalcharge_dc[i],weights_dc[i])
+						TotalCharge_DC.Fill(event['totalCharge'],weight)
 						Zenith_DC.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 						RecEnergy_DC.Fill(event['reco/energy'],weight)
 						EndPointZ_DC.Fill(event['recoEndPoint/z'],weight)
@@ -438,14 +428,8 @@ if __name__ == '__main__':
 					Impact_seeMPE_dc.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 					TimeResidual_DC[i_dist].Fill(dom['minTimeResidual'],weight)
 				if dom['string'] in IC_Strings :
-					#print("IC DOM Passed")
-					if event['icHitsOut'] > args.nhits[1] or event['icHitsOut']< 1:
-						continue;
-					#print("IC Distance Charge")
-					#print(dom['recoDist'])
-					#print(dom['totalCharge'])
 					if first_ic :
-						TotalCharge_IC.Fill(totalcharge_dc[i],weights_dc[i])
+						TotalCharge_IC.Fill(event['totalCharge'],weight)
 						Zenith_IC.Fill(ROOT.TMath.Cos(event['reco/dir/zenith']),weight)
 						RecEnergy_IC.Fill(event['reco/energy'],weight)
 						EndPointZ_IC.Fill(event['recoEndPoint/z'],weight)
@@ -469,8 +453,6 @@ if __name__ == '__main__':
 						Impact_seeMPE_ic.Fill(ROOT.TMath.Cos(dom['impactAngle']),weight)
 
 		h5file.close()
-	
-	print("Total number of events = %d/%d" % (eventcount,totalevent))
 	
 	fout.cd()
 

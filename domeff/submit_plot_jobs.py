@@ -25,5 +25,5 @@ folderlist = ['Run00125791','Run00125827','Run00125872','Run00125915','Run001259
 for folder in folderlist :
 	if os.path.isfile('/data/user/tmcelroy/domeff/datahd5/'+folder+".root") :
 		continue
-	submit = subprocess.Popen(['python','MakeRootPlots.py','-e', 'Level2pass2',  '-d', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-o', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-f','data'])
+	submit = subprocess.Popen(['python','MakeROOTPlots.py','-e', 'Level2pass2',  '-d', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-o', '/data/user/tmcelroy/domeff/datahd5/'+folder, '-f','data'])
 	submit.wait()
