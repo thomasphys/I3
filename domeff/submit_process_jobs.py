@@ -31,9 +31,9 @@ flux = "GaisserH4a"
 for folder in folderlist :
 	if os.path.isfile('/data/user/tmcelroy/domeff/'+basefolder+folder+".h5") :
 		continue
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-f','data'])
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-f',flux])
 	submit.wait()
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"lowE", '-f','data','-q','0.0','30.0'])
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"lowE", '-f',flux,'-q','0.0','30.0'])
 	submit.wait()
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"highE", '-f','data','-q','30.0','1000.0'])
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"highE", '-f',flux,'-q','30.0','1000.0'])
 	submit.wait()
