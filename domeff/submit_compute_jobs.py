@@ -24,14 +24,14 @@ folderlist = ['Run00125791','Run00125827','Run00125872','Run00125915','Run001259
 				'Run00125800','Run00125859','Run00125898','Run00125914','Run00125938','Run00125962','Run00125981','Run00126000','Run00126032','Run00126384']
 #flux = "data"
 
-for folder in folderlist :
-	submit = subprocess.Popen(['mv','/data/user/tmcelroy/domeff/datahd5/'+folder+".h5",'/data/user/tmcelroy/domeff/datahd5/'+folder+"all.h5"])
-	submit.wait()
+#for folder in folderlist :
+#	submit = subprocess.Popen(['mv','/data/user/tmcelroy/domeff/datahd5/'+folder+".h5",'/data/user/tmcelroy/domeff/datahd5/'+folder+"all.h5"])
+#	submit.wait()
 
-folderlist = ['eff090','eff100','eff110','eff120']
-for folder in folderlist :
-	submit = subprocess.Popen(['mv','/data/user/tmcelroy/domeff/hd5/'+folder+".h5",'/data/user/tmcelroy/domeff/datahd5/'+folder+"all.h5"])
-	submit.wait()
+#folderlist = ['eff090','eff100','eff110','eff120']
+#for folder in folderlist :
+#	submit = subprocess.Popen(['mv','/data/user/tmcelroy/domeff/hd5/'+folder+".h5",'/data/user/tmcelroy/domeff/datahd5/'+folder+"all.h5"])
+#	submit.wait()
 
 
 basefolder = "hd5/"
@@ -48,6 +48,6 @@ submit.wait()
 for folder in folderlist :
 	if os.path.isfile('/data/user/tmcelroy/domeff/hd5/'+folder+"_ChargeDist.h5") :
 		continue
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/hd5/', '-o', '/data/user/tmcelroy/domeff/hd5/'+folder+"_ChargeDist"])
+	submit = subprocess.Popen(['python','ComputeChargeDist.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/hd5/', '-o', '/data/user/tmcelroy/domeff/hd5/'+folder+"_ChargeDist"])
 	submit.wait()
 	

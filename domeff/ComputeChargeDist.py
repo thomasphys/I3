@@ -190,7 +190,6 @@ if __name__ == '__main__':
 
 
 	args = parser.parse_args()
-	weightname = 'weight_'+args.flux
 
 	# compute how many 20m bins to use.
 	nbins = int(args.cherdist[1] / args.binwidth)
@@ -224,6 +223,8 @@ if __name__ == '__main__':
 		
 		ictable = h5file.root.icecube
 		dctable = h5file.root.deepcore
+
+		columbnames = names = ictable.coldescrs.keys()
 		
 		for dom in ictable.iterrows() :
 	 
@@ -231,11 +232,9 @@ if __name__ == '__main__':
 			if i_dist < 0 or i_dist > nbins-1 :
 				continue
 
-			bin_DomCharge_ic[i_dist].append(dom['totalCharge'])
-			bin_weights_ic[i_dist].append(weight)
-
-			if "weight" in dom.list_keys() :
-				bin_weights_ic[i_dist].append(weight)
+			bin_DomCharge_ic[i_dist].append(dom['charge'])
+			if "weight" in columbnames :
+				bin_weights_ic[i_dist].append(dom['weight'])
 			else :
 				bin_weights_ic[i_dist].append(1.0)
 
@@ -245,15 +244,13 @@ if __name__ == '__main__':
 			if i_dist < 0 or i_dist > nbins-1 :
 				continue
 
-			bin_DomCharge_dc[i_dist].append(dom['totalCharge'])
-			if "weight" in dom.list_keys() :
-				bin_weights_dc[i_dist].append(weight)
+			bin_DomCharge_dc[i_dist].append(dom['charge'])
+			if "weight" in columbnames :
+				bin_weights_dc[i_dist].append(dom['weight'])
 			else :
 				bin_weights_dc[i_dist].append(1.0)
 
 		h5file.close()
-	
-	print("Total number of events = %d/%d" % (eventcount,totalevent))
 	
 	binneddistance_dc = np.zeros(nbins,dtype=float)
 	binneddistanceerror_dc = np.zeros(nbins,dtype=float)
