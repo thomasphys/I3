@@ -29,12 +29,11 @@ folderlist = ['eff090','eff100','eff110','eff120']
 flux = "GaisserH4a"
 
 for folder in folderlist :
-	if not os.path.isfile('/data/user/tmcelroy/domeff/'+basefolder+folder+"all.h5") :
-		submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"all", '-f',flux])
-		submit.wait()
-	#if not os.path.isfile('/data/user/tmcelroy/domeff/'+basefolder+folder+"lowE.h5") :
-	#	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"lowE", '-f',flux,'-p','0.0','30.0'])
-	#	submit.wait()
-	#if not os.path.isfile('/data/user/tmcelroy/domeff/'+basefolder+folder+"highE.h5") :
-	#	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"highE", '-f',flux,'-p','30.0','1000.0'])
-	#	submit.wait()
+	if os.path.isfile('/data/user/tmcelroy/domeff/'+basefolder+folder+"all.h5") :
+		continue
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"all", '-f',flux])
+	submit.wait()
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"lowE", '-f',flux,'-p','0.0','30.0'])
+	submit.wait()
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"highE", '-f',flux,'-p','30.0','1000.0'])
+	submit.wait()
