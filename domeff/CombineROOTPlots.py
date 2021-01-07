@@ -119,14 +119,18 @@ if __name__ == '__main__':
 	TimeResidual_IC = [ROOT.TH1F(str("TimeResidual_IC_%d" % (i)),"",1000,-100.0,900.0) for i in range(nbins)]
 	TimeResidual_DC = [ROOT.TH1F(str("TimeResidual_DC_%d" % (i)),"",1000,-100.0,900.0) for i in range(nbins)]
 
-	files_dir = args.data
-	file_list_aux = os.listdir(files_dir)
-	file_list = list()
-	for (dirpath, dirnames, filenames) in os.walk(files_dir):
-		for eff in args.eff :
-			file_list += [os.path.join(dirpath,x) for x in filenames if '.root' in x and eff in x]
+	file_list = []
+
+	if "." in args.data :
+		file_list = [args.data]
+	else :
+		files_dir = args.data
+		file_list_aux = os.listdir(files_dir)
+		file_list = list()
+		for (dirpath, dirnames, filenames) in os.walk(files_dir):
+			file_list += [os.path.join(dirpath,x) for x in filenames if '.root' in x]
     #remove duclicates
-	file_list = list(set(file_list))
+		file_list = list(set(file_list))
 #	if args.flux == "data" :
 #		file_list = [x for x in file_list_h5 if (args.eff in x and os.path.getsize(files_dir+x) > 12000000 )]
 #	else :

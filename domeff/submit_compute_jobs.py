@@ -46,8 +46,6 @@ submit = subprocess.Popen(['python','ComputeChargeDist.py','-e', "highE",  '-d',
 submit.wait()
 
 for folder in folderlist :
-	if os.path.isfile('/data/user/tmcelroy/domeff/hd5/'+folder+"_ChargeDist.h5") :
-		continue
 	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/hd5/', '-o', '/data/user/tmcelroy/domeff/hd5/'+folder+"_ChargeDist"])
 	submit.wait()
 	

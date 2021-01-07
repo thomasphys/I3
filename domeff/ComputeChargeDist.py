@@ -231,7 +231,7 @@ if __name__ == '__main__':
 			if i_dist < 0 or i_dist > nbins-1 :
 				continue
 
-			bin_DomCharge_ic[i_dist].append(dom['totalCharge'])
+			bin_DomCharge_ic[i_dist].append(dom['charge'])
 			bin_weights_ic[i_dist].append(weight)
 
 			if "weight" in dom.list_keys() :
@@ -245,7 +245,7 @@ if __name__ == '__main__':
 			if i_dist < 0 or i_dist > nbins-1 :
 				continue
 
-			bin_DomCharge_dc[i_dist].append(dom['totalCharge'])
+			bin_DomCharge_dc[i_dist].append(dom['charge'])
 			if "weight" in dom.list_keys() :
 				bin_weights_dc[i_dist].append(weight)
 			else :

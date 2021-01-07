@@ -33,7 +33,7 @@ for folder in folderlist :
 		continue
 	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-f',flux])
 	submit.wait()
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"lowE", '-f',flux,'-q','0.0','30.0'])
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"lowE", '-f',flux,'-p','0.0','30.0'])
 	submit.wait()
-	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"highE", '-f',flux,'-q','30.0','1000.0'])
+	submit = subprocess.Popen(['python','ProcessDomInfo.py','-e', folder,  '-d', '/data/user/tmcelroy/domeff/'+basefolder+folder, '-o', '/data/user/tmcelroy/domeff/'+basefolder+folder+"highE", '-f',flux,'-p','30.0','1000.0'])
 	submit.wait()
